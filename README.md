@@ -1,2 +1,3 @@
 # dominque-hossou
-Aidez les éléves et les étudiants à mieux réviser les cours
+Aidez les éléves et les étudiants à mieux se cultiver 
+
