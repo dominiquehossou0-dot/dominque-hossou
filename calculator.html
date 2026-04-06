@@ -1,0 +1,1206 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Calculateurs Hydrologiques v2 — INE/UAC</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a1f3c'/><text y='.9em' font-size='72' x='10'>🧮</text></svg>"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0a1f3c;--blue:#1565c0;--sky:#2196f3;--cyan:#00b4d8;
+  --light:#e8f4fd;--white:#fff;--g50:#f8fafc;--g100:#f1f5f9;
+  --g200:#e2e8f0;--g500:#64748b;--g700:#334155;--g900:#0f172a;
+  --green:#16a34a;--red:#dc2626;--gold:#d97706;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--g50);color:var(--g700)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97);
+    backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,180,216,.2);
+    display:flex;align-items:center;gap:.8rem;padding:.7rem 1.5rem;flex-wrap:wrap}
+.nb{color:var(--cyan);text-decoration:none;font-size:.73rem;font-weight:600;
+    padding:.28rem .7rem;border-radius:6px;border:1px solid var(--cyan);transition:all .2s;white-space:nowrap}
+.nb:hover{background:var(--cyan);color:var(--navy)}
+.nbrand{font-weight:700;font-size:.95rem;color:#fff;margin-right:auto}
+.nbrand span{color:var(--cyan)}
+.npill{font-size:.68rem;color:rgba(255,255,255,.55);text-decoration:none;
+       padding:.28rem .6rem;border-radius:5px;transition:all .15s;white-space:nowrap}
+.npill:hover{background:rgba(0,180,216,.15);color:var(--cyan)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a6e 55%,#0d3b6e 100%);
+      padding:5.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 75% 35%,rgba(33,150,243,.12) 0%,transparent 60%),
+  linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:auto,50px 50px,50px 50px}
+.hero-inner{position:relative;z-index:1;max-width:800px;margin:0 auto}
+.hero-badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.18em;
+            text-transform:uppercase;color:var(--cyan);background:rgba(0,180,216,.12);
+            border:1px solid rgba(0,180,216,.25);border-radius:100px;
+            padding:.28rem .9rem;margin-bottom:1rem}
+.hero h1{font-family:Georgia,serif;font-size:clamp(1.8rem,4vw,2.9rem);font-weight:700;
+         color:#fff;line-height:1.2;margin-bottom:.7rem}
+.hero h1 em{color:var(--cyan);font-style:normal}
+.hero p{font-size:.9rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:1.5rem}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;margin-bottom:1.5rem}
+.hc{font-size:.68rem;background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);
+    border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:.22rem .75rem}
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;z-index:1}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:255px 1fr;gap:0;max-width:1380px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:65px;height:fit-content;padding-right:1rem}
+.sb-card{background:var(--white);border:1px solid var(--g200);border-radius:12px;
+         margin-bottom:.8rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.sb-title{font-size:.63rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+          color:var(--g500);padding:.65rem 1rem;border-bottom:1px solid var(--g100)}
+.cat-btn{display:flex;align-items:center;gap:.6rem;width:100%;padding:.48rem .7rem;
+         border:none;background:transparent;border-radius:7px;font-size:.74rem;
+         font-family:inherit;color:var(--g700);cursor:pointer;transition:all .15s;text-align:left;margin:.15rem .4rem;width:calc(100% - .8rem)}
+.cat-btn:hover,.cat-btn.active{background:var(--light);color:var(--blue);font-weight:600}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-count{margin-left:auto;font-size:.62rem;color:var(--g500);background:var(--g100);padding:.1rem .4rem;border-radius:100px}
+.hist-list{padding:.5rem;max-height:200px;overflow-y:auto}
+.hist-item{padding:.48rem .7rem;border-radius:7px;font-size:.71rem;cursor:pointer;
+           transition:background .15s;border-bottom:1px solid var(--g100);color:var(--g700)}
+.hist-item:hover{background:var(--g50)}
+.hist-item:last-child{border-bottom:none}
+.hist-time{font-size:.6rem;color:var(--g500);display:block;margin-top:.1rem}
+.hist-empty{padding:.8rem 1rem;font-size:.73rem;color:var(--g500);text-align:center}
+.exp-btn{display:flex;align-items:center;gap:.5rem;width:calc(100% - 1.2rem);margin:.2rem .6rem;
+         padding:.48rem .7rem;border-radius:7px;font-size:.73rem;font-family:inherit;cursor:pointer;
+         transition:all .15s;border:none}
+.exp-pdf{background:rgba(220,38,38,.08);color:#b91c1c;border:1px solid rgba(220,38,38,.2)}
+.exp-pdf:hover{background:rgba(220,38,38,.16)}
+.exp-all{background:rgba(22,163,74,.08);color:#15803d;border:1px solid rgba(22,163,74,.2)}
+.exp-all:hover{background:rgba(22,163,74,.16)}
+.exp-clr{background:rgba(100,116,139,.07);color:var(--g500);border:1px solid var(--g200)}
+.exp-clr:hover{background:var(--g100)}
+
+/* CONTENU */
+.content{min-width:0}
+.filter-bar{display:flex;gap:.6rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap}
+.search-calc{flex:1;min-width:160px;padding:.52rem 1rem;border:1.5px solid var(--g200);
+             border-radius:100px;font-size:.82rem;font-family:inherit;outline:none;
+             background:var(--white);transition:border-color .2s}
+.search-calc:focus{border-color:var(--blue)}
+.filter-btns{display:flex;gap:.3rem;flex-wrap:wrap}
+.fb{padding:.38rem .75rem;border:1.5px solid var(--g200);border-radius:100px;
+    font-size:.71rem;font-family:inherit;cursor:pointer;background:var(--white);
+    color:var(--g500);transition:all .15s}
+.fb:hover,.fb.active{border-color:var(--blue);color:var(--blue);background:var(--light);font-weight:600}
+
+/* CARTE CALCULATEUR */
+.ccard{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+       margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,.05);overflow:hidden;
+       transition:box-shadow .25s}
+.ccard:hover{box-shadow:0 5px 22px rgba(0,0,0,.09)}
+.ccard.hidden{display:none}
+.cheader{display:flex;align-items:center;gap:.85rem;padding:.95rem 1.3rem;
+         border-bottom:1px solid var(--g100);cursor:pointer;user-select:none;
+         background:var(--g50);transition:background .15s}
+.cheader:hover{background:var(--g100)}
+.cicon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
+       justify-content:center;font-size:1.2rem;flex-shrink:0}
+.chead-text{flex:1;min-width:0}
+.cnum{font-size:.59rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g500)}
+.ctitle{font-family:Georgia,serif;font-size:.93rem;font-weight:700;color:var(--navy)}
+.cform{font-size:.68rem;color:var(--g500);font-family:'Courier New',monospace;
+       background:var(--g100);padding:.1rem .42rem;border-radius:4px;display:inline-block;margin-top:.12rem}
+.ex-tag{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:700;
+        letter-spacing:.06em;text-transform:uppercase;padding:.12rem .5rem;
+        border-radius:100px;background:rgba(22,163,74,.1);color:#15803d;
+        border:1px solid rgba(22,163,74,.25);cursor:pointer;transition:all .15s;margin-left:.4rem;vertical-align:middle}
+.ex-tag:hover{background:rgba(22,163,74,.2)}
+.ctoggle{color:var(--g500);font-size:.75rem;transition:transform .25s;flex-shrink:0}
+.ccard.open .ctoggle{transform:rotate(180deg)}
+.cbody{display:none;padding:1.4rem}
+.ccard.open .cbody{display:block}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;align-items:start}
+
+/* INPUTS */
+.ig{margin-bottom:.85rem}
+label.il{display:block;font-size:.75rem;font-weight:600;color:var(--g700);margin-bottom:.28rem}
+label.il span{font-size:.66rem;color:var(--g500);font-weight:400;margin-left:.22rem}
+input.if,textarea.if,select.if{width:100%;padding:.5rem .8rem;border:1.5px solid var(--g200);
+  border-radius:8px;font-size:.82rem;font-family:inherit;color:var(--g900);background:var(--white);
+  transition:border-color .2s,box-shadow .2s;outline:none}
+input.if:focus,textarea.if:focus,select.if:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,101,192,.09)}
+textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;font-size:.77rem}
+.ih{font-size:.66rem;color:var(--g500);margin-top:.16rem;line-height:1.4}
+
+/* BOUTONS */
+.bcalc{width:100%;padding:.62rem;background:linear-gradient(135deg,var(--blue),var(--sky));
+       color:#fff;border:none;border-radius:9px;font-size:.84rem;font-weight:700;
+       font-family:inherit;cursor:pointer;transition:all .2s;
+       box-shadow:0 3px 12px rgba(21,101,192,.28);margin-top:.3rem}
+.bcalc:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(21,101,192,.4)}
+.breset{width:100%;padding:.45rem;background:transparent;color:var(--g500);
+        border:1px solid var(--g200);border-radius:8px;font-size:.75rem;
+        font-family:inherit;cursor:pointer;margin-top:.35rem;transition:all .15s}
+.breset:hover{background:var(--g100);color:var(--g700)}
+.bdl-row{display:flex;gap:.5rem;margin-top:.5rem}
+.bdl{flex:1;padding:.42rem;border:none;border-radius:7px;font-size:.71rem;font-weight:600;
+     font-family:inherit;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.3rem}
+.bdl-pdf{background:rgba(220,38,38,.08);color:#b91c1c;border:1px solid rgba(220,38,38,.2)}
+.bdl-pdf:hover{background:rgba(220,38,38,.17)}
+.bdl-png{background:rgba(21,101,192,.08);color:var(--blue);border:1px solid rgba(21,101,192,.2)}
+.bdl-png:hover{background:rgba(21,101,192,.17)}
+
+/* RÉSULTATS */
+.rpanel{background:linear-gradient(135deg,var(--navy),#1a3a6e);border-radius:11px;
+        padding:1.2rem;display:none;margin-top:.8rem}
+.rpanel.show{display:block}
+.rptitle{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+         color:var(--cyan);margin-bottom:.75rem}
+.rpmain{font-family:Georgia,serif;font-size:1.75rem;font-weight:700;color:#fff;
+        margin-bottom:.22rem;line-height:1}
+.rpunit{font-size:.76rem;color:rgba(255,255,255,.5);margin-bottom:.75rem}
+.rpdet{display:flex;flex-direction:column;gap:.38rem}
+.rpitem{display:flex;justify-content:space-between;align-items:center;
+        padding:.4rem .68rem;background:rgba(255,255,255,.07);border-radius:6px;font-size:.74rem}
+.rplbl{color:rgba(255,255,255,.55)}
+.rpval{font-weight:700;color:#fff;font-family:Georgia,serif;font-size:.78rem;text-align:right;max-width:55%}
+.rpinterp{margin-top:.75rem;padding:.68rem .82rem;background:rgba(0,180,216,.1);
+          border:1px solid rgba(0,180,216,.2);border-radius:7px;
+          font-size:.72rem;color:rgba(255,255,255,.75);line-height:1.6}
+.rperr{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);border-radius:7px;
+       padding:.62rem .82rem;font-size:.74rem;color:#fca5a5;display:none;margin-top:.5rem}
+.rperr.show{display:block}
+.rptable{width:100%;border-collapse:collapse;margin-top:.65rem;font-size:.73rem}
+.rptable th{background:rgba(255,255,255,.1);color:var(--cyan);font-size:.63rem;
+            letter-spacing:.07em;text-transform:uppercase;padding:.4rem .52rem;text-align:center}
+.rptable td{padding:.4rem .52rem;text-align:center;color:rgba(255,255,255,.8);
+            border-bottom:1px solid rgba(255,255,255,.06)}
+.rptable tr:last-child td{border-bottom:none}
+
+/* CHART */
+.chart-wrap{background:var(--white);border:1px solid var(--g200);border-radius:10px;
+            padding:.85rem;margin-top:.85rem;display:block;min-height:0;overflow:hidden}
+.chart-wrap.show{min-height:255px}
+.chart-wrap canvas{display:block;width:100%!important}
+.chart-title{font-size:.68rem;font-weight:700;color:var(--navy);margin-bottom:.45rem;
+             text-align:center;letter-spacing:.05em;text-transform:uppercase;display:none}
+.chart-wrap.show .chart-title{display:block}
+
+/* AIDE */
+.chelp{background:rgba(21,101,192,.05);border-left:3px solid var(--blue);
+       border-radius:0 8px 8px 0;padding:.7rem .88rem;margin-top:.75rem;
+       font-size:.72rem;color:var(--g700);line-height:1.6}
+.chelp strong{color:var(--navy)}
+
+/* GRILLE MENSUELLE */
+.mgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.38rem;margin-bottom:.75rem}
+.mgi label{font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--g500);
+           display:block;margin-bottom:.15rem;text-align:center}
+
+/* COURBE TARAGE */
+.tarage-table{width:100%;border-collapse:collapse;font-size:.74rem;margin-bottom:.55rem}
+.tarage-table th{background:var(--navy);color:#fff;padding:.38rem .48rem;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+.tarage-table td{padding:.28rem .38rem;border-bottom:1px solid var(--g200)}
+.tarage-table input{width:100%;border:1px solid var(--g200);border-radius:5px;padding:.22rem .38rem;font-size:.73rem;font-family:inherit;outline:none}
+.tarage-table input:focus{border-color:var(--blue)}
+.add-row-btn{font-size:.71rem;padding:.32rem .68rem;border:1px solid var(--g200);border-radius:6px;cursor:pointer;background:var(--g50);color:var(--g700);transition:all .15s;margin-bottom:.55rem}
+.add-row-btn:hover{background:var(--light);color:var(--blue);border-color:var(--blue)}
+
+/* ICÔNES COULEURS */
+.ci1{background:linear-gradient(135deg,#e3f2fd,#bbdefb)}
+.ci2{background:linear-gradient(135deg,#e0f7fa,#b2ebf2)}
+.ci3{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
+.ci4{background:linear-gradient(135deg,#fffde7,#fff9c4)}
+.ci5{background:linear-gradient(135deg,#f3e5f5,#e1bee7)}
+.ci6{background:linear-gradient(135deg,#fce4ec,#f8bbd0)}
+.ci7{background:linear-gradient(135deg,#e8eaf6,#c5cae9)}
+.ci8{background:linear-gradient(135deg,#e0f2f1,#b2dfdb)}
+.ci9{background:linear-gradient(135deg,#fff3e0,#ffe0b2)}
+.ci10{background:linear-gradient(135deg,#efebe9,#d7ccc8)}
+.ci11{background:linear-gradient(135deg,#f1f8e9,#dcedc8)}
+.ci12{background:linear-gradient(135deg,#e8eaf6,#9fa8da)}
+.ci13{background:linear-gradient(135deg,#fdf2f8,#f5d0fe)}
+.ci14{background:linear-gradient(135deg,#f0fdf4,#bbf7d0)}
+.ci15{background:linear-gradient(135deg,#fff7ed,#fed7aa)}
+.ci16{background:linear-gradient(135deg,#f0f9ff,#bae6fd)}
+.ci17{background:linear-gradient(135deg,#fefce8,#fef08a)}
+.ci18{background:linear-gradient(135deg,#fdf4ff,#e879f9)}
+.ci19{background:linear-gradient(135deg,#ecfdf5,#6ee7b7)}
+.ci20{background:linear-gradient(135deg,#eff6ff,#93c5fd)}
+
+/* NOTIF & BTT */
+.notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);
+       background:var(--navy);color:#fff;border-radius:10px;padding:.62rem 1.2rem;
+       font-size:.76rem;z-index:2000;opacity:0;transition:all .3s;
+       border-left:4px solid var(--cyan);white-space:nowrap;pointer-events:none}
+.notif.show{transform:translateX(-50%) translateY(0);opacity:1}
+#btt{position:fixed;bottom:1.8rem;right:1.8rem;width:42px;height:42px;border-radius:50%;
+     background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;border:none;
+     cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;
+     justify-content:center;opacity:0;transform:translateY(20px);
+     transition:opacity .3s,transform .3s;z-index:999;box-shadow:0 4px 14px rgba(21,101,192,.35)}
+#btt.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:1000px){.app{grid-template-columns:1fr}.sidebar{position:static;padding-right:0;margin-bottom:1rem}}
+@media(max-width:700px){.cgrid{grid-template-columns:1fr}.mgrid{grid-template-columns:repeat(3,1fr)}.filter-btns{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nb">← Hydro</a>
+  <div class="nbrand">Calcul<span>Hydro</span> <span style="font-size:.58rem;opacity:.45;font-weight:400">v2.0</span></div>
+  <a href="analyse.html" class="npill">📊 Analyse</a>
+  <a href="carte.html" class="npill">🗺️ Carte</a>
+  <a href="BiblioHydro.html" class="npill">📚 Biblio</a>
+  <a href="profil.html" class="npill">👤 Profil</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🧮 20 Calculateurs · Exemples · Historique · PDF/PNG · INE–UAC</div>
+    <h1>Calculateurs <em>Hydrologiques</em></h1>
+    <p>20 outils avec exemples pré-remplis, historique des calculs, graphiques interactifs et export PDF/PNG.</p>
+    <div class="hero-chips">
+      <span class="hc">Rationnel</span><span class="hc">Temps concentration</span><span class="hc">SCS-CN</span>
+      <span class="hc">Courbe tarage</span><span class="hc">Muskingum</span><span class="hc">Gumbel</span>
+      <span class="hc">Normale/LogN</span><span class="hc">Statistiques</span><span class="hc">Thornthwaite</span>
+      <span class="hc">Turc</span><span class="hc">Manning</span><span class="hc">Canal optimal</span>
+      <span class="hc">Reynolds</span><span class="hc">Recharge nappes</span><span class="hc">Gravelius</span>
+      <span class="hc">Mayer</span><span class="hc">CDC</span><span class="hc">SPI</span>
+      <span class="hc">Pearson III</span><span class="hc">Jacob pompage</span>
+    </div>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1440 50" preserveAspectRatio="none">
+    <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#f8fafc"/>
+  </svg>
+</div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-card">
+    <div class="sb-title">Navigation rapide</div>
+    <div style="padding:.4rem 0">
+      <button class="cat-btn active" onclick="filterCat('all',this)"><span class="cat-dot" style="background:#1565c0"></span>Tous<span class="cat-count">20</span></button>
+      <button class="cat-btn" onclick="filterCat('hydro',this)"><span class="cat-dot" style="background:#0891b2"></span>Hydrologie surface<span class="cat-count">7</span></button>
+      <button class="cat-btn" onclick="filterCat('stat',this)"><span class="cat-dot" style="background:#7c3aed"></span>Statistiques<span class="cat-count">5</span></button>
+      <button class="cat-btn" onclick="filterCat('hydraul',this)"><span class="cat-dot" style="background:#16a34a"></span>Hydraulique<span class="cat-count">3</span></button>
+      <button class="cat-btn" onclick="filterCat('bilan',this)"><span class="cat-dot" style="background:#d97706"></span>Bilans hydrologiques<span class="cat-count">3</span></button>
+      <button class="cat-btn" onclick="filterCat('souterrain',this)"><span class="cat-dot" style="background:#ea580c"></span>Eaux souterraines<span class="cat-count">2</span></button>
+    </div>
+  </div>
+  <div class="sb-card">
+    <div class="sb-title">📋 Historique des calculs</div>
+    <div class="hist-list" id="histList"><div class="hist-empty">Aucun calcul effectué</div></div>
+  </div>
+  <div class="sb-card">
+    <div class="sb-title">💾 Export global</div>
+    <div style="padding:.4rem 0">
+      <button class="exp-btn exp-pdf" onclick="exportAllPDF()">📄 Rapport PDF complet</button>
+      <button class="exp-btn exp-all" onclick="copyAllResults()">📋 Copier les résultats</button>
+      <button class="exp-btn exp-clr" onclick="clearHistory()">🗑️ Vider l'historique</button>
+    </div>
+  </div>
+</aside>
+
+<!-- CONTENU -->
+<div class="content">
+<div class="filter-bar">
+  <input class="search-calc" type="text" placeholder="🔍 Rechercher un calculateur..." oninput="searchCalc(this.value)"/>
+  <div class="filter-btns">
+    <button class="fb active" onclick="filterCat2('all',this)">Tous</button>
+    <button class="fb" onclick="filterCat2('hydro',this)">Hydro</button>
+    <button class="fb" onclick="filterCat2('stat',this)">Stat</button>
+    <button class="fb" onclick="filterCat2('hydraul',this)">Hydraul.</button>
+    <button class="fb" onclick="filterCat2('bilan',this)">Bilan</button>
+    <button class="fb" onclick="filterCat2('souterrain',this)">Nappes</button>
+  </div>
+</div>
+
+<!-- ══ C01 — MÉTHODE RATIONNELLE ══ -->
+<div class="ccard open" id="c1" data-cat="hydro" data-kw="rationnel débit pointe ruissellement bassin">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci1">🌊</div>
+  <div class="chead-text">
+    <div class="cnum">01 · Hydrologie de surface</div>
+    <div class="ctitle">Débit de Pointe — Méthode Rationnelle</div>
+    <div><span class="cform">Q = C·i·A / 3,6</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c1')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Coefficient de ruissellement C <span>(0–1)</span></label>
+        <input class="if" id="r_C" type="number" min="0.01" max="1" step="0.01" placeholder="ex : 0.65"/>
+        <div class="ih">Forêt:0,10–0,20 · Prairie:0,30–0,45 · Urbain:0,55–0,70 · Béton:0,85–0,95</div></div>
+      <div class="ig"><label class="il">Intensité pluviale i <span>(mm/h)</span></label>
+        <input class="if" id="r_i" type="number" min="0.1" step="0.1" placeholder="ex : 55"/></div>
+      <div class="ig"><label class="il">Superficie du bassin A <span>(km²)</span></label>
+        <input class="if" id="r_A" type="number" min="0.001" step="0.001" placeholder="ex : 2.5"/></div>
+      <div class="ig"><label class="il">Durée de pluie tc <span>(h, pour hydrogramme)</span></label>
+        <input class="if" id="r_tc" type="number" min="0.1" step="0.1" placeholder="ex : 1.0"/></div>
+      <button class="bcalc" onclick="calcRationnel()">⚡ Calculer &amp; Tracer</button>
+      <button class="breset" onclick="rst(['r_C','r_i','r_A','r_tc'],'r_res','r_err','cw_r')">↺ Réinitialiser</button>
+      <div class="rperr" id="r_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('r_res','Méthode Rationnelle')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_r','hydrogramme')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Valable pour A &lt; 5 km².</strong> Pluie uniforme d'intensité constante sur la durée tc (temps de concentration).</div>
+    </div>
+    <div>
+      <div class="rpanel" id="r_res">
+        <div class="rptitle">📊 Résultats</div>
+        <div class="rpmain" id="r_Qp">—</div><div class="rpunit">m³/s — Débit de pointe</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">C (ruissellement)</span><span class="rpval" id="r_dC">—</span></div>
+          <div class="rpitem"><span class="rplbl">i (mm/h)</span><span class="rpval" id="r_di">—</span></div>
+          <div class="rpitem"><span class="rplbl">A (km²)</span><span class="rpval" id="r_dA">—</span></div>
+        </div>
+        <div class="rpinterp" id="r_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_r"><div class="chart-title">Hydrogramme triangulaire simplifié</div><canvas id="chart_r" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C02 — TEMPS DE CONCENTRATION ══ -->
+<div class="ccard" id="c2" data-cat="hydro" data-kw="temps concentration kirpich giandotti passini bassin">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci2">⏱️</div>
+  <div class="chead-text">
+    <div class="cnum">02 · Hydrologie de surface</div>
+    <div class="ctitle">Temps de Concentration (Kirpich, Giandotti, Passini)</div>
+    <div><span class="cform">tc = f(L, ΔH, A, Im)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c2')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Longueur du talweg L <span>(km)</span></label>
+        <input class="if" id="tc_L" type="number" min="0.1" step="0.01" placeholder="ex : 18.5"/></div>
+      <div class="ig"><label class="il">Dénivelée ΔH <span>(m)</span></label>
+        <input class="if" id="tc_H" type="number" min="1" step="1" placeholder="ex : 320"/></div>
+      <div class="ig"><label class="il">Superficie du bassin A <span>(km²)</span></label>
+        <input class="if" id="tc_A" type="number" min="0.1" step="0.01" placeholder="ex : 85"/></div>
+      <div class="ig"><label class="il">Pente moyenne Im <span>(m/km)</span></label>
+        <input class="if" id="tc_Im" type="number" min="0.01" step="0.01" placeholder="ex : 17.3"/></div>
+      <button class="bcalc" onclick="calcTC()">⏱️ Calculer</button>
+      <button class="breset" onclick="rst(['tc_L','tc_H','tc_A','tc_Im'],'tc_res','tc_err',null)">↺ Réinitialiser</button>
+      <div class="rperr" id="tc_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('tc_res','Temps concentration')">📄 PDF</button></div>
+      <div class="chelp">
+        <strong>Kirpich :</strong> tc = 0,0195·L⁰˙⁷⁷·S⁻⁰˙³⁸⁵ (S=ΔH/L en m/m)<br/>
+        <strong>Giandotti :</strong> tc = (4√A + 1,5·L) / (0,8·√ΔH)<br/>
+        <strong>Passini :</strong> tc = 0,108·(A·L)^(1/3) / √Im
+      </div>
+    </div>
+    <div>
+      <div class="rpanel" id="tc_res">
+        <div class="rptitle">📊 Résultats — 3 Méthodes</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Kirpich (h)</span><span class="rpval" id="tc_kirpich">—</span></div>
+          <div class="rpitem"><span class="rplbl">Giandotti (h)</span><span class="rpval" id="tc_giandotti">—</span></div>
+          <div class="rpitem"><span class="rplbl">Passini (h)</span><span class="rpval" id="tc_passini">—</span></div>
+          <div class="rpitem"><span class="rplbl">Moyenne (h)</span><span class="rpval" id="tc_moy">—</span></div>
+          <div class="rpitem"><span class="rplbl">Écart (min–max)</span><span class="rpval" id="tc_range">—</span></div>
+        </div>
+        <div class="rpinterp" id="tc_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C03 — SCS-CN ══ -->
+<div class="ccard" id="c3" data-cat="hydro" data-kw="SCS CN hydrogramme unitaire crue ruissellement">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci3">📈</div>
+  <div class="chead-text">
+    <div class="cnum">03 · Hydrologie de surface</div>
+    <div class="ctitle">Hydrogramme Unitaire — Méthode SCS-CN</div>
+    <div><span class="cform">Pe=(P−0,2S)²/(P+0,8S) · S=25400/CN−254</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c3')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Numéro de courbe CN <span>(1–100)</span></label>
+        <input class="if" id="cn_CN" type="number" min="1" max="100" step="1" placeholder="ex : 75"/>
+        <div class="ih">Sol A (sableux) : 60–80 · Sol B : 70–85 · Sol C : 80–90 · Sol D (argileux) : 85–95</div></div>
+      <div class="ig"><label class="il">Précipitation totale P <span>(mm)</span></label>
+        <input class="if" id="cn_P" type="number" min="1" step="0.1" placeholder="ex : 85"/></div>
+      <div class="ig"><label class="il">Superficie A <span>(km²)</span></label>
+        <input class="if" id="cn_A" type="number" min="0.01" step="0.01" placeholder="ex : 12.5"/></div>
+      <div class="ig"><label class="il">Temps de concentration tc <span>(h)</span></label>
+        <input class="if" id="cn_tc" type="number" min="0.1" step="0.1" placeholder="ex : 2.5"/></div>
+      <button class="bcalc" onclick="calcSCSCN()">📈 Calculer &amp; Tracer</button>
+      <button class="breset" onclick="rst(['cn_CN','cn_P','cn_A','cn_tc'],'cn_res','cn_err','cw_cn')">↺ Réinitialiser</button>
+      <div class="rperr" id="cn_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('cn_res','SCS-CN')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_cn','hydrogramme_scs')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="cn_res">
+        <div class="rptitle">📊 Résultats SCS-CN</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">S (rétention max, mm)</span><span class="rpval" id="cn_S">—</span></div>
+          <div class="rpitem"><span class="rplbl">Ia (abstr. initiale, mm)</span><span class="rpval" id="cn_Ia">—</span></div>
+          <div class="rpitem"><span class="rplbl">Pe (pluie nette, mm)</span><span class="rpval" id="cn_Pe">—</span></div>
+          <div class="rpitem"><span class="rplbl">Qp (débit pointe, m³/s)</span><span class="rpval" id="cn_Qp">—</span></div>
+          <div class="rpitem"><span class="rplbl">Tp (temps pointe, h)</span><span class="rpval" id="cn_Tp">—</span></div>
+          <div class="rpitem"><span class="rplbl">Volume ruissellement (m³)</span><span class="rpval" id="cn_Vol">—</span></div>
+        </div>
+        <div class="rpinterp" id="cn_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_cn"><div class="chart-title">Hydrogramme unitaire SCS</div><canvas id="chart_cn" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C04 — COURBE DE TARAGE ══ -->
+<div class="ccard" id="c4" data-cat="hydro" data-kw="courbe tarage hauteur débit H-Q jaugeage station">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci4">📏</div>
+  <div class="chead-text">
+    <div class="cnum">04 · Hydrologie de surface</div>
+    <div class="ctitle">Courbe de Tarage H = f(Q)</div>
+    <div><span class="cform">Q = a·(H−H₀)^b</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c4')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <p style="font-size:.76rem;color:var(--g500);margin-bottom:.65rem">Saisir les paires (H, Q) mesurées lors des jaugeages :</p>
+      <table class="tarage-table" id="tarageTable">
+        <thead><tr><th>H (m)</th><th>Q (m³/s)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addTarageRow()">+ Ajouter une ligne</button>
+      <div class="ig"><label class="il">H₀ — Niveau zéro d'écoulement <span>(m, souvent 0)</span></label>
+        <input class="if" id="tar_H0" type="number" step="0.001" value="0" placeholder="ex : 0.05"/></div>
+      <button class="bcalc" onclick="calcTarage()">📏 Ajuster la courbe</button>
+      <button class="breset" onclick="rstTarage()">↺ Réinitialiser</button>
+      <div class="rperr" id="tar_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('tar_res','Courbe de tarage')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_tar','tarage')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Ajustement puissance :</strong> Q = a·(H−H₀)^b par régression log-linéaire. R² indique la qualité de l'ajustement (R² > 0,95 : excellent).</div>
+    </div>
+    <div>
+      <div class="rpanel" id="tar_res">
+        <div class="rptitle">📊 Courbe de Tarage</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Équation</span><span class="rpval" id="tar_eq">—</span></div>
+          <div class="rpitem"><span class="rplbl">a</span><span class="rpval" id="tar_a">—</span></div>
+          <div class="rpitem"><span class="rplbl">b (exposant)</span><span class="rpval" id="tar_b">—</span></div>
+          <div class="rpitem"><span class="rplbl">R² (ajustement)</span><span class="rpval" id="tar_r2">—</span></div>
+          <div class="rpitem"><span class="rplbl">n (points)</span><span class="rpval" id="tar_n">—</span></div>
+        </div>
+        <div class="rpinterp" id="tar_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_tar"><div class="chart-title">Courbe de tarage H = f(Q)</div><canvas id="chart_tar" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C05 — MUSKINGUM ══ -->
+<div class="ccard" id="c5" data-cat="hydro" data-kw="muskingum routage crue propagation onde hydrologique">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci5">🌊</div>
+  <div class="chead-text">
+    <div class="cnum">05 · Hydrologie de surface</div>
+    <div class="ctitle">Routage de Crue — Méthode de Muskingum</div>
+    <div><span class="cform">O₂ = C₀·I₂ + C₁·I₁ + C₂·O₁</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c5')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Paramètre K <span>(h, temps de transit)</span></label>
+        <input class="if" id="msk_K" type="number" min="0.1" step="0.1" placeholder="ex : 6"/></div>
+      <div class="ig"><label class="il">Paramètre X <span>(0–0,5)</span></label>
+        <input class="if" id="msk_X" type="number" min="0" max="0.5" step="0.01" placeholder="ex : 0.2"/>
+        <div class="ih">X=0 : réservoir pur · X=0,5 : canal prismatique</div></div>
+      <div class="ig"><label class="il">Pas de temps Δt <span>(h)</span></label>
+        <input class="if" id="msk_dt" type="number" min="0.1" step="0.1" placeholder="ex : 3"/></div>
+      <div class="ig"><label class="il">Hydrogramme entrant I(t) <span>(m³/s, virgules)</span></label>
+        <textarea class="if" id="msk_I" placeholder="ex : 5,12,28,45,55,60,52,40,28,18,12,8,5"></textarea></div>
+      <button class="bcalc" onclick="calcMuskingum()">🌊 Router la crue</button>
+      <button class="breset" onclick="rst(['msk_K','msk_X','msk_dt','msk_I'],'msk_res','msk_err','cw_msk')">↺ Réinitialiser</button>
+      <div class="rperr" id="msk_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('msk_res','Muskingum')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_msk','muskingum')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="msk_res">
+        <div class="rptitle">📊 Résultats Muskingum</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">C₀</span><span class="rpval" id="msk_C0">—</span></div>
+          <div class="rpitem"><span class="rplbl">C₁</span><span class="rpval" id="msk_C1">—</span></div>
+          <div class="rpitem"><span class="rplbl">C₂</span><span class="rpval" id="msk_C2">—</span></div>
+          <div class="rpitem"><span class="rplbl">Qp entrant (m³/s)</span><span class="rpval" id="msk_Qpin">—</span></div>
+          <div class="rpitem"><span class="rplbl">Qp sortant (m³/s)</span><span class="rpval" id="msk_Qpout">—</span></div>
+          <div class="rpitem"><span class="rplbl">Écrêtement (%)</span><span class="rpval" id="msk_ecr">—</span></div>
+        </div>
+        <div class="rpinterp" id="msk_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_msk"><div class="chart-title">Routage de crue — Muskingum</div><canvas id="chart_msk" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C06 — GUMBEL ══ -->
+<div class="ccard" id="c6" data-cat="stat" data-kw="gumbel loi fréquence période retour extrême">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci6">📈</div>
+  <div class="chead-text">
+    <div class="cnum">06 · Statistiques</div>
+    <div class="ctitle">Loi de Gumbel &amp; Périodes de Retour</div>
+    <div><span class="cform">X(T) = u + α·[−ln(−ln(1−1/T))]</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c6')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de données <span>(virgules ou espaces)</span></label>
+        <textarea class="if" id="g_data" placeholder="ex : 78,95,112,68,134,89,103,145,72,98,128"></textarea></div>
+      <button class="bcalc" onclick="calcGumbel()">📈 Ajuster &amp; Tracer</button>
+      <button class="breset" onclick="rst(['g_data'],'g_res','g_err','cw_g')">↺ Réinitialiser</button>
+      <div class="rperr" id="g_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('g_res','Gumbel')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_g','gumbel')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Méthode des moments :</strong> α = s·√6/π | u = x̄ − 0,5772·α<br/>Test KS valide l'ajustement au seuil α = 5%.</div>
+    </div>
+    <div>
+      <div class="rpanel" id="g_res">
+        <div class="rptitle">📊 Paramètres Gumbel</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">n</span><span class="rpval" id="g_n">—</span></div>
+          <div class="rpitem"><span class="rplbl">x̄ (moyenne)</span><span class="rpval" id="g_mean">—</span></div>
+          <div class="rpitem"><span class="rplbl">s (écart-type)</span><span class="rpval" id="g_std">—</span></div>
+          <div class="rpitem"><span class="rplbl">u (position)</span><span class="rpval" id="g_u">—</span></div>
+          <div class="rpitem"><span class="rplbl">α (échelle)</span><span class="rpval" id="g_alpha">—</span></div>
+          <div class="rpitem"><span class="rplbl">Test KS</span><span class="rpval" id="g_ks">—</span></div>
+        </div>
+        <table class="rptable"><thead><tr><th>T (ans)</th><th>y(T)</th><th>X(T)</th></tr></thead><tbody id="g_tbody"></tbody></table>
+        <div class="rpinterp" id="g_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_g"><div class="chart-title">Droite de Gumbel</div><canvas id="chart_g" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C07 — NORMALE ══ -->
+<div class="ccard" id="c7" data-cat="stat" data-kw="normale log lognormale distribution ajustement fréquence">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci7">🔔</div>
+  <div class="chead-text">
+    <div class="cnum">07 · Statistiques</div>
+    <div class="ctitle">Loi Normale &amp; Log-Normale</div>
+    <div><span class="cform">f(x) = (1/σ√2π)·exp[−(x−μ)²/2σ²]</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c7')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de données</label><textarea class="if" id="n_data" placeholder="ex : 1082,956,1134,1045,1201,978,1056,1189,932,1078"></textarea></div>
+      <div class="ig"><label class="il">Loi à ajuster</label>
+        <select class="if" id="n_law"><option value="normal">Loi Normale</option><option value="lognormal">Loi Log-Normale</option></select></div>
+      <button class="bcalc" onclick="calcNormale()">🔔 Ajuster &amp; Tracer</button>
+      <button class="breset" onclick="rst(['n_data'],'n_res','n_err','cw_n')">↺ Réinitialiser</button>
+      <div class="rperr" id="n_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('n_res','Loi Normale')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_n','normale')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="n_res">
+        <div class="rptitle">📊 Paramètres</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Loi ajustée</span><span class="rpval" id="n_lawname">—</span></div>
+          <div class="rpitem"><span class="rplbl">μ (moyenne)</span><span class="rpval" id="n_mu">—</span></div>
+          <div class="rpitem"><span class="rplbl">σ (écart-type)</span><span class="rpval" id="n_sigma">—</span></div>
+          <div class="rpitem"><span class="rplbl">Test KS</span><span class="rpval" id="n_ks">—</span></div>
+        </div>
+        <table class="rptable"><thead><tr><th>T (ans)</th><th>z(T)</th><th>X(T)</th></tr></thead><tbody id="n_tbody"></tbody></table>
+        <div class="rpinterp" id="n_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_n"><div class="chart-title">Histogramme + courbe densité</div><canvas id="chart_n" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C08 — STATISTIQUES ══ -->
+<div class="ccard" id="c8" data-cat="stat" data-kw="statistiques descriptives moyenne médiane écart-type Cv">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci8">📊</div>
+  <div class="chead-text">
+    <div class="cnum">08 · Statistiques</div>
+    <div class="ctitle">Paramètres Statistiques Complets</div>
+    <div><span class="cform">x̄, s, Cv, Me, Cs, Ck, Q1, Q3, Min, Max</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c8')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de données</label><textarea class="if" id="s_data" placeholder="ex : 1082,956,1134,1045,1201,978,1056,1189,932,1078,1156,1023"></textarea></div>
+      <div class="ig"><label class="il">Nom de la variable <span>(optionnel)</span></label><input class="if" id="s_name" type="text" placeholder="ex : Pluies annuelles Bohicon (mm)"/></div>
+      <button class="bcalc" onclick="calcStats()">📊 Calculer &amp; Tracer</button>
+      <button class="breset" onclick="rst(['s_data','s_name'],'s_res','s_err','cw_s')">↺ Réinitialiser</button>
+      <div class="rperr" id="s_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('s_res','Statistiques')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_s','histogramme')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Cv &lt; 15%</strong> : homogène · <strong>15–30%</strong> : variabilité modérée · <strong>&gt; 30%</strong> : forte irrégularité</div>
+    </div>
+    <div>
+      <div class="rpanel" id="s_res">
+        <div class="rptitle" id="s_title">📊 Statistiques descriptives</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">n</span><span class="rpval" id="s_n">—</span></div>
+          <div class="rpitem"><span class="rplbl">Moyenne / Médiane</span><span class="rpval" id="s_mean">—</span></div>
+          <div class="rpitem"><span class="rplbl">Écart-type / Variance</span><span class="rpval" id="s_std">—</span></div>
+          <div class="rpitem"><span class="rplbl">Cv (%)</span><span class="rpval" id="s_cv">—</span></div>
+          <div class="rpitem"><span class="rplbl">Cs / Ck</span><span class="rpval" id="s_cs">—</span></div>
+          <div class="rpitem"><span class="rplbl">Min / Max</span><span class="rpval" id="s_mm">—</span></div>
+          <div class="rpitem"><span class="rplbl">Q1 / Q3 / IQR</span><span class="rpval" id="s_qq">—</span></div>
+        </div>
+        <div class="rpinterp" id="s_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_s"><div class="chart-title">Histogramme de fréquences</div><canvas id="chart_s" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C09 — THORNTHWAITE ══ -->
+<div class="ccard" id="c9" data-cat="bilan" data-kw="thornthwaite bilan hydrologique ETP ETR déficit excédent">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci9">🌱</div>
+  <div class="chead-text">
+    <div class="cnum">09 · Bilan hydrologique</div>
+    <div class="ctitle">Bilan Hydrologique — Méthode de Thornthwaite</div>
+    <div><span class="cform">ETP = 16·(10T/I)^a·(N/360)·(d/30)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c9')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="ig"><label class="il">Latitude de la station <span>(degrés, ex : 9.35 pour Parakou)</span></label>
+    <input class="if" id="th_lat" type="number" min="-90" max="90" step="0.01" placeholder="ex : 9.35" style="max-width:240px"/></div>
+  <p style="font-size:.75rem;color:var(--g500);margin-bottom:.65rem">Températures mensuelles (°C) et précipitations (mm) :</p>
+  <div class="mgrid" id="th_inputs"></div>
+  <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+    <button class="bcalc" style="max-width:240px" onclick="calcTH()">🌱 Calculer &amp; Tracer</button>
+    <button class="breset" style="max-width:150px" onclick="rstTH()">↺ Réinitialiser</button>
+  </div>
+  <div class="rperr" id="th_err"></div>
+  <div class="rpanel" id="th_res" style="margin-top:1rem">
+    <div class="rptitle">📊 Bilan Annuel</div>
+    <div class="rpdet" style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem">
+      <div class="rpitem"><span class="rplbl">P totale</span><span class="rpval" id="th_P">—</span></div>
+      <div class="rpitem"><span class="rplbl">ETP annuelle</span><span class="rpval" id="th_ETP">—</span></div>
+      <div class="rpitem"><span class="rplbl">ETR annuelle</span><span class="rpval" id="th_ETR">—</span></div>
+      <div class="rpitem"><span class="rplbl">Déficit</span><span class="rpval" id="th_def">—</span></div>
+      <div class="rpitem"><span class="rplbl">Excédent</span><span class="rpval" id="th_exc">—</span></div>
+      <div class="rpitem"><span class="rplbl">Indice I</span><span class="rpval" id="th_I">—</span></div>
+    </div>
+    <table class="rptable" style="margin-top:.6rem">
+      <thead><tr><th>Mois</th><th>T°C</th><th>P mm</th><th>ETP mm</th><th>ETR mm</th><th>Bilan</th></tr></thead>
+      <tbody id="th_tbody"></tbody>
+    </table>
+    <div class="rpinterp" id="th_interp"></div>
+  </div>
+  <div class="chart-wrap" id="cw_th" style="margin-top:.8rem"><div class="chart-title">Diagramme ombrothermique &amp; bilan</div><canvas id="chart_th" style="height:240px"></canvas></div>
+  <div class="bdl-row" style="margin-top:.5rem"><button class="bdl bdl-pdf" onclick="dlPDF('th_res','Thornthwaite')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_th','thornthwaite')">🖼 PNG</button></div>
+</div>
+</div>
+
+<!-- ══ C10 — TURC ══ -->
+<div class="ccard" id="c10" data-cat="bilan" data-kw="Turc ETP évapotranspiration bilan mensuel rayonnement">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci10">☀️</div>
+  <div class="chead-text">
+    <div class="cnum">10 · Bilan hydrologique</div>
+    <div class="ctitle">ETP Mensuelle — Méthode de Turc</div>
+    <div><span class="cform">ETP = 0,4·T/(T+15)·(Rg+50)  si HR≥50%</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c10')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <p style="font-size:.75rem;color:var(--g500);margin-bottom:.65rem">Température mensuelle (°C), rayonnement global Rg (cal/cm²/j) et humidité relative (%) :</p>
+  <div class="mgrid" id="turc_inputs"></div>
+  <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+    <button class="bcalc" style="max-width:240px" onclick="calcTurc()">☀️ Calculer</button>
+    <button class="breset" style="max-width:150px" onclick="rstTurc()">↺ Réinitialiser</button>
+  </div>
+  <div class="rperr" id="turc_err"></div>
+  <div class="rpanel" id="turc_res" style="margin-top:.9rem">
+    <div class="rptitle">📊 ETP Mensuelle (Turc)</div>
+    <table class="rptable"><thead><tr><th>Mois</th><th>T(°C)</th><th>Rg</th><th>HR%</th><th>ETP(mm)</th></tr></thead><tbody id="turc_tbody"></tbody></table>
+    <div class="rpinterp" id="turc_interp"></div>
+  </div>
+  <div class="chart-wrap" id="cw_turc" style="margin-top:.8rem"><div class="chart-title">ETP mensuelle — Méthode de Turc</div><canvas id="chart_turc" style="height:240px"></canvas></div>
+  <div class="bdl-row" style="margin-top:.5rem"><button class="bdl bdl-pdf" onclick="dlPDF('turc_res','Turc ETP')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_turc','etp_turc')">🖼 PNG</button></div>
+</div>
+</div>
+
+<!-- ══ C11 — MANNING-STRICKLER ══ -->
+<div class="ccard" id="c11" data-cat="hydraul" data-kw="Manning Strickler débit canal hydraulique section écoulement">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci11">🏗️</div>
+  <div class="chead-text">
+    <div class="cnum">11 · Hydraulique</div>
+    <div class="ctitle">Formule de Manning-Strickler</div>
+    <div><span class="cform">Q = K·A·R^(2/3)·I^(1/2)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c11')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Coefficient de Strickler K <span>(m^(1/3)/s)</span></label>
+        <input class="if" id="ms_K" type="number" min="1" max="120" step="1" placeholder="ex : 35"/>
+        <div class="ih">Béton lisse:75–90 · Maçonnerie:50–60 · Terre:25–40 · Rivière naturelle:20–35</div></div>
+      <div class="ig"><label class="il">Forme de la section</label>
+        <select class="if" id="ms_shape" onchange="updateMS()">
+          <option value="rect">Rectangulaire</option>
+          <option value="trap">Trapézoïdale</option>
+          <option value="circ">Circulaire</option>
+        </select></div>
+      <div id="ms_fields"></div>
+      <div class="ig"><label class="il">Pente hydraulique I <span>(m/m)</span></label>
+        <input class="if" id="ms_I" type="number" min="0.00001" step="0.0001" placeholder="ex : 0.002"/>
+        <div class="ih">Pente 2‰ → 0,002 · Pente 5‰ → 0,005</div></div>
+      <button class="bcalc" onclick="calcMS()">🏗️ Calculer</button>
+      <button class="breset" onclick="rstMS()">↺ Réinitialiser</button>
+      <div class="rperr" id="ms_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('ms_res','Manning-Strickler')">📄 PDF</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="ms_res">
+        <div class="rpmain" id="ms_Q">—</div><div class="rpunit">m³/s — Débit</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Section A (m²)</span><span class="rpval" id="ms_A">—</span></div>
+          <div class="rpitem"><span class="rplbl">Périmètre Pm (m)</span><span class="rpval" id="ms_Pm">—</span></div>
+          <div class="rpitem"><span class="rplbl">Rayon hydraulique R (m)</span><span class="rpval" id="ms_R">—</span></div>
+          <div class="rpitem"><span class="rplbl">Vitesse V (m/s)</span><span class="rpval" id="ms_V">—</span></div>
+          <div class="rpitem"><span class="rplbl">Nombre de Froude Fr</span><span class="rpval" id="ms_Fr">—</span></div>
+        </div>
+        <div class="rpinterp" id="ms_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C12 — REYNOLDS ══ -->
+<div class="ccard" id="c12" data-cat="hydraul" data-kw="Reynolds régime écoulement laminaire turbulent viscosité">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci12">🔄</div>
+  <div class="chead-text">
+    <div class="cnum">12 · Hydraulique</div>
+    <div class="ctitle">Nombre de Reynolds &amp; Régime d'Écoulement</div>
+    <div><span class="cform">Re = V·D/ν</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c12')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Vitesse d'écoulement V <span>(m/s)</span></label>
+        <input class="if" id="re_V" type="number" min="0.001" step="0.001" placeholder="ex : 1.5"/></div>
+      <div class="ig"><label class="il">Diamètre ou rayon hydraulique ×4 D <span>(m)</span></label>
+        <input class="if" id="re_D" type="number" min="0.001" step="0.001" placeholder="ex : 0.5"/></div>
+      <div class="ig"><label class="il">Température de l'eau <span>(°C)</span></label>
+        <input class="if" id="re_T" type="number" min="0" max="100" step="1" placeholder="ex : 25"/>
+        <div class="ih">ν(20°C)=1,004×10⁻⁶ · ν(25°C)=0,893×10⁻⁶ · ν(30°C)=0,801×10⁻⁶ m²/s</div></div>
+      <button class="bcalc" onclick="calcReynolds()">🔄 Calculer</button>
+      <button class="breset" onclick="rst(['re_V','re_D','re_T'],'re_res','re_err',null)">↺ Réinitialiser</button>
+      <div class="rperr" id="re_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('re_res','Reynolds')">📄 PDF</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="re_res">
+        <div class="rpmain" id="re_Re">—</div><div class="rpunit">Re — Nombre de Reynolds</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">ν (viscosité cinématique)</span><span class="rpval" id="re_nu">—</span></div>
+          <div class="rpitem"><span class="rplbl">Régime</span><span class="rpval" id="re_regime">—</span></div>
+          <div class="rpitem"><span class="rplbl">Re &lt; 2000</span><span class="rpval">Laminaire</span></div>
+          <div class="rpitem"><span class="rplbl">2000 &lt; Re &lt; 4000</span><span class="rpval">Transitoire</span></div>
+          <div class="rpitem"><span class="rplbl">Re &gt; 4000</span><span class="rpval">Turbulent</span></div>
+        </div>
+        <div class="rpinterp" id="re_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C13 — CANAL OPTIMAL ══ -->
+<div class="ccard" id="c13" data-cat="hydraul" data-kw="canal dimensionnement section optimale hydraulique économique">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci13">📐</div>
+  <div class="chead-text">
+    <div class="cnum">13 · Hydraulique</div>
+    <div class="ctitle">Dimensionnement Canal — Section Optimale</div>
+    <div><span class="cform">Rect : b=2h · Trap : b+2mh=2h√(1+m²)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c13')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Débit à transporter Q <span>(m³/s)</span></label>
+        <input class="if" id="co_Q" type="number" min="0.001" step="0.001" placeholder="ex : 5.0"/></div>
+      <div class="ig"><label class="il">Coefficient de Strickler K <span>(m^(1/3)/s)</span></label>
+        <input class="if" id="co_K" type="number" min="1" max="120" step="1" placeholder="ex : 40"/></div>
+      <div class="ig"><label class="il">Pente I <span>(m/m)</span></label>
+        <input class="if" id="co_I" type="number" min="0.0001" step="0.0001" placeholder="ex : 0.001"/></div>
+      <div class="ig"><label class="il">Type de section</label>
+        <select class="if" id="co_type">
+          <option value="rect">Rectangulaire (m=0)</option>
+          <option value="trap1">Trapézoïdale (m=1)</option>
+          <option value="trap15">Trapézoïdale (m=1,5)</option>
+        </select></div>
+      <button class="bcalc" onclick="calcCanalOpt()">📐 Dimensionner</button>
+      <button class="breset" onclick="rst(['co_Q','co_K','co_I'],'co_res','co_err',null)">↺ Réinitialiser</button>
+      <div class="rperr" id="co_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('co_res','Canal optimal')">📄 PDF</button></div>
+      <div class="chelp"><strong>Section économique :</strong> minimise le périmètre mouillé pour une section donnée → coûts de terrassement et revêtement réduits.</div>
+    </div>
+    <div>
+      <div class="rpanel" id="co_res">
+        <div class="rptitle">📊 Dimensions optimales</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Hauteur h (m)</span><span class="rpval" id="co_h">—</span></div>
+          <div class="rpitem"><span class="rplbl">Largeur b (m)</span><span class="rpval" id="co_b">—</span></div>
+          <div class="rpitem"><span class="rplbl">Section A (m²)</span><span class="rpval" id="co_A">—</span></div>
+          <div class="rpitem"><span class="rplbl">Périmètre Pm (m)</span><span class="rpval" id="co_Pm">—</span></div>
+          <div class="rpitem"><span class="rplbl">Rayon R (m)</span><span class="rpval" id="co_R">—</span></div>
+          <div class="rpitem"><span class="rplbl">Vitesse V (m/s)</span><span class="rpval" id="co_V">—</span></div>
+          <div class="rpitem"><span class="rplbl">Vérification Q (m³/s)</span><span class="rpval" id="co_Qv">—</span></div>
+        </div>
+        <div class="rpinterp" id="co_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C14 — RECHARGE NAPPES ══ -->
+<div class="ccard" id="c14" data-cat="souterrain" data-kw="recharge nappe bilan chlorure aquifère infiltration">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci14">💧</div>
+  <div class="chead-text">
+    <div class="cnum">14 · Eaux souterraines</div>
+    <div class="ctitle">Recharge des Nappes — Méthode du Bilan Chlorure</div>
+    <div><span class="cform">R = P·[Cl]p / [Cl]e</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c14')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Précipitations annuelles P <span>(mm/an)</span></label>
+        <input class="if" id="rc_P" type="number" min="1" step="1" placeholder="ex : 1100"/></div>
+      <div class="ig"><label class="il">Concentration Cl⁻ dans les pluies [Cl]p <span>(mg/L)</span></label>
+        <input class="if" id="rc_Cp" type="number" min="0.01" step="0.01" placeholder="ex : 0.8"/></div>
+      <div class="ig"><label class="il">Concentration Cl⁻ dans les eaux souterraines [Cl]e <span>(mg/L)</span></label>
+        <input class="if" id="rc_Ce" type="number" min="0.1" step="0.1" placeholder="ex : 18.5"/></div>
+      <div class="ig"><label class="il">Superficie du bassin A <span>(km², optionnel)</span></label>
+        <input class="if" id="rc_A" type="number" min="0" step="0.1" placeholder="ex : 150"/></div>
+      <button class="bcalc" onclick="calcRecharge()">💧 Calculer</button>
+      <button class="breset" onclick="rst(['rc_P','rc_Cp','rc_Ce','rc_A'],'rc_res','rc_err',null)">↺ Réinitialiser</button>
+      <div class="rperr" id="rc_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('rc_res','Recharge nappes')">📄 PDF</button></div>
+      <div class="chelp"><strong>Principe :</strong> Le Cl⁻ est conservatif (non absorbé par le sol). Sa concentration élevée dans la nappe traduit la concentration par évaporation lors de l'infiltration.</div>
+    </div>
+    <div>
+      <div class="rpanel" id="rc_res">
+        <div class="rptitle">📊 Recharge de la nappe</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Taux de recharge R (mm/an)</span><span class="rpval" id="rc_R">—</span></div>
+          <div class="rpitem"><span class="rplbl">R / P (%)</span><span class="rpval" id="rc_pct">—</span></div>
+          <div class="rpitem"><span class="rplbl">Volume (Mm³/an)</span><span class="rpval" id="rc_vol">—</span></div>
+          <div class="rpitem"><span class="rplbl">Facteur concentration Cl</span><span class="rpval" id="rc_fcl">—</span></div>
+        </div>
+        <div class="rpinterp" id="rc_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C15 — GRAVELIUS ══ -->
+<div class="ccard" id="c15" data-cat="hydro" data-kw="Gravelius morphométrie bassin versant compacité drainage">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci15">🗺️</div>
+  <div class="chead-text">
+    <div class="cnum">15 · Hydrologie de surface</div>
+    <div class="ctitle">Indice de Gravelius &amp; Morphométrie</div>
+    <div><span class="cform">Kc = 0,28·P / √A</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c15')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Superficie A <span>(km²)</span></label><input class="if" id="gr_A" type="number" min="0.01" step="0.01" placeholder="ex : 1250"/></div>
+      <div class="ig"><label class="il">Périmètre P <span>(km)</span></label><input class="if" id="gr_P" type="number" min="0.1" step="0.1" placeholder="ex : 185"/></div>
+      <div class="ig"><label class="il">Altitude max Zmax <span>(m)</span></label><input class="if" id="gr_Zmax" type="number" min="0" step="1" placeholder="ex : 450"/></div>
+      <div class="ig"><label class="il">Altitude min Zmin <span>(m)</span></label><input class="if" id="gr_Zmin" type="number" min="0" step="1" placeholder="ex : 35"/></div>
+      <div class="ig"><label class="il">Longueur totale cours d'eau ΣL <span>(km)</span></label><input class="if" id="gr_L" type="number" min="0.1" step="0.1" placeholder="ex : 890"/></div>
+      <button class="bcalc" onclick="calcGravelius()">🗺️ Calculer</button>
+      <button class="breset" onclick="rst(['gr_A','gr_P','gr_Zmax','gr_Zmin','gr_L'],'gr_res','gr_err',null)">↺ Réinitialiser</button>
+      <div class="rperr" id="gr_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('gr_res','Gravelius')">📄 PDF</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="gr_res">
+        <div class="rptitle">📊 Paramètres Morphométriques</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Kc (Gravelius)</span><span class="rpval" id="gr_Kc">—</span></div>
+          <div class="rpitem"><span class="rplbl">L rectangle (km)</span><span class="rpval" id="gr_Lr">—</span></div>
+          <div class="rpitem"><span class="rplbl">l rectangle (km)</span><span class="rpval" id="gr_lr">—</span></div>
+          <div class="rpitem"><span class="rplbl">Dénivelée ΔZ (m)</span><span class="rpval" id="gr_dZ">—</span></div>
+          <div class="rpitem"><span class="rplbl">Pente Ig (m/km)</span><span class="rpval" id="gr_Ig">—</span></div>
+          <div class="rpitem"><span class="rplbl">Densité drainage Dd</span><span class="rpval" id="gr_Dd">—</span></div>
+        </div>
+        <div class="rpinterp" id="gr_interp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C16 — MAYER ══ -->
+<div class="ccard" id="c16" data-cat="stat" data-kw="Mayer corrélation régression pluie débit droite Pearson">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci16">🔗</div>
+  <div class="chead-text">
+    <div class="cnum">16 · Statistiques</div>
+    <div class="ctitle">Méthode de Mayer — Corrélation &amp; Régression</div>
+    <div><span class="cform">Y = a·X + b | r = Cov(X,Y)/(σX·σY)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c16')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série X <span>(variable indépendante)</span></label><textarea class="if" id="m_X" placeholder="ex : 1082,956,1134,1045,1201,978,1056,1189,932,1078"></textarea></div>
+      <div class="ig"><label class="il">Série Y <span>(variable dépendante)</span></label><textarea class="if" id="m_Y" placeholder="ex : 45.2,38.1,52.4,41.3,58.7,36.9,47.2,55.1,33.8,44.6"></textarea></div>
+      <div class="ig" style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <div><label class="il">Nom X</label><input class="if" id="m_nx" type="text" placeholder="Pluies (mm)"/></div>
+        <div><label class="il">Nom Y</label><input class="if" id="m_ny" type="text" placeholder="Débits (m³/s)"/></div>
+      </div>
+      <button class="bcalc" onclick="calcMayer()">🔗 Calculer &amp; Tracer</button>
+      <button class="breset" onclick="rst(['m_X','m_Y','m_nx','m_ny'],'m_res','m_err','cw_m')">↺ Réinitialiser</button>
+      <div class="rperr" id="m_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('m_res','Mayer')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_m','mayer')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="m_res">
+        <div class="rptitle">📊 Résultats Mayer</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Équation</span><span class="rpval" id="m_eq">—</span></div>
+          <div class="rpitem"><span class="rplbl">r (Pearson)</span><span class="rpval" id="m_r">—</span></div>
+          <div class="rpitem"><span class="rplbl">R²</span><span class="rpval" id="m_r2">—</span></div>
+          <div class="rpitem"><span class="rplbl">a (pente)</span><span class="rpval" id="m_a">—</span></div>
+          <div class="rpitem"><span class="rplbl">b (ordonnée)</span><span class="rpval" id="m_b">—</span></div>
+        </div>
+        <div class="rpinterp" id="m_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_m"><div class="chart-title">Nuage de points &amp; droite de Mayer</div><canvas id="chart_m" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C17 — CDC ══ -->
+<div class="ccard" id="c17" data-cat="hydro" data-kw="courbe débits classés CDC étiage module crue régime">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci17">📊</div>
+  <div class="chead-text">
+    <div class="cnum">17 · Hydrologie de surface</div>
+    <div class="ctitle">Courbe des Débits Classés (CDC)</div>
+    <div><span class="cform">F(Q) = rang/n × 100%  (ordre décroissant)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c17')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de débits <span>(m³/s, virgules ou espaces)</span></label>
+        <textarea class="if" id="cdc_data" placeholder="ex : 45,38,52,41,58,36,47,55,33,44,62,29,50,39,48,71,25,43"></textarea></div>
+      <button class="bcalc" onclick="calcCDC()">📊 Tracer la CDC</button>
+      <button class="breset" onclick="rst(['cdc_data'],'cdc_res','cdc_err','cw_cdc')">↺ Réinitialiser</button>
+      <div class="rperr" id="cdc_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('cdc_res','CDC')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_cdc','cdc')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Q10%</strong> = haute hydraulicité · <strong>Q50%</strong> = médiane · <strong>Q90%</strong> = étiage caractéristique · <strong>Irrégularité</strong> = Qmax/Qmin</div>
+    </div>
+    <div>
+      <div class="rpanel" id="cdc_res">
+        <div class="rptitle">📊 Débits Caractéristiques</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Qmax (m³/s)</span><span class="rpval" id="cdc_max">—</span></div>
+          <div class="rpitem"><span class="rplbl">Q10% (haute eau)</span><span class="rpval" id="cdc_q10">—</span></div>
+          <div class="rpitem"><span class="rplbl">Q50% (médiane)</span><span class="rpval" id="cdc_q50">—</span></div>
+          <div class="rpitem"><span class="rplbl">Qmoy (module)</span><span class="rpval" id="cdc_moy">—</span></div>
+          <div class="rpitem"><span class="rplbl">Q90% (étiage)</span><span class="rpval" id="cdc_q90">—</span></div>
+          <div class="rpitem"><span class="rplbl">Qmin (m³/s)</span><span class="rpval" id="cdc_min">—</span></div>
+          <div class="rpitem"><span class="rplbl">Irrégularité</span><span class="rpval" id="cdc_irr">—</span></div>
+        </div>
+        <div class="rpinterp" id="cdc_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_cdc"><div class="chart-title">Courbe des débits classés</div><canvas id="chart_cdc" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C18 — SPI ══ -->
+<div class="ccard" id="c18" data-cat="stat" data-kw="SPI sécheresse précipitations standardisé indice aridité">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci18">🏜️</div>
+  <div class="chead-text">
+    <div class="cnum">18 · Statistiques</div>
+    <div class="ctitle">Analyse des Sécheresses — Indice SPI</div>
+    <div><span class="cform">SPI = (P − μ) / σ</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c18')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de précipitations annuelles <span>(mm)</span></label>
+        <textarea class="if" id="spi_data" placeholder="ex : 1082,956,1134,1045,1201,978,1056,1189,932,1078,1156,1023,1098,945,1167"></textarea></div>
+      <button class="bcalc" onclick="calcSPI()">🏜️ Calculer SPI</button>
+      <button class="breset" onclick="rst(['spi_data'],'spi_res','spi_err','cw_spi')">↺ Réinitialiser</button>
+      <div class="rperr" id="spi_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('spi_res','SPI')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_spi','spi')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="spi_res">
+        <div class="rptitle">📊 Analyse SPI</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Années analysées</span><span class="rpval" id="spi_n">—</span></div>
+          <div class="rpitem"><span class="rplbl">Années sèches (SPI &lt; -1)</span><span class="rpval" id="spi_dry">—</span></div>
+          <div class="rpitem"><span class="rplbl">Années humides (SPI &gt; 1)</span><span class="rpval" id="spi_wet">—</span></div>
+          <div class="rpitem"><span class="rplbl">SPI min (plus sèche)</span><span class="rpval" id="spi_min">—</span></div>
+          <div class="rpitem"><span class="rplbl">SPI max (plus humide)</span><span class="rpval" id="spi_max">—</span></div>
+        </div>
+        <div class="rpinterp" id="spi_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_spi"><div class="chart-title">Indice SPI par année</div><canvas id="chart_spi" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C19 — PEARSON III ══ -->
+<div class="ccard" id="c19" data-cat="stat" data-kw="Pearson III gamma distribution fréquence asymétrie">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci19">📐</div>
+  <div class="chead-text">
+    <div class="cnum">19 · Statistiques</div>
+    <div class="ctitle">Loi de Pearson III</div>
+    <div><span class="cform">X(T) = x̄ + K(T,Cs)·s  (Wilson-Hilferty)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c19')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Série de données</label>
+        <textarea class="if" id="p3_data" placeholder="ex : 78,95,112,68,134,89,103,145,72,98,128,87,115,76,142"></textarea></div>
+      <button class="bcalc" onclick="calcPearson3()">📐 Calculer &amp; Tracer</button>
+      <button class="breset" onclick="rst(['p3_data'],'p3_res','p3_err','cw_p3')">↺ Réinitialiser</button>
+      <div class="rperr" id="p3_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('p3_res','Pearson III')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_p3','pearson3')">🖼 PNG</button></div>
+      <div class="chelp"><strong>Pearson III</strong> (loi gamma décalée) : recommandée pour les débits asymétriques. K(T,Cs) calculé par l'approximation de Wilson-Hilferty.</div>
+    </div>
+    <div>
+      <div class="rpanel" id="p3_res">
+        <div class="rptitle">📊 Pearson III</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">x̄ (moyenne)</span><span class="rpval" id="p3_mean">—</span></div>
+          <div class="rpitem"><span class="rplbl">s (écart-type)</span><span class="rpval" id="p3_std">—</span></div>
+          <div class="rpitem"><span class="rplbl">Cs (asymétrie)</span><span class="rpval" id="p3_cs">—</span></div>
+        </div>
+        <table class="rptable"><thead><tr><th>T (ans)</th><th>K(T,Cs)</th><th>X(T)</th></tr></thead><tbody id="p3_tbody"></tbody></table>
+        <div class="rpinterp" id="p3_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_p3"><div class="chart-title">F empirique vs Pearson III</div><canvas id="chart_p3" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ C20 — JACOB (POMPAGE) ══ -->
+<div class="ccard" id="c20" data-cat="souterrain" data-kw="Jacob pompage rabattement transmissivité aquifère nappe">
+<div class="cheader" onclick="tog(this)">
+  <div class="cicon ci20">🪨</div>
+  <div class="chead-text">
+    <div class="cnum">20 · Eaux souterraines</div>
+    <div class="ctitle">Essai de Pompage — Méthode de Jacob</div>
+    <div><span class="cform">s = (2,3Q/4πT)·log(2,25Tt/r²S)</span><span class="ex-tag" onclick="event.stopPropagation();fillEx('c20')">▶ Exemple</span></div>
+  </div>
+  <div class="ctoggle">▼</div>
+</div>
+<div class="cbody">
+  <div class="cgrid">
+    <div>
+      <div class="ig"><label class="il">Débit de pompage Q <span>(m³/h)</span></label>
+        <input class="if" id="jac_Q" type="number" min="0.01" step="0.01" placeholder="ex : 12.5"/></div>
+      <div class="ig"><label class="il">Distance au puits r <span>(m)</span></label>
+        <input class="if" id="jac_r" type="number" min="0.1" step="0.1" placeholder="ex : 50"/></div>
+      <div class="ig"><label class="il">Transmissivité T <span>(m²/h)</span></label>
+        <input class="if" id="jac_T" type="number" min="0.0001" step="0.0001" placeholder="ex : 0.85"/></div>
+      <div class="ig"><label class="il">Coefficient d'emmagasinement S</label>
+        <input class="if" id="jac_S" type="number" min="0.000001" step="0.00001" placeholder="ex : 0.001"/></div>
+      <div class="ig"><label class="il">Temps de pompage t <span>(h)</span></label>
+        <input class="if" id="jac_t" type="number" min="0.01" step="0.01" placeholder="ex : 24"/></div>
+      <button class="bcalc" onclick="calcJacob()">🪨 Calculer</button>
+      <button class="breset" onclick="rst(['jac_Q','jac_r','jac_T','jac_S','jac_t'],'jac_res','jac_err','cw_jac')">↺ Réinitialiser</button>
+      <div class="rperr" id="jac_err"></div>
+      <div class="bdl-row"><button class="bdl bdl-pdf" onclick="dlPDF('jac_res','Jacob pompage')">📄 PDF</button><button class="bdl bdl-png" onclick="dlChart('chart_jac','rabattement')">🖼 PNG</button></div>
+    </div>
+    <div>
+      <div class="rpanel" id="jac_res">
+        <div class="rptitle">📊 Résultats — Méthode de Jacob</div>
+        <div class="rpdet">
+          <div class="rpitem"><span class="rplbl">Rabattement s (m)</span><span class="rpval" id="jac_s">—</span></div>
+          <div class="rpitem"><span class="rplbl">Paramètre u</span><span class="rpval" id="jac_u">—</span></div>
+          <div class="rpitem"><span class="rplbl">T (m²/s)</span><span class="rpval" id="jac_Tms">—</span></div>
+          <div class="rpitem"><span class="rplbl">K (conductivité, m/s)</span><span class="rpval" id="jac_K">—</span></div>
+        </div>
+        <div class="rpinterp" id="jac_interp"></div>
+      </div>
+      <div class="chart-wrap" id="cw_jac"><div class="chart-title">Rabattement s = f(log t)</div><canvas id="chart_jac" style="height:240px"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /app -->
+
+<div class="notif" id="notif"></div>
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<footer style="background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:1.4rem;font-size:.72rem">
+  CalcHydro v1.0 · <a href="index.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="analyse.html" style="color:var(--cyan);text-decoration:none">Analyse</a> · <a href="carte.html" style="color:var(--cyan);text-decoration:none">Carte</a> · INE–UAC · Bénin
+</footer>
+<!-- JAVASCRIPT CHARGÉ DEPUIS FICHIER SÉPARÉ -->
+<script src="calculator.js"></script>
+</body>
+</html>

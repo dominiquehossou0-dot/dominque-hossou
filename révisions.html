@@ -1,0 +1,1367 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Centre de Révisions — INE/UAC</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a1f3c'/><text y='.9em' font-size='72' x='10'>📝</text></svg>"/>
+<style>
+:root{
+  --navy:#0a1f3c;--blue:#1565c0;--sky:#2196f3;--cyan:#00b4d8;
+  --light:#e8f4fd;--white:#fff;--g50:#f8fafc;--g100:#f1f5f9;
+  --g200:#e2e8f0;--g500:#64748b;--g700:#334155;--g900:#0f172a;
+  --green:#16a34a;--red:#dc2626;--gold:#d97706;--purple:#7c3aed;--orange:#ea580c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--g50);color:var(--g700)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97);
+    backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,180,216,.2);
+    display:flex;align-items:center;gap:.8rem;padding:.7rem 1.5rem;flex-wrap:wrap}
+.nb{color:var(--cyan);text-decoration:none;font-size:.73rem;font-weight:600;
+    padding:.28rem .7rem;border-radius:6px;border:1px solid var(--cyan);transition:all .2s;white-space:nowrap}
+.nb:hover{background:var(--cyan);color:var(--navy)}
+.nbrand{font-weight:700;font-size:.95rem;color:#fff;margin-right:auto}
+.nbrand span{color:var(--cyan)}
+.npill{font-size:.68rem;color:rgba(255,255,255,.55);text-decoration:none;
+       padding:.28rem .6rem;border-radius:5px;transition:all .15s;white-space:nowrap}
+.npill:hover{background:rgba(0,180,216,.15);color:var(--cyan)}
+
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a6e 55%,#0d3b6e 100%);
+      padding:5.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 75% 35%,rgba(33,150,243,.12) 0%,transparent 60%)}
+.hero-inner{position:relative;z-index:1;max-width:780px;margin:0 auto}
+.hero-badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.18em;
+            text-transform:uppercase;color:var(--cyan);background:rgba(0,180,216,.12);
+            border:1px solid rgba(0,180,216,.25);border-radius:100px;padding:.28rem .9rem;margin-bottom:1rem}
+.hero h1{font-family:Georgia,serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;
+         color:#fff;line-height:1.2;margin-bottom:.7rem}
+.hero h1 em{color:var(--cyan);font-style:normal}
+.hero p{font-size:.9rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:1.5rem}
+
+.stats-bar{display:flex;gap:0;justify-content:center;flex-wrap:wrap;
+           background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+           border-radius:14px;padding:.9rem 1.5rem;width:fit-content;margin:0 auto;gap:.5rem}
+.sb-item{text-align:center;padding:0 1.2rem}
+.sb-val{font-family:Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--cyan);display:block;line-height:1}
+.sb-lbl{font-size:.62rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;display:block;margin-top:.2rem}
+.sb-sep{width:1px;height:36px;background:rgba(255,255,255,.1);margin:auto 0}
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;z-index:1}
+
+.main{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:2rem;
+      background:var(--white);border:1px solid var(--g200);
+      border-radius:12px;padding:.5rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.tab-btn{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.1rem;
+         border:none;border-radius:8px;font-size:.8rem;font-weight:600;
+         font-family:inherit;cursor:pointer;transition:all .2s;color:var(--g500);background:transparent}
+.tab-btn:hover{background:var(--g50);color:var(--g700)}
+.tab-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(21,101,192,.3)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+.qcm-header{display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
+.qcm-filters{display:flex;gap:.4rem;flex-wrap:wrap}
+.qf-btn{padding:.38rem .8rem;border:1.5px solid var(--g200);border-radius:100px;
+        font-size:.72rem;font-family:inherit;cursor:pointer;background:var(--white);
+        color:var(--g500);transition:all .15s}
+.qf-btn:hover,.qf-btn.active{border-color:var(--blue);color:var(--blue);background:var(--light);font-weight:600}
+
+.timer-box{display:flex;align-items:center;gap:.8rem;background:var(--navy);
+           border-radius:10px;padding:.6rem 1.2rem;color:#fff}
+.timer-display{font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:var(--cyan);min-width:60px;text-align:center}
+.timer-display.warning{color:#f59e0b;animation:pulse .8s infinite}
+.timer-display.danger{color:#ef4444;animation:pulse .4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.timer-btn{padding:.3rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.2);
+           background:transparent;color:rgba(255,255,255,.8);font-size:.72rem;cursor:pointer;transition:all .15s}
+.timer-btn:hover{background:rgba(255,255,255,.1)}
+.timer-select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+              color:#fff;border-radius:6px;padding:.3rem .6rem;font-size:.72rem;font-family:inherit}
+
+.score-bar{background:var(--white);border:1px solid var(--g200);border-radius:12px;
+           padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.score-val{font-family:Georgia,serif;font-size:2rem;font-weight:700;color:var(--blue)}
+.score-label{font-size:.78rem;color:var(--g500)}
+.score-progress{flex:1;min-width:200px}
+.sp-bar{height:10px;background:var(--g100);border-radius:100px;overflow:hidden;margin-top:.3rem}
+.sp-fill{height:100%;border-radius:100px;transition:width .6s ease;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+
+.question-card{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+               padding:1.8rem;margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.q-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap}
+.q-num{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g500)}
+.q-badge{font-size:.62rem;font-weight:700;padding:.18rem .55rem;border-radius:100px}
+.badge-stat{background:rgba(124,58,237,.1);color:var(--purple);border:1px solid rgba(124,58,237,.25)}
+.badge-bilan{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.25)}
+.badge-hydraul{background:rgba(21,101,192,.1);color:var(--blue);border:1px solid rgba(21,101,192,.25)}
+.badge-hydrogeo{background:rgba(234,88,12,.1);color:var(--orange);border:1px solid rgba(234,88,12,.25)}
+.badge-qualite{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.badge-gire{background:rgba(0,180,216,.1);color:var(--cyan);border:1px solid rgba(0,180,216,.25)}
+.badge-morpho{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.25)}
+.q-diff{font-size:.62rem;font-weight:700;padding:.18rem .55rem;border-radius:100px}
+.diff-easy{background:rgba(22,163,74,.1);color:var(--green)}
+.diff-med{background:rgba(217,119,6,.1);color:var(--gold)}
+.diff-hard{background:rgba(220,38,38,.1);color:var(--red)}
+.q-text{font-size:.95rem;color:var(--g900);line-height:1.65;margin-bottom:1.1rem;font-weight:500}
+.q-options{display:flex;flex-direction:column;gap:.5rem}
+.q-opt{display:flex;align-items:flex-start;gap:.8rem;padding:.7rem 1rem;
+       border:1.5px solid var(--g200);border-radius:9px;cursor:pointer;
+       transition:all .2s;font-size:.85rem;color:var(--g700)}
+.q-opt:hover:not(.disabled){border-color:var(--blue);background:var(--light)}
+.q-opt.selected{border-color:var(--blue);background:var(--light)}
+.q-opt.correct{border-color:var(--green);background:rgba(22,163,74,.08);color:var(--green);font-weight:600}
+.q-opt.wrong{border-color:var(--red);background:rgba(220,38,38,.06);color:var(--red)}
+.q-opt.disabled{cursor:default}
+.opt-letter{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g500);
+            display:flex;align-items:center;justify-content:center;font-size:.72rem;
+            font-weight:700;flex-shrink:0;transition:all .2s}
+.q-opt.selected .opt-letter{background:var(--blue);color:#fff}
+.q-opt.correct .opt-letter{background:var(--green);color:#fff}
+.q-opt.wrong .opt-letter{background:var(--red);color:#fff}
+.q-explanation{margin-top:.9rem;padding:.8rem 1rem;background:rgba(22,163,74,.06);
+               border:1px solid rgba(22,163,74,.2);border-radius:8px;
+               font-size:.8rem;color:var(--g700);line-height:1.6;display:none}
+.q-explanation.show{display:block}
+.q-explanation strong{color:var(--green)}
+
+.qcm-controls{display:flex;gap:.7rem;margin-top:1.5rem;flex-wrap:wrap}
+.btn-primary{padding:.65rem 1.4rem;background:linear-gradient(135deg,var(--blue),var(--sky));
+             color:#fff;border:none;border-radius:9px;font-size:.85rem;font-weight:700;
+             font-family:inherit;cursor:pointer;transition:all .2s;
+             box-shadow:0 3px 12px rgba(21,101,192,.28)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(21,101,192,.4)}
+.btn-secondary{padding:.65rem 1.2rem;background:transparent;color:var(--g500);
+               border:1.5px solid var(--g200);border-radius:9px;font-size:.85rem;
+               font-family:inherit;cursor:pointer;transition:all .2s}
+.btn-secondary:hover{background:var(--g100);color:var(--g700)}
+.btn-success{padding:.65rem 1.2rem;background:linear-gradient(135deg,var(--green),#15803d);
+             color:#fff;border:none;border-radius:9px;font-size:.85rem;font-weight:700;
+             font-family:inherit;cursor:pointer;transition:all .2s}
+
+.epreuve-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem}
+.ep-card{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+         overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05);
+         transition:transform .25s,box-shadow .25s}
+.ep-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.ep-header{padding:1.1rem 1.3rem;background:linear-gradient(135deg,var(--navy),#1a3a6e)}
+.ep-year{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+         color:var(--cyan);margin-bottom:.3rem}
+.ep-title{font-family:Georgia,serif;font-size:.95rem;font-weight:700;color:#fff;line-height:1.3}
+.ep-body{padding:1.1rem 1.3rem}
+.ep-meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem}
+.ep-tag{font-size:.62rem;padding:.15rem .5rem;border-radius:100px;font-weight:600}
+.ep-duration{font-size:.75rem;color:var(--g500);margin-bottom:.7rem}
+.ep-btn{display:flex;gap:.4rem}
+.ep-btn button{flex:1;padding:.48rem;border:none;border-radius:7px;font-size:.73rem;
+               font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.ep-btn .btn-view{background:var(--light);color:var(--blue)}
+.ep-btn .btn-view:hover{background:rgba(21,101,192,.15)}
+.ep-btn .btn-corr{background:rgba(22,163,74,.1);color:var(--green)}
+.ep-btn .btn-corr:hover{background:rgba(22,163,74,.2)}
+
+.epreuve-detail{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+                padding:2rem;display:none;box-shadow:0 3px 14px rgba(0,0,0,.07)}
+.epreuve-detail.show{display:block}
+.ed-header{border-bottom:2px solid var(--g200);padding-bottom:1rem;margin-bottom:1.5rem}
+.ed-title{font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:.4rem}
+.exercise{background:var(--g50);border:1px solid var(--g200);border-radius:10px;
+          padding:1.3rem;margin-bottom:1rem}
+.ex-num{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--blue);margin-bottom:.5rem}
+.ex-text{font-size:.88rem;color:var(--g900);line-height:1.7;margin-bottom:.6rem}
+.ex-data{background:var(--white);border:1px solid var(--g200);border-radius:7px;
+         padding:.7rem 1rem;font-family:'Courier New',monospace;font-size:.8rem;
+         color:var(--g700);margin-bottom:.6rem}
+.corr-btn{padding:.4rem .9rem;background:rgba(22,163,74,.1);color:var(--green);
+          border:1px solid rgba(22,163,74,.25);border-radius:7px;font-size:.73rem;
+          font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.corr-btn:hover{background:rgba(22,163,74,.2)}
+.correction{background:rgba(22,163,74,.04);border:1px solid rgba(22,163,74,.2);
+            border-radius:8px;padding:1rem;margin-top:.7rem;display:none}
+.correction.show{display:block}
+.corr-step{display:flex;gap:.8rem;margin-bottom:.7rem;align-items:flex-start;font-size:.83rem;color:var(--g700);line-height:1.65}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;
+          display:flex;align-items:center;justify-content:center;font-size:.65rem;
+          font-weight:700;flex-shrink:0;margin-top:.1rem}
+.corr-result{background:var(--navy);border-radius:7px;padding:.6rem .9rem;
+             font-family:Georgia,serif;font-size:.9rem;color:var(--cyan);
+             font-weight:700;margin-top:.5rem;text-align:center}
+
+.exo-list{display:flex;flex-direction:column;gap:1rem}
+.exo-card{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+          overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.exo-header{display:flex;align-items:center;gap:1rem;padding:1rem 1.3rem;
+            border-bottom:1px solid var(--g100);cursor:pointer;background:var(--g50)}
+.exo-header:hover{background:var(--g100)}
+.exo-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;
+          justify-content:center;font-size:1.1rem;flex-shrink:0}
+.exo-title-wrap{flex:1}
+.exo-title{font-weight:700;font-size:.9rem;color:var(--navy)}
+.exo-subtitle{font-size:.72rem;color:var(--g500);margin-top:.1rem}
+.exo-toggle{color:var(--g500);font-size:.75rem;transition:transform .25s}
+.exo-card.open .exo-toggle{transform:rotate(180deg)}
+.exo-body{display:none;padding:1.3rem}
+.exo-card.open .exo-body{display:block}
+.exo-enonce{font-size:.85rem;color:var(--g900);line-height:1.7;margin-bottom:.9rem}
+.exo-donnees{background:var(--g50);border:1px solid var(--g200);border-radius:8px;
+             padding:.8rem 1rem;font-size:.82rem;margin-bottom:1rem}
+.exo-donnees strong{color:var(--navy);display:block;margin-bottom:.3rem}
+.solution-btn{padding:.45rem 1rem;background:rgba(21,101,192,.1);color:var(--blue);
+              border:1px solid rgba(21,101,192,.25);border-radius:7px;font-size:.75rem;
+              font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;margin-bottom:.8rem}
+.solution-btn:hover{background:rgba(21,101,192,.2)}
+.solution{background:rgba(21,101,192,.04);border:1px solid rgba(21,101,192,.15);
+          border-radius:10px;padding:1.2rem;display:none}
+.solution.show{display:block}
+.sol-step{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--g200)}
+.sol-step:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.sol-step-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+                color:var(--blue);margin-bottom:.4rem}
+.sol-formula{background:var(--navy);border-radius:6px;padding:.5rem .9rem;
+             font-family:'Courier New',monospace;font-size:.82rem;color:var(--cyan);
+             margin:.4rem 0;display:inline-block}
+.sol-text{font-size:.83rem;color:var(--g700);line-height:1.65}
+.sol-result{font-family:Georgia,serif;font-size:1rem;font-weight:700;color:var(--green);
+            background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);
+            border-radius:6px;padding:.4rem .8rem;display:inline-block;margin-top:.3rem}
+
+.fiches-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.fiche-card{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+            overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);
+            transition:transform .25s,box-shadow .25s;cursor:pointer}
+.fiche-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.fiche-top{padding:1.3rem;background:linear-gradient(135deg,var(--navy),#1a3a6e);position:relative}
+.fiche-emoji{font-size:2rem;display:block;margin-bottom:.5rem}
+.fiche-title{font-family:Georgia,serif;font-size:.95rem;font-weight:700;color:#fff}
+.fiche-count{position:absolute;top:.8rem;right:.8rem;font-size:.65rem;font-weight:700;
+             background:rgba(0,180,216,.2);color:var(--cyan);border:1px solid rgba(0,180,216,.3);
+             border-radius:100px;padding:.15rem .5rem}
+.fiche-body{padding:1rem 1.3rem}
+.fiche-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.7rem}
+.fiche-tag{font-size:.65rem;background:var(--g100);color:var(--g500);
+           border-radius:100px;padding:.15rem .5rem}
+.fiche-preview{font-size:.78rem;color:var(--g500);line-height:1.5}
+
+.fiche-detail{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+              padding:2rem;display:none;margin-top:1rem}
+.fiche-detail.show{display:block}
+.fd-title{font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:1.2rem}
+.fd-section{margin-bottom:1.5rem}
+.fd-section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+                  color:var(--blue);margin-bottom:.7rem;padding-bottom:.35rem;
+                  border-bottom:2px solid var(--light)}
+.fd-content{font-size:.85rem;color:var(--g700);line-height:1.75}
+.fd-formula{background:var(--navy);border-radius:8px;padding:.7rem 1.1rem;
+            font-family:'Courier New',monospace;font-size:.88rem;color:var(--cyan);
+            margin:.5rem 0;display:block}
+.fd-table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.5rem 0}
+.fd-table th{background:var(--navy);color:#fff;padding:.45rem .65rem;text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.fd-table td{padding:.4rem .65rem;border-bottom:1px solid var(--g200)}
+.fd-table tr:nth-child(even) td{background:var(--g50)}
+.fd-key-point{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem .8rem;
+              background:rgba(21,101,192,.05);border-radius:7px;margin-bottom:.4rem;
+              font-size:.82rem;color:var(--g700)}
+.fd-key-point::before{content:'💡';flex-shrink:0}
+
+.result-screen{background:var(--white);border:1px solid var(--g200);border-radius:16px;
+               padding:3rem 2rem;text-align:center;display:none}
+.result-screen.show{display:block}
+.result-score{font-family:Georgia,serif;font-size:4rem;font-weight:700;margin-bottom:.5rem}
+.result-grade{font-size:1.2rem;font-weight:600;margin-bottom:1rem}
+.result-msg{font-size:.9rem;color:var(--g500);margin-bottom:2rem;line-height:1.6}
+.result-detail{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.rd-item{background:var(--g50);border-radius:10px;padding:.9rem;text-align:center}
+.rd-val{font-family:Georgia,serif;font-size:1.8rem;font-weight:700}
+.rd-lbl{font-size:.68rem;color:var(--g500);text-transform:uppercase;letter-spacing:.08em}
+
+.notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);
+       background:var(--navy);color:#fff;border-radius:10px;padding:.65rem 1.2rem;
+       font-size:.76rem;z-index:2000;opacity:0;transition:all .3s;
+       border-left:4px solid var(--cyan);white-space:nowrap;pointer-events:none}
+.notif.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+#btt{position:fixed;bottom:1.8rem;right:1.8rem;width:42px;height:42px;border-radius:50%;
+     background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;border:none;
+     cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;
+     justify-content:center;opacity:0;transform:translateY(20px);
+     transition:opacity .3s,transform .3s;z-index:999}
+#btt.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){.epreuve-grid,.fiches-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.epreuve-grid,.fiches-grid{grid-template-columns:1fr}.result-detail{grid-template-columns:1fr}.sb-sep{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nb">← Hydro</a>
+  <div class="nbrand">Révisions <span>INE</span></div>
+  <a href="calculator.html" class="npill">🧮 Calc</a>
+  <a href="analyse.html" class="npill">📊 Analyse</a>
+  <a href="carte.html" class="npill">🗺️ Carte</a>
+  <a href="profil.html" class="npill">👤 Profil</a>
+  <a href="BiblioHydro.html" class="npill">📚 Bibliothèques</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">📝 Centre de révisions · INE–UAC · Licence S3A54</div>
+    <h1>Centre de <em>Révisions</em></h1>
+    <p>QCM interactifs, épreuves corrigées, exercices numériques étape par étape et fiches de révision pour tous les thèmes de la filière.</p>
+    <div class="stats-bar">
+      <div class="sb-item"><span class="sb-val">80</span><span class="sb-lbl">Questions QCM</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item"><span class="sb-val">19</span><span class="sb-lbl">Épreuves</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item"><span class="sb-val">15</span><span class="sb-lbl">Exercices résolus</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item"><span class="sb-val">7</span><span class="sb-lbl">Fiches de révision</span></div>
+    </div>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1440 50" preserveAspectRatio="none">
+    <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#f8fafc"/>
+  </svg>
+</div>
+
+<div class="main">
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('qcm',this)">🎯 QCM Interactif</button>
+  <button class="tab-btn" onclick="showTab('epreuves',this)">📄 Épreuves Corrigées</button>
+  <button class="tab-btn" onclick="showTab('exercices',this)">🔢 Exercices Numériques</button>
+  <button class="tab-btn" onclick="showTab('fiches',this)">📚 Fiches de Révision</button>
+</div>
+
+<div class="tab-content active" id="tab-qcm">
+
+  <div class="qcm-header">
+    <div class="qcm-filters">
+      <button class="qf-btn active" onclick="filterQCM('all',this)">Toutes</button>
+      <button class="qf-btn" onclick="filterQCM('stat',this)">Statistiques</button>
+      <button class="qf-btn" onclick="filterQCM('bilan',this)">Bilan hydrique</button>
+      <button class="qf-btn" onclick="filterQCM('hydraul',this)">Hydraulique</button>
+      <button class="qf-btn" onclick="filterQCM('hydrogeo',this)">Hydrogéologie</button>
+      <button class="qf-btn" onclick="filterQCM('qualite',this)">Qualité eaux</button>
+      <button class="qf-btn" onclick="filterQCM('gire',this)">GIRE</button>
+      <button class="qf-btn" onclick="filterQCM('morpho',this)">Morphométrie</button>
+    </div>
+    <div class="timer-box">
+      <span>⏱️</span>
+      <div class="timer-display" id="timerDisplay">00:00</div>
+      <select class="timer-select" id="timerDuration">
+        <option value="0">Libre</option>
+        <option value="600">10 min</option>
+        <option value="1200">20 min</option>
+        <option value="1800" selected>30 min</option>
+        <option value="3600">60 min</option>
+      </select>
+      <button class="timer-btn" onclick="startTimer()">▶</button>
+      <button class="timer-btn" onclick="stopTimer()">⏹</button>
+    </div>
+  </div>
+
+  <div class="score-bar" id="scoreBar">
+    <div><div class="score-val" id="scoreVal">0/0</div><div class="score-label">Score actuel</div></div>
+    <div class="score-progress">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--g500)">
+        <span>Progression</span><span id="progressTxt">0 question(s) répondue(s)</span>
+      </div>
+      <div class="sp-bar"><div class="sp-fill" id="spFill" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn-primary" onclick="submitQCM()">✅ Valider</button>
+      <button class="btn-secondary" onclick="resetQCM()">↺ Recommencer</button>
+    </div>
+  </div>
+
+  <div id="questionsContainer"></div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="result-score" id="resultScore">—</div>
+    <div class="result-grade" id="resultGrade">—</div>
+    <div class="result-msg" id="resultMsg">—</div>
+    <div class="result-detail">
+      <div class="rd-item"><div class="rd-val" id="rdCorrect" style="color:var(--green)">—</div><div class="rd-lbl">Correctes</div></div>
+      <div class="rd-item"><div class="rd-val" id="rdWrong" style="color:var(--red)">—</div><div class="rd-lbl">Incorrectes</div></div>
+      <div class="rd-item"><div class="rd-val" id="rdTime" style="color:var(--blue)">—</div><div class="rd-lbl">Temps</div></div>
+    </div>
+    <button class="btn-primary" onclick="resetQCM()" style="margin-right:.5rem">🔄 Recommencer</button>
+    <button class="btn-secondary" onclick="showTab('epreuves',document.querySelectorAll('.tab-btn')[1])">📄 Voir les épreuves</button>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-epreuves">
+  <div class="epreuve-grid" id="epreuveGrid"></div>
+  <div class="epreuve-detail" id="epreuveDetail"></div>
+</div>
+
+<div class="tab-content" id="tab-exercices">
+  <div class="exo-list" id="exoList"></div>
+</div>
+
+<div class="tab-content" id="tab-fiches">
+  <div class="fiches-grid" id="fichesGrid"></div>
+  <div class="fiche-detail" id="ficheDetail"></div>
+</div>
+
+</div>
+
+<div class="notif" id="notif"></div>
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<footer style="background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:1.4rem;font-size:.72rem">
+  Révisions · <a href="index.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="calculator.html" style="color:var(--cyan);text-decoration:none">Calculateurs</a> · INE–UAC · Bénin
+</footer>
+
+<script>
+const QUESTIONS = [
+
+{id:1,cat:'stat',diff:'easy',q:"Quelle est la formule de la variable réduite de Gumbel ?",opts:["y = -ln(-ln(F))", "y = (X-μ)/σ", "y = ln(X/X̄)", "y = F/(1-F)"],ans:0,exp:"La variable réduite de Gumbel est y = −ln(−ln(F)) où F est la fréquence de non-dépassement. Elle linéarise la relation X = f(F) sur papier Gumbel."},
+{id:2,cat:'stat',diff:'easy',q:"Dans la méthode des moments pour la loi de Gumbel, le paramètre d'échelle α est :",opts:["α = s·√6/π", "α = s·π/√6", "α = s/√6", "α = s·√2/π"],ans:0,exp:"Par la méthode des moments : α = s·√6/π ≈ 0,7797·s et u = x̄ − 0,5772·α (u est le paramètre de position)."},
+{id:3,cat:'stat',diff:'med',q:"Un test KS donne Dn = 0,18 pour n = 30 observations. La valeur critique au seuil 5% est Dcrit = 0,242. Quelle conclusion ?",opts:["La loi est acceptée (Dn < Dcrit)","La loi est rejetée (Dn > Dcrit)","Le test est non concluant","Il faut un échantillon plus grand"],ans:0,exp:"Dn = 0,18 < Dcrit = 0,242 → on ne peut pas rejeter l'hypothèse nulle au seuil α = 5%. La loi ajustée est statistiquement acceptable."},
+{id:4,cat:'stat',diff:'med',q:"Le coefficient de variation Cv d'une série pluviométrique est de 35%. Ce régime est caractérisé par :",opts:["Forte variabilité interannuelle","Régime très homogène","Variabilité modérée","Série non analysable"],ans:0,exp:"Cv < 15% : homogène · 15–30% : variabilité modérée · > 30% : forte irrégularité interannuelle. Cv = 35% indique un régime pluviométrique très variable."},
+{id:5,cat:'stat',diff:'hard',q:"Pour un ajustement Gumbel avec u = 50 mm et α = 20 mm, quelle est la pluie pour T = 100 ans ?",opts:["141,9 mm","120 mm","135,4 mm","160 mm"],ans:0,exp:"y(100) = -ln(-ln(1-1/100)) = -ln(-ln(0,99)) ≈ 4,600. X(100) = u + α·y = 50 + 20×4,600 = 142 mm ≈ 141,9 mm."},
+{id:6,cat:'stat',diff:'easy',q:"La médiane d'une série correspond à la fréquence de dépassement :",opts:["50%","25%","75%","33%"],ans:0,exp:"La médiane est la valeur centrale de la série classée. Elle correspond à F = 50% sur la courbe des fréquences cumulées, soit Q50%."},
+{id:7,cat:'stat',diff:'med',q:"Le test de Mann-Kendall permet de détecter :",opts:["Une tendance monotone dans une série","Une rupture de stationnarité","La normalité d'une série","Des valeurs aberrantes"],ans:0,exp:"Mann-Kendall est un test non paramétrique de tendance monotone (croissante ou décroissante). Le test de Pettitt est utilisé pour les ruptures, KS pour la normalité, et Grubbs pour les aberrantes."},
+{id:8,cat:'stat',diff:'hard',q:"Le coefficient d'asymétrie Cs d'une série est de 1,8. Cela indique :",opts:["Distribution étalée vers les grandes valeurs","Distribution symétrique","Distribution étalée vers les petites valeurs","Distribution bimodale"],ans:0,exp:"Cs > 0 : asymétrie positive (queue droite, étalée vers les grandes valeurs). Cs = 0 : symétrique. Cs < 0 : asymétrie négative. Pour les débits de crue, Cs est souvent positif."},
+{id:9,cat:'stat',diff:'easy',q:"Dans la formule de Weibull, la fréquence empirique du rang i dans une série de n valeurs est :",opts:["F = i/(n+1)","F = i/n","F = (i-0,5)/n","F = i/(n-1)"],ans:0,exp:"La formule de Weibull F = i/(n+1) est la plus utilisée en hydrologie. Elle donne une probabilité de non-dépassement comprise entre 0 et 1 (jamais 0 ni 1 exactement)."},
+{id:10,cat:'stat',diff:'med',q:"L'approximation de Wilson-Hilferty est utilisée pour calculer les quantiles de la loi :",opts:["Pearson III","Gumbel","Normale","Log-Normale"],ans:0,exp:"L'approximation de Wilson-Hilferty X(T) = x̄ + K(T,Cs)·s permet de calculer les quantiles de la loi de Pearson III (gamma décalée) sans tables, en fonction du coefficient d'asymétrie Cs."},
+
+{id:11,cat:'bilan',diff:'easy',q:"La méthode de Thornthwaite calcule l'ETP à partir :",opts:["De la température et de la durée du jour","Du rayonnement solaire uniquement","De la vitesse du vent et de l'humidité","De la pression atmosphérique"],ans:0,exp:"Thornthwaite utilise la température mensuelle et la photoperiode (durée du jour). L'ETP est calculée via l'indice thermique I et la formule ETP = 16·(10T/I)^a, puis corrigée par la durée du jour."},
+{id:12,cat:'bilan',diff:'med',q:"Dans le bilan hydrologique P = ETR + R + ΔS, que représente R ?",opts:["Ruissellement et écoulement vers l'exutoire","Rayonnement","Recharge de la nappe","Résidu"],ans:0,exp:"P = précipitations, ETR = évapotranspiration réelle, R = lame ruisselée (écoulements vers l'exutoire), ΔS = variation du stock (sol, nappe). Sur une longue période, ΔS ≈ 0 et P ≈ ETR + R."},
+{id:13,cat:'bilan',diff:'easy',q:"La formule de Turc pour l'ETP est basée sur :",opts:["La température et le rayonnement global","La pression de vapeur saturante","La conductance stomatique","L'albédo de surface"],ans:0,exp:"ETP Turc = 0,4·T/(T+15)·(Rg+50) si HR ≥ 50%, avec correction si HR < 50%. Simple d'utilisation mais moins précise que Penman-Monteith qui intègre aussi le vent et l'humidité."},
+{id:14,cat:'bilan',diff:'med',q:"L'ETR est toujours inférieure ou égale à :",opts:["L'ETP","La précipitation","La lame ruisselée","Le déficit hydrique"],ans:0,exp:"Par définition, ETR ≤ ETP (on ne peut pas évaporer plus que le maximum potentiel). Aussi, ETR ≤ P (on ne peut pas évaporer plus qu'il n'est disponible sans stock). ETR = min(ETP, P + stock)."},
+{id:15,cat:'bilan',diff:'hard',q:"Pour une station avec P = 1200 mm/an et ETP = 1600 mm/an, le déficit hydrique est :",opts:["400 mm/an","1600 mm/an","800 mm/an","200 mm/an"],ans:0,exp:"Déficit = ETP - ETR. Comme P < ETP et en supposant la réserve utile épuisée, ETR ≈ P = 1200 mm. Déficit = ETP - ETR = 1600 - 1200 = 400 mm/an."},
+{id:16,cat:'bilan',diff:'easy',q:"La Réserve Utile (RU) du sol dans la méthode de Thornthwaite est généralement prise égale à :",opts:["100 mm","50 mm","200 mm","150 mm"],ans:0,exp:"La RU = 100 mm est la valeur standard utilisée par Thornthwaite. Elle représente la quantité d'eau disponible dans la zone racinaire. Elle peut être ajustée selon le type de sol et la végétation."},
+{id:17,cat:'bilan',diff:'med',q:"La photoperiode N dans la méthode de Thornthwaite représente :",opts:["La durée mensuelle d'ensoleillement potentiel","La durée du jour solaire","Le nombre d'heures de pluie","La durée de la saison des pluies"],ans:0,exp:"La photoperiode N est la durée théorique de l'ensoleillement (en heures) calculée selon la latitude et le mois de l'année. Elle permet de corriger l'ETP pour l'inégalité des mois et la latitude."},
+{id:18,cat:'bilan',diff:'hard',q:"L'indice thermique annuel I de Thornthwaite est calculé comme :",opts:["I = Σᵢ(Tᵢ/5)^1,514 pour les mois avec T > 0°C","I = Σᵢ Tᵢ/12","I = Tmax - Tmin","I = Σᵢ(Tᵢ - 10)"],ans:0,exp:"I = Σ(T/5)^1,514 pour les 12 mois avec T > 0°C. I est l'indice thermique annuel utilisé pour calculer l'exposant a = f(I) dans la formule ETP. Plus le climat est chaud, plus I est élevé."},
+{id:19,cat:'bilan',diff:'easy',q:"Un diagramme ombrothermique représente :",opts:["Les précipitations et les températures mensuelles sur le même graphique","L'ETP mensuelle en fonction de l'ETR","Le bilan hydrique mensuel","La courbe des débits classés"],ans:0,exp:"Le diagramme ombrothermique (ou climagramme de Gaussen) trace P(mm) et 2T(°C) par mois. Quand 2T > P : mois sec (période de sécheresse). Quand 2T < P : mois humide. Outil fondamental d'analyse climatique."},
+{id:20,cat:'bilan',diff:'med',q:"La saison sèche biologique est définie comme la période où :",opts:["P < 2T (selon Gaussen)","ETR = 0","P < ETP","La nappe ne se recharge pas"],ans:0,exp:"Selon la règle de Gaussen, un mois est biologiquement sec quand P (mm) < 2T (°C). Cette définition est pratique pour les zones tropicales comme le Bénin."},
+
+{id:21,cat:'hydraul',diff:'easy',q:"La formule de Manning-Strickler s'écrit :",opts:["Q = K·A·R^(2/3)·√I","Q = K·A·R^(1/2)·I^(2/3)","Q = A·V/K","Q = K·V·A·I"],ans:0,exp:"Q = K·A·Rh^(2/3)·I^(1/2) où K est le coefficient de Strickler (m^(1/3)/s), A la section mouillée, Rh le rayon hydraulique et I la pente. Plus K est élevé, plus le lit est lisse."},
+{id:22,cat:'hydraul',diff:'med',q:"Le nombre de Froude Fr < 1 indique un écoulement :",opts:["Fluvial (torrentiel faible)","Torrentiel","Critique","Laminaire"],ans:0,exp:"Fr = V/√(g·h) < 1 : écoulement fluvial (lent, sous-critique). Fr = 1 : critique. Fr > 1 : torrentiel (rapide, supercritique). La majorité des rivières naturelles ont un régime fluvial."},
+{id:23,cat:'hydraul',diff:'easy',q:"Le coefficient de Strickler K pour un canal en béton lisse est généralement :",opts:["75–90 m^(1/3)/s","25–40 m^(1/3)/s","50–65 m^(1/3)/s","10–20 m^(1/3)/s"],ans:0,exp:"K varie selon la rugosité : béton lisse 75–90 · maçonnerie 50–65 · canal en terre compactée 25–40 · rivière naturelle avec végétation 15–30. Plus la surface est lisse, plus K est élevé."},
+{id:24,cat:'hydraul',diff:'med',q:"Le rayon hydraulique Rh est défini comme :",opts:["Rh = Section mouillée / Périmètre mouillé","Rh = Périmètre / Section","Rh = √(Section)","Rh = Section / Largeur de surface libre"],ans:0,exp:"Rh = A/Pm est le rapport de la section mouillée sur le périmètre mouillé. Pour une section rectangulaire large : Rh ≈ h (hauteur d'eau). Pour un canal circulaire plein : Rh = D/4."},
+{id:25,cat:'hydraul',diff:'hard',q:"Pour un canal rectangulaire de section optimale (section économique), la relation entre b et h est :",opts:["b = 2h","b = h","b = √2·h","b = 3h"],ans:0,exp:"La section rectangulaire économique minimise le périmètre mouillé pour une section donnée. La condition d'optimalité donne b = 2h, ce qui correspond à un demi-carré. Le rayon hydraulique est alors Rh = h/2."},
+{id:26,cat:'hydraul',diff:'easy',q:"La méthode rationnelle Q = C·i·A/3,6 est valable pour :",opts:["Bassins versants A < 5 km²","Tous les bassins versants","Bassins A > 10 km²","Bassins urbains uniquement"],ans:0,exp:"La méthode rationnelle s'applique aux petits bassins (A < 5 km²), avec une pluie uniforme sur toute la durée tc. Pour de grands bassins, on utilise HEC-HMS ou une approche distribuée."},
+{id:27,cat:'hydraul',diff:'med',q:"Dans la méthode SCS-CN, la pluie nette Pe est calculée par :",opts:["Pe = (P−0,2S)²/(P+0,8S)","Pe = P·CN/100","Pe = P−S","Pe = C·P"],ans:0,exp:"Pe = (P−Ia)²/(P−Ia+S) avec Ia = 0,2S (abstractions initiales) et S = 25400/CN − 254. Pe = 0 si P ≤ 0,2S. CN = 100 → ruissellement total. CN = 0 → infiltration totale."},
+{id:28,cat:'hydraul',diff:'easy',q:"Le nombre de Reynolds Re > 4000 correspond à un écoulement :",opts:["Turbulent","Laminaire","Transitoire","Critique"],ans:0,exp:"Re < 2000 : laminaire (viscosité domine). 2000 < Re < 4000 : transitoire. Re > 4000 : turbulent (inertie domine). En hydraulique fluviale, les écoulements sont presque toujours turbulents (Re >> 4000)."},
+{id:29,cat:'hydraul',diff:'hard',q:"Dans la méthode de Muskingum, la somme C₀ + C₁ + C₂ est égale à :",opts:["1","0","K","K·X"],ans:0,exp:"Par construction, C₀ + C₁ + C₂ = 1, ce qui garantit la conservation du volume lors du routage. Si cette somme ≠ 1, les paramètres ou le pas de temps sont incorrects."},
+{id:30,cat:'hydraul',diff:'med',q:"Le temps de concentration tc selon la formule de Kirpich dépend de :",opts:["La longueur et la pente du talweg","La superficie et la pluie","La perméabilité du sol","L'occupation des terres"],ans:0,exp:"Kirpich : tc = 0,0195·L^0,77·S^(-0,385) en heures, avec L (m) longueur du talweg et S = ΔH/L la pente. Giandotti inclut aussi la superficie A, Passini inclut la pente moyenne Im."},
+
+{id:31,cat:'hydrogeo',diff:'easy',q:"La loi de Darcy s'écrit :",opts:["Q = K·A·(dh/dl)","Q = K·A²·I","Q = K·(dh/dl)²","Q = A·K²·I"],ans:0,exp:"Q = K·A·i où K est la conductivité hydraulique (m/s), A la section d'écoulement et i = dh/dl le gradient hydraulique. Valable pour les écoulements laminaires (Re < 1–10 en milieu poreux)."},
+{id:32,cat:'hydrogeo',diff:'med',q:"La transmissivité T d'un aquifère est liée à K et à l'épaisseur saturée e par :",opts:["T = K·e","T = K/e","T = K²·e","T = K·e²"],ans:0,exp:"T = K·e (m²/s) est la transmissivité. Elle représente le débit que peut transmettre une colonne d'aquifère d'un mètre de largeur sous un gradient hydraulique unitaire. Typ. : 10⁻⁴ à 10⁻¹ m²/s."},
+{id:33,cat:'hydrogeo',diff:'easy',q:"Un aquifère captif se distingue d'un aquifère libre par :",opts:["La présence d'un toit imperméable","Une profondeur supérieure","Une transmissivité plus élevée","Une eau plus chargée en sels"],ans:0,exp:"Aquifère captif : couche perméable coincée entre deux couches imperméables (toit et mur). La surface piézométrique est au-dessus du toit. Aquifère libre : nappe à surface libre (phréatique)."},
+{id:34,cat:'hydrogeo',diff:'med',q:"Dans la méthode de Jacob pour les essais de pompage, l'approximation est valable si :",opts:["u = r²S/(4Tt) < 0,05","u > 1","T > 10⁻³ m²/s","Q constant uniquement"],ans:0,exp:"Jacob : s ≈ (2,303Q/4πT)·log(2,25Tt/r²S), valable si u = r²S/(4Tt) < 0,05 (temps long, grand T, petit r). Pour u ≥ 0,05, utiliser la solution de Theis avec la fonction de puits W(u)."},
+{id:35,cat:'hydrogeo',diff:'hard',q:"La méthode du bilan chlorure permet d'estimer la recharge par la relation :",opts:["R = P·[Cl]pluie/[Cl]nappe","R = P·[Cl]nappe/[Cl]pluie","R = ETP·[Cl]pluie","R = P·[Cl]sol"],ans:0,exp:"R = P·[Cl]p/[Cl]e. Le chlorure est conservatif : sa concentration s'élève dans la nappe car une partie des pluies est évapotranspirée. Plus [Cl]e est élevé par rapport à [Cl]p, plus la recharge est faible."},
+{id:36,cat:'hydrogeo',diff:'easy',q:"La piézométrie permet de :",opts:["Mesurer le niveau de l'eau dans un forage","Analyser la qualité chimique de l'eau","Pomper l'eau souterraine","Tester la perméabilité du sol"],ans:0,exp:"La piézométrie mesure la pression (ou le niveau piézométrique) dans un aquifère via un piezomètre. La carte piézométrique montre les lignes d'égal potentiel hydraulique et le sens d'écoulement."},
+{id:37,cat:'hydrogeo',diff:'med',q:"L'emmagasinement S d'un aquifère captif représente :",opts:["La quantité d'eau libérée par unité de surface pour une baisse unitaire de charge","Le volume d'eau dans l'aquifère","La porosité totale","La porosité efficace"],ans:0,exp:"S (sans dimension) = volume libéré / (surface · baisse de charge). Pour aquifère captif : S = 10⁻⁵ à 10⁻³ (compression de l'aquifère + détente de l'eau). Pour nappe libre : S ≈ porosité efficace (0,05–0,30)."},
+{id:38,cat:'hydrogeo',diff:'easy',q:"Quelle est la différence entre nappe libre et nappe captive ?",opts:["La nappe libre a une surface libre (non confinée), la captive est confinée entre 2 couches imperméables","La nappe libre est plus profonde","La nappe captive est plus polluée","La nappe libre a un débit plus élevé"],ans:0,exp:"Nappe libre (phréatique) : surface libre en équilibre avec l'atmosphère. Nappe captive : confinée entre deux couches imperméables, sous pression — l'eau peut monter au-dessus du toit si on la perce."},
+{id:39,cat:'hydrogeo',diff:'hard',q:"La conductivité hydraulique K d'un aquifère sableux typique est de l'ordre de :",opts:["10⁻⁵ à 10⁻³ m/s","10⁻¹⁰ à 10⁻⁸ m/s","1 à 10 m/s","10⁻¹ à 1 m/s"],ans:0,exp:"K (m/s) : argile : 10⁻¹⁰–10⁻⁸ · limon : 10⁻⁸–10⁻⁶ · sable fin : 10⁻⁶–10⁻⁴ · sable grossier : 10⁻⁴–10⁻² · gravier : 10⁻² et plus. Les aquifères sableux ont K ≈ 10⁻⁵ à 10⁻³ m/s."},
+{id:40,cat:'hydrogeo',diff:'med',q:"Le rabattement dans un forage augmente avec :",opts:["L'augmentation du débit de pompage Q","L'augmentation de la transmissivité T","La diminution du temps de pompage","L'augmentation de r"],ans:0,exp:"D'après Jacob : s ≈ (2,303Q/4πT)·log(2,25Tt/r²S). Plus Q augmente, plus s augmente (proportionnel). Plus T augmente, plus s diminue. Plus t augmente, plus s augmente (log). Plus r augmente, plus s diminue."},
+
+{id:41,cat:'qualite',diff:'easy',q:"La valeur limite de pH pour l'eau potable selon les normes OMS est :",opts:["6,5 à 8,5","5,0 à 9,0","7,0 à 7,5","6,0 à 8,0"],ans:0,exp:"OMS : pH entre 6,5 et 8,5. Un pH < 6,5 peut induire une corrosion des canalisations. Un pH > 8,5 peut indiquer une forte teneur en carbonates. Le pH optimal est neutre (≈ 7)."},
+{id:42,cat:'qualite',diff:'med',q:"La DBO₅ est une mesure de :",opts:["La demande en oxygène des matières organiques biodégradables sur 5 jours","La teneur totale en oxygène dissous","La concentration en matières en suspension","La dureté de l'eau"],ans:0,exp:"DBO₅ = Demande Biologique en Oxygène à 5 jours (20°C). Elle mesure la quantité d'O₂ consommée par les bactéries pour dégrader les matières organiques. DBO₅ eau propre : < 2 mg/L · eau polluée : > 20 mg/L."},
+{id:43,cat:'qualite',diff:'easy',q:"La norme OMS pour les nitrates (NO₃⁻) dans l'eau potable est :",opts:["50 mg/L","100 mg/L","25 mg/L","10 mg/L"],ans:0,exp:"OMS : NO₃⁻ ≤ 50 mg/L. Au-delà, risque de méthémoglobinémie chez les nourrissons (blue baby syndrome). En France, la norme est également 50 mg/L. Les nitrates proviennent des engrais agricoles et des effluents domestiques."},
+{id:44,cat:'qualite',diff:'med',q:"Le diagramme de Piper représente :",opts:["La composition ionique des eaux sur un diagramme trilinéaire","L'évolution temporelle de la qualité","La relation débit-qualité","La distribution spatiale de la pollution"],ans:0,exp:"Le diagramme de Piper comporte deux triangles (cations : Ca²⁺, Mg²⁺, Na⁺+K⁺ et anions : HCO₃⁻, SO₄²⁻, Cl⁻) et un losange central. Il permet d'identifier le faciès hydrochimique et les familles d'eaux."},
+{id:45,cat:'qualite',diff:'easy',q:"Le faciès hydrochimique bicarbonaté calcique (Ca-HCO₃) indique :",opts:["Une eau jeune peu minéralisée ayant circulé en terrain calcaire","Une eau profonde fortement minéralisée","Une pollution anthropique aux chlorures","Une eau de surface non filtrée"],ans:0,exp:"Faciès Ca-HCO₃ : eau typique des aquifères superficiels en terrain calcaire (dissolution de CaCO₃). Eau douce, peu minéralisée. Faciès Na-Cl : eau profonde ou marine. Faciès Mg-SO₄ : terrains évaporitiques."},
+{id:46,cat:'qualite',diff:'med',q:"La conductivité électrique (CE) de l'eau est une mesure indirecte de :",opts:["La minéralisation totale (TDS)","Le pH","La teneur en matières organiques","La turbidité"],ans:0,exp:"CE (µS/cm ou mS/cm) est proportionnelle à la somme des ions dissous. Relation approximative : TDS (mg/L) ≈ 0,5–0,7 × CE (µS/cm). Eau potable : CE < 2500 µS/cm (OMS). Eau distillée : ≈ 1 µS/cm."},
+{id:47,cat:'qualite',diff:'hard',q:"La balance ionique d'une analyse chimique d'eau est vérifiée si l'erreur est :",opts:["< 5%","< 10%","< 1%","< 15%"],ans:0,exp:"Balance ionique : erreur = (Σcations − Σanions)/(Σcations + Σanions) × 100 (en méq/L). Une erreur < 5% est acceptable. Elle vérifie que l'analyse est correcte (électroneutralité de l'eau)."},
+{id:48,cat:'qualite',diff:'easy',q:"Parmi ces paramètres, lequel est un indicateur de contamination fécale ?",opts:["E. coli (Escherichia coli)","Nitrates","Chlorures","Sulfates"],ans:0,exp:"E. coli est le principal indicateur de contamination fécale (humaine ou animale) dans l'eau. Sa présence indique un risque de contamination par des agents pathogènes (cholera, typhoïde). Norme OMS : 0 UFC/100 mL dans l'eau potable."},
+{id:49,cat:'qualite',diff:'med',q:"La teneur en fer (Fe) dans l'eau potable recommandée par l'OMS est :",opts:["< 0,3 mg/L","< 1,0 mg/L","< 0,1 mg/L","< 5,0 mg/L"],ans:0,exp:"Fe < 0,3 mg/L (OMS) — valeur indicative. Au-delà : goût métallique, coloration brunâtre des installations. Le fer est courant dans les eaux souterraines africaines (terrains granitiques et ferrugineux)."},
+{id:50,cat:'qualite',diff:'hard',q:"La conversion de la concentration d'un ion en méq/L se fait par :",opts:["[mg/L] / poids équivalent","[mg/L] × poids moléculaire","[mg/L] × charge","[mol/L] / valence"],ans:0,exp:"méq/L = mg/L / poids équivalent = (mg/L × valence) / masse molaire. Exemples : Ca²⁺ : poids éq = 40/2 = 20 · HCO₃⁻ : 61/1 = 61 · Cl⁻ : 35,5/1 = 35,5. Nécessaire pour la balance ionique."},
+
+{id:51,cat:'gire',diff:'easy',q:"Les 4 principes fondamentaux de la GIRE ont été définis lors de :",opts:["La Conférence de Dublin (1992)","La Conférence de Rio (1992)","Le Sommet de Johannesburg (2002)","La Convention de Paris (1994)"],ans:0,exp:"Les 4 principes de Dublin (janvier 1992) : 1) Ressource finie et vulnérable · 2) Approche participative · 3) Rôle central des femmes · 4) Valeur économique de l'eau. Ils ont guidé la politique mondiale de l'eau depuis 30 ans."},
+{id:52,cat:'gire',diff:'easy',q:"L'ODD 6 vise à garantir l'accès à l'eau potable pour tous d'ici :",opts:["2030","2025","2050","2020"],ans:0,exp:"L'ODD 6 (Objectif de Développement Durable n°6) de l'Agenda 2030 des Nations Unies vise un accès universel à l'eau potable et à l'assainissement d'ici 2030. Il comporte 8 cibles (6.1 à 6.b)."},
+{id:53,cat:'gire',diff:'med',q:"Quelle institution est chargée de la gestion de l'eau au Bénin ?",opts:["DG-Eau (Direction Générale de l'Eau)","SONEB","ABE","DGFRN"],ans:0,exp:"DG-Eau (Direction Générale de l'Eau) est l'institution nationale de référence pour la gestion et le suivi des ressources en eau. La SONEB distribue l'eau potable en milieu urbain. L'ABE gère l'environnement."},
+{id:54,cat:'gire',diff:'easy',q:"La SONEB au Bénin est responsable de :",opts:["La distribution d'eau potable en milieu urbain","La gestion des bassins versants","La construction des barrages","La surveillance de la qualité des eaux"],ans:0,exp:"SONEB = Société Nationale des Eaux du Bénin. Elle gère la production, le transport et la distribution d'eau potable dans les villes béninoises. En milieu rural, c'est la Direction Générale de l'Eau qui intervient."},
+{id:55,cat:'gire',diff:'med',q:"La valeur économique de l'eau (4ème principe de Dublin) implique que :",opts:["L'eau doit être gérée comme un bien économique, pas seulement comme un bien social gratuit","L'eau doit être vendue au prix du marché","L'eau n'est accessible qu'aux personnes qui paient","L'eau est un bien privé avant tout"],ans:0,exp:"Le 4ème principe reconnaît la valeur économique de l'eau pour orienter son allocation efficace. Mais cela n'exclut pas son caractère de droit humain (ONU 2010) ni les subventions pour les ménages pauvres."},
+{id:56,cat:'gire',diff:'hard',q:"Le barrage de Nangbéto au Bénin est partagé avec :",opts:["Le Togo","Le Nigeria","Le Burkina Faso","Le Niger"],ans:0,exp:"Le barrage de Nangbéto est un barrage hydroélectrique (65 MW) sur le fleuve Mono, géré conjointement par le Bénin et le Togo. C'est le seul barrage hydroélectrique du pays. Mis en service en 1987."},
+{id:57,cat:'gire',diff:'med',q:"Les bassins versants internationaux du Bénin incluent :",opts:["L'Ouémé, le Mono, la Pendjari et le Niger","Uniquement l'Ouémé","L'Ouémé et le Congo","L'Okpara et le Zou"],ans:0,exp:"Le Bénin est traversé par 4 grands bassins : Ouémé (national), Mono (Bénin-Togo), Pendjari (Bénin-Burkina-Togo, tributaire du Volta), Niger (Bénin-Niger-Nigeria). Tous impliquent une coopération transfrontalière."},
+{id:58,cat:'gire',diff:'easy',q:"L'approche par bassin versant en GIRE signifie que :",opts:["La gestion doit être organisée à l'échelle du bassin hydrologique naturel","On gère l'eau par département administratif","On gère uniquement les cours d'eau principaux","On divise les ressources de façon égale entre pays"],ans:0,exp:"La gestion par bassin versant est le principal principe spatial de la GIRE. Elle permet de coordonner tous les usagers d'un même bassin (amont-aval, rive droite-rive gauche) et de gérer les conflits d'usage."},
+{id:59,cat:'gire',diff:'med',q:"Le principe de participation en GIRE implique l'implication de :",opts:["Tous les acteurs : pouvoirs publics, secteur privé, société civile","Uniquement les ingénieurs et techniciens","Uniquement les gouvernements nationaux","Les bailleurs de fonds internationaux seulement"],ans:0,exp:"La participation est le 2ème principe de Dublin. Elle implique tous les niveaux : de l'État aux usagers locaux, en incluant les femmes (3ème principe), la société civile, le secteur privé et les communautés."},
+{id:60,cat:'gire',diff:'hard',q:"Le taux d'accès à l'eau potable au Bénin est approximativement de :",opts:["~74%","~45%","~90%","~30%"],ans:0,exp:"Selon les données récentes, environ 74% de la population béninoise a accès à une eau potable de base (cible ODD 6.1). L'accès à l'assainissement géré en toute sécurité est beaucoup plus faible (~20%)."},
+
+{id:61,cat:'morpho',diff:'easy',q:"L'indice de Gravelius Kc est défini par :",opts:["Kc = 0,28·P/√A","Kc = A/P²","Kc = P/(2√πA)","Kc = A/P"],ans:0,exp:"Kc = 0,28·P/√A où P est le périmètre (km) et A la superficie (km²). Kc = 1 pour un cercle. Plus Kc est grand, plus le bassin est allongé. Cette formule est une simplification de 0,28 ≈ 1/(2√π)."},
+{id:62,cat:'morpho',diff:'med',q:"Un bassin avec Kc = 1,15 est caractérisé comme :",opts:["Ramassé (quasi-circulaire), sensible aux crues rapides","Allongé, crues lentes","Ovale, sensibilité modérée","Très allongé"],ans:0,exp:"Kc 1,0–1,25 : ramassé → réponse rapide aux pluies, fort risque de crues. Kc 1,25–1,50 : ovale-ramassé. Kc 1,50–1,75 : ovale-allongé. Kc > 1,75 : très allongé → crues lentes et étalées."},
+{id:63,cat:'morpho',diff:'easy',q:"La densité de drainage Dd est définie par :",opts:["Dd = ΣL/A (km/km²)","Dd = A/ΣL","Dd = ΣL × A","Dd = A/P"],ans:0,exp:"Dd = ΣL/A en km/km² est le rapport de la longueur totale des cours d'eau sur la superficie du bassin. Dd élevée → drainage dense → ruissellement rapide et important. Dd faible → infiltration dominante."},
+{id:64,cat:'morpho',diff:'med',q:"Le rectangle équivalent d'un bassin versant est construit pour :",opts:["Faciliter le calcul de la pente équivalente et caractériser l'hypsométrie","Remplacer le bassin par une forme régulière pour les calculs hydrauliques","Calculer la superficie du bassin","Estimer le volume ruisselé"],ans:0,exp:"Le rectangle équivalent (Kc, A) est une transformation géométrique conservant la superficie et l'indice de Gravelius. Il permet de calculer la pente équivalente et tracer la courbe hypsométrique de façon simplifiée."},
+{id:65,cat:'morpho',diff:'hard',q:"La courbe hypsométrique d'un bassin versant représente :",opts:["La distribution des altitudes : % de la superficie en dessous (ou au-dessus) d'une altitude donnée","La variation du débit avec l'altitude","Le profil en long du cours d'eau principal","La distribution des pluies en altitude"],ans:0,exp:"La courbe hypsométrique trace sur l'axe X l'altitude (m) et sur l'axe Y le % de superficie au-dessus de cette altitude. Forme convexe : bassin jeune (relief dominant). Forme concave : bassin vieux (plaine dominante)."},
+{id:66,cat:'morpho',diff:'easy',q:"Le temps de concentration tc d'un bassin versant représente :",opts:["Le temps nécessaire pour que l'eau tombe au point le plus éloigné atteigne l'exutoire","La durée de la pluie","Le temps de montée de la crue","Le délai entre pluie et débit maximal"],ans:0,exp:"tc = temps de concentration = durée de trajet hydraulique du point le plus éloigné jusqu'à l'exutoire. C'est le paramètre clé de la méthode rationnelle et des hydrogrammes unitaires."},
+{id:67,cat:'morpho',diff:'med',q:"La pente moyenne d'un bassin versant Im est liée à la capacité d'infiltration par :",opts:["Pente élevée → moins d'infiltration, plus de ruissellement","Pente élevée → plus d'infiltration","Pas de relation directe","Pente élevée → érosion sans effet sur l'infiltration"],ans:0,exp:"Pente élevée → temps de séjour court de l'eau sur le sol → moins d'infiltration → plus de ruissellement. Les bassins de montagne à forte pente génèrent donc des crues plus rapides et plus importantes."},
+{id:68,cat:'morpho',diff:'easy',q:"Le talweg est :",opts:["La ligne de plus grande pente au fond d'une vallée (cours d'eau)","La ligne de crête d'un bassin versant","La ligne de partage des eaux","La courbe de niveau principale"],ans:0,exp:"Le talweg (de l'allemand Talweg = chemin de vallée) est la ligne joignant les points les plus bas d'une vallée. C'est le lit du cours d'eau. Son profil en long montre la décroissance de la pente de l'amont vers l'aval."},
+{id:69,cat:'morpho',diff:'hard',q:"L'ordre des cours d'eau selon Strahler : 1 + 1 = ?",opts:["2","1","3","4"],ans:0,exp:"Selon Strahler : deux cours d'eau d'ordre n se rejoignent pour donner un cours d'eau d'ordre n+1. Deux de rang 1 → rang 2. Un rang 1 + un rang 2 → reste rang 2 (seulement quand deux égaux se rejoignent, l'ordre augmente)."},
+{id:70,cat:'morpho',diff:'med',q:"La délimitation d'un bassin versant sous SIG utilise :",opts:["Un Modèle Numérique de Terrain (MNT) et l'algorithme de direction d'écoulement","Des photos satellites uniquement","Les cartes topographiques scannées","L'interpolation des courbes de niveau"],ans:0,exp:"Sous QGIS/SAGA : 1) MNT (SRTM 30m) 2) Remplissage des dépressions 3) Direction d'écoulement (D8) 4) Accumulation d'écoulement 5) Définition du réseau hydrographique 6) Délimitation du bassin depuis l'exutoire."}
+];
+
+const EPREUVES = [
+{id:1,annee:"2022–2023",titre:"Hydrologie Statistique — Examen Final",matieres:["Statistiques","Fréquences"],duree:"3h",tags:[{t:"Gumbel",c:"badge-stat"},{t:"KS",c:"badge-stat"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Analyse statistique d'une série pluviométrique",
+   texte:"On dispose des pluies maximales journalières annuelles (mm) à la station de Parakou (1998–2017) :",
+   data:"68,5 · 95,2 · 112,4 · 78,8 · 134,6 · 89,3 · 103,7 · 145,2 · 72,1 · 98,6 · 128,4 · 87,2 · 115,9 · 76,4 · 142,1 · 93,5 · 108,8 · 131,3 · 81,7 · 117,4",
+   questions:["1. Calculer la moyenne, l'écart-type, le coefficient de variation et le coefficient d'asymétrie.","2. Ajuster la loi de Gumbel par la méthode des moments. Calculer les paramètres u et α.","3. Calculer les quantiles pour T = 10, 50 et 100 ans.","4. Tester l'adéquation au seuil α = 5% (Dcrit = 0,294)."],
+   corr:[{t:"Calcul des paramètres",txt:"n=20, x̄ = (68,5+95,2+...)/20 = 105,01 mm, s = √[Σ(xi-x̄)²/(n-1)] = 23,87 mm, Cv = 23,87/105,01×100 = 22,7%, Cs = 0,41 (asymétrie positive → Gumbel appropriée)",res:"x̄=105,0 mm · s=23,9 mm · Cv=22,7% · Cs=0,41"},
+          {t:"Paramètres Gumbel",txt:"α = s×√6/π = 23,87×0,7797 = 18,62 mm, u = x̄ - 0,5772×α = 105,01 - 0,5772×18,62 = 105,01 - 10,75 = 94,26 mm",res:"u = 94,26 mm · α = 18,62 mm"},
+          {t:"Quantiles",txt:"y(10) = -ln(-ln(0,9)) = 2,250 → X10 = 94,26+18,62×2,250 = 136,2 mm\ny(50) = -ln(-ln(0,98)) = 3,902 → X50 = 94,26+18,62×3,902 = 167,0 mm\ny(100) = -ln(-ln(0,99)) = 4,600 → X100 = 94,26+18,62×4,600 = 180,0 mm",res:"X10=136,2 mm · X50=167,0 mm · X100=180,0 mm"},
+          {t:"Test KS",txt:"Calculer Dn = max|F(xi)-F̂(xi)| sur les valeurs classées. Avec les paramètres calculés, Dn ≈ 0,152 < Dcrit = 0,294 → la loi de Gumbel est acceptée au seuil 5%.",res:"✅ Loi de Gumbel acceptée (Dn=0,152 < Dcrit=0,294)"}]},
+  {num:"Exercice 2 (12 pts)",titre:"Régression linéaire et corrélation pluie-débit",
+   texte:"Les pluies annuelles P (mm) et les lames ruisselées Q (mm) à la station de Bétérou sont :",
+   data:"P: 1082,956,1134,1045,1201,978,1056,1189,932,1078\nQ: 312,248,345,298,389,261,318,372,241,309",
+   questions:["1. Tracer le nuage de points Q = f(P).","2. Calculer les coefficients a et b de la droite de régression Q = a·P + b.","3. Calculer le coefficient de corrélation r. Commenter la relation.","4. Pour P = 1100 mm, estimer Q."],
+   corr:[{t:"Paramètres de régression",txt:"x̄P = 1065,1 mm · x̄Q = 309,3 mm\nΣ(Pi-P̄)(Qi-Q̄) = 53 847 · Σ(Pi-P̄)² = 64 769\na = 53847/64769 = 0,8314 · b = 309,3 - 0,8314×1065,1 = -576,4",res:"a = 0,831 · b = -576,4"},
+          {t:"Coefficient de corrélation",txt:"r = Σ(Pi-P̄)(Qi-Q̄)/√[Σ(Pi-P̄)²·Σ(Qi-Q̄)²]\nΣ(Qi-Q̄)² = 17 985 → r = 53847/√(64769×17985) = 53847/34137 = 0,997",res:"r = 0,997 → corrélation très forte (quasi-parfaite)"},
+          {t:"Prédiction P=1100 mm",txt:"Q = 0,831×1100 + (-576,4) = 913,9 - 576,4 = 337,5 mm",res:"Q ≈ 337,5 mm pour P = 1100 mm"}]}
+ ]},
+{id:2,annee:"2021–2022",titre:"Bilan Hydrologique de Bassin Versant",matieres:["Bilan hydrique","Thornthwaite"],duree:"2h30",tags:[{t:"Thornthwaite",c:"badge-bilan"},{t:"ETP",c:"badge-bilan"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Bilan de Thornthwaite — Station de Cotonou",
+   texte:"Les données climatiques mensuelles de Cotonou (lat = 6,37°N) sont :",
+   data:"Mois: Jan Fév Mar Avr Mai Jun Jul Aoû Sep Oct Nov Déc\nT°C:  27 29 30 30 29 27 26 26 27 28 28 27\nP mm:  25 40 120 135 160 380 195 70 135 110 50 20",
+   questions:["1. Calculer l'indice thermique mensuel i et l'indice annuel I.","2. Calculer l'ETP non corrigée puis l'ETP corrigée pour chaque mois.","3. Établir le bilan mensuel ETR, déficit et excédent (RU=100mm).","4. Calculer l'ETP et l'ETR annuelles. Commenter le régime hydrique."],
+   corr:[{t:"Indice thermique I",txt:"iᵢ = (Tᵢ/5)^1,514 pour chaque mois\nEx: Jan: (27/5)^1,514 = 5,4^1,514 ≈ 12,0\nI = Σiᵢ = 12,0+13,6+14,5+14,5+13,6+12,0+11,3+11,3+12,0+12,8+12,8+12,0 ≈ 142,4",res:"I ≈ 142,4"},
+          {t:"ETP corrigée (exemple mai)",txt:"a = 6,75×10⁻⁷×I³ - 7,71×10⁻⁵×I² + 1,79×10⁻²×I + 0,49 ≈ 4,26\nETP_nc = 16×(10×29/142,4)^4,26 ≈ 148 mm\nN(mai, 6,37°N) ≈ 12,5h · d=31 jours\nETP = 148×(12,5/360)×(31/30) ≈ 177 mm",res:"ETP(mai) ≈ 177 mm"},
+          {t:"Bilan annuel",txt:"ETP annuelle ≈ 1580 mm · P totale = 1440 mm\nComme P < ETP sur plusieurs mois, ETR < ETP. ETR ≈ 1200 mm.\nDéficit hydrique = 1580-1200 = 380 mm. Régime bimodal avec 2 saisons sèches.",res:"ETP≈1580mm · ETR≈1200mm · Déficit≈380mm"}]}
+ ]},
+{id:3,annee:"2022",titre:"Hydraulique Appliquée — Dimensionnement Canal",matieres:["Hydraulique","Manning"],duree:"2h",tags:[{t:"Manning",c:"badge-hydraul"},{t:"Canal",c:"badge-hydraul"}],
+ exercices:[
+  {num:"Exercice 1 (15 pts)",titre:"Dimensionnement d'un canal d'irrigation",
+   texte:"On doit concevoir un canal d'irrigation rectangulaire pour transporter Q = 8 m³/s dans un sol argileux compact (K = 35 m^(1/3)/s). La pente disponible est I = 0,0015.",
+   data:"Q = 8 m³/s · K = 35 m^(1/3)/s · I = 0,0015 · Section optimale (section économique)",
+   questions:["1. Déterminer les dimensions optimales (b, h) du canal.","2. Calculer la vitesse d'écoulement et le nombre de Froude.","3. Vérifier la compatibilité avec les vitesses limites (Vmin=0,5 m/s, Vmax=1,5 m/s pour argile).","4. Calculer le périmètre mouillé et le rayon hydraulique."],
+   corr:[{t:"Dimensions optimales (rect., b=2h)",txt:"Section optimale : b = 2h · A = 2h² · Pm = 4h · Rh = h/2\nQ = K·A·Rh^(2/3)·√I → 8 = 35·2h²·(h/2)^(2/3)·√0,0015\n8 = 35×2×0,03873×h²×(0,5)^(2/3)×h^(2/3) = 35×2×0,03873×0,63×h^(8/3)\n8 = 1,708×h^(8/3) → h^(8/3) = 4,681 → h = 4,681^(3/8) = 2,01 m",res:"h ≈ 2,01 m · b ≈ 4,02 m"},
+          {t:"Vitesse et Froude",txt:"A = 2×2,01² = 8,08 m² · V = Q/A = 8/8,08 = 0,99 m/s\nRh = h/2 = 1,005 m · Fr = V/√(g·Rh) = 0,99/√(9,81×1,005) = 0,99/3,14 = 0,315",res:"V ≈ 0,99 m/s · Fr ≈ 0,315 < 1 (écoulement fluvial)"},
+          {t:"Vérification vitesses",txt:"Vmin = 0,5 m/s < V = 0,99 m/s < Vmax = 1,5 m/s ✅\nLa vitesse est dans la plage acceptable : pas de sédimentation, pas d'érosion.",res:"✅ V = 0,99 m/s acceptable (0,5 < 0,99 < 1,5 m/s)"}]}
+ ]},
+{id:4,annee:"2021",titre:"Hydrogéologie — Aquifères et Pompage",matieres:["Hydrogéologie","Darcy"],duree:"2h",tags:[{t:"Darcy",c:"badge-hydrogeo"},{t:"Jacob",c:"badge-hydrogeo"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Calcul de débit selon la loi de Darcy",
+   texte:"Un aquifère libre sableux a une conductivité K = 2,5×10⁻⁴ m/s et une épaisseur saturée e = 15 m. Sur une coupe de 200 m de large, le gradient hydraulique est i = 0,008.",
+   data:"K = 2,5×10⁻⁴ m/s · e = 15 m · l = 200 m · i = 0,008",
+   questions:["1. Calculer la transmissivité T.","2. Calculer le débit Q traversant la coupe selon Darcy.","3. Un forage de pompage de Q = 50 m³/h provoque un rabattement s = 3,5 m à r = 80 m après t = 48h. En utilisant la méthode de Jacob, vérifier la valeur de T."],
+   corr:[{t:"Transmissivité",txt:"T = K × e = 2,5×10⁻⁴ × 15 = 3,75×10⁻³ m²/s",res:"T = 3,75×10⁻³ m²/s"},
+          {t:"Débit Darcy",txt:"A = l × e = 200 × 15 = 3000 m² · Q = K × A × i = 2,5×10⁻⁴ × 3000 × 0,008 = 0,60 m³/s = 2160 m³/h",res:"Q = 0,60 m³/s"},
+          {t:"Vérification Jacob",txt:"Q = 50/3600 = 0,01389 m³/s · t = 48×3600 = 172800 s · S ≈ 0,1 (nappe libre)\nu = r²S/(4Tt) = 80²×0,1/(4×3,75×10⁻³×172800) = 640/2592 = 0,247\nu > 0,05 → utiliser W(u) ≈ 0,910\ns = Q/(4πT)×W(u) → T = Q×W(u)/(4πs) = 0,01389×0,910/(4π×3,5) = 0,01264/43,98 = 2,87×10⁻⁴ m²/s\n(ordre de grandeur cohérent mais différent car S supposé)",res:"T_Jacob ≈ 2,9×10⁻⁴ m²/s (cohérent avec T=3,75×10⁻³ si S ajusté)"}]}
+ ]},
+{id:5,annee:"2020",titre:"Qualité des Eaux — Analyse et Normes",matieres:["Qualité","Hydrochimie"],duree:"1h30",tags:[{t:"Normes OMS",c:"badge-qualite"},{t:"Piper",c:"badge-qualite"}],
+ exercices:[
+  {num:"Exercice 1 (12 pts)",titre:"Analyse physico-chimique d'eaux souterraines",
+   texte:"Les résultats d'analyse de 3 forages F1, F2, F3 du Plateau béninois sont (mg/L) :",
+   data:"Paramètre | F1    | F2    | F3    | Norme OMS\npH       | 6,8   | 7,2   | 8,1   | 6,5–8,5\nCE µS/cm | 245   | 487   | 612   | <2500\nCa²⁺     | 28    | 56    | 72    | —\nMg²⁺     | 12    | 24    | 31    | —\nNa⁺      | 15    | 32    | 48    | 200\nHCO₃⁻    | 145   | 278   | 334   | —\nCl⁻      | 22    | 48    | 76    | 250\nNO₃⁻     | 8     | 32    | 18    | 50\nFe       | 0,15  | 0,42  | 0,28  | 0,3",
+   questions:["1. Comparer les valeurs aux normes OMS. Identifier les paramètres hors normes.","2. Convertir les concentrations en méq/L pour F1. Vérifier la balance ionique.","3. Identifier le faciès hydrochimique dominant de chaque forage.","4. Quelle est la signification du Fe > 0,3 mg/L de F2 ?"],
+   corr:[{t:"Conformité normes OMS",txt:"F1 : tous paramètres conformes (Fe=0,15 < 0,3). F2 : Fe=0,42 > 0,3 → non conforme. F3 : pH=8,1 conforme (< 8,5). NO₃⁻ < 50 mg/L pour tous.",res:"F2 non conforme : Fe = 0,42 mg/L > 0,3 mg/L (norme OMS)"},
+          {t:"Faciès hydrochimique",txt:"F1 et F2 : Ca²⁺ dominant parmi cations + HCO₃⁻ dominant parmi anions → Faciès Ca-HCO₃ (bicarbonaté calcique)\nF3 : Na⁺ plus important → tendance Na-HCO₃",res:"F1,F2 : Faciès Ca-HCO₃ (eaux jeunes, terrain calcaire)"},
+          {t:"Balance ionique F1",txt:"Σcations : Ca²⁺=28/20=1,40 + Mg²⁺=12/12=1,00 + Na⁺=15/23=0,65 = 3,05 méq/L\nΣanions : HCO₃⁻=145/61=2,38 + Cl⁻=22/35,5=0,62 + NO₃⁻=8/62=0,13 = 3,13 méq/L\nErreur = (3,05-3,13)/(3,05+3,13)×100 = -0,08/6,18×100 = -1,3% < 5% ✅",res:"Erreur balance = 1,3% → analyse correcte"}]}
+ ]},
+{id:6,annee:"2019–2020",titre:"Morphométrie — Caractérisation d'un Bassin Versant",matieres:["Morphométrie","GIRE"],duree:"2h",tags:[{t:"Gravelius",c:"badge-morpho"},{t:"Bassin",c:"badge-morpho"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Calcul des paramètres morphométriques du bassin de l'Ouémé Supérieur",
+   texte:"Le bassin versant de l'Ouémé supérieur (à l'exutoire de Bétérou) a les caractéristiques suivantes :",
+   data:"Superficie A = 10 250 km² · Périmètre P = 560 km · Altitude max = 648 m · Altitude exutoire = 180 m\nLongueur totale cours d'eau = 8 200 km · Longueur talweg principal = 185 km",
+   questions:["1. Calculer l'indice de compacité de Gravelius Kc et interpréter.","2. Calculer les dimensions L et l du rectangle équivalent.","3. Calculer la densité de drainage Dd et interpréter.","4. Calculer la pente globale du bassin Ig (en m/km)."],
+   corr:[{t:"Indice de Gravelius",txt:"Kc = 0,28 × P/√A = 0,28 × 560/√10250 = 156,8/101,24 = 1,549",res:"Kc = 1,55 → Bassin ovale-allongé : crues progressives, modérément sensible"},
+          {t:"Rectangle équivalent",txt:"Disc = 1-(1,12/Kc)² = 1-(1,12/1,549)² = 1-0,524 = 0,476\nL = Kc×√A/1,12 × (1+√0,476) = 1,549×101,24/1,12 × (1+0,690) = 139,9×1,690 = 236,4 km\nl = A/L = 10250/236,4 = 43,4 km",res:"L = 236 km · l = 43 km"},
+          {t:"Densité drainage",txt:"Dd = ΣL/A = 8200/10250 = 0,80 km/km²",res:"Dd = 0,80 km/km² → réseau peu dense → bonne infiltration"},
+          {t:"Pente globale",txt:"Ig = (Zmax-Zmin)/L = (648-180)/236,4 = 468/236,4 = 1,98 m/km",res:"Ig = 1,98 m/km → relief modéré (bassin de savane)"}]}
+ ]},
+
+{id:7,annee:"2022–2023",titre:"Planctologie — Écologie du Plancton Aquatique",matieres:["Planctologie","Écologie aquatique"],duree:"2h",tags:[{t:"Phytoplancton",c:"badge-hydrogeo"},{t:"Zooplancton",c:"badge-bilan"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Identification et classification du plancton",
+   texte:"On réalise un prélèvement planctonique dans le lac Nokoué (Bénin) avec un filet de maille 55 µm. L'analyse microscopique révèle les organismes suivants : Chlorella sp., Daphnia sp., Navicula sp., Cyclops sp., Microcystis aeruginosa, Rotifera sp.",
+   data:"Organismes identifiés :\n• Chlorella sp. — 2 450 ind/L\n• Navicula sp. (diatomée) — 1 820 ind/L\n• Microcystis aeruginosa (cyanobactérie) — 3 200 ind/L\n• Daphnia sp. (crustacé) — 45 ind/L\n• Cyclops sp. (copépode) — 28 ind/L\n• Rotifera sp. — 112 ind/L",
+   questions:["1. Classer chaque organisme en phytoplancton ou zooplancton.","2. Calculer la densité totale du phytoplancton et du zooplancton.","3. La présence abondante de Microcystis aeruginosa est-elle un bon signe pour la qualité de l'eau ? Justifier.","4. Calculer l'indice de diversité de Shannon H' pour le phytoplancton. Interpréter."],
+   corr:[
+    {t:"Classification phyto/zooplancton",txt:"Phytoplancton (producteurs primaires, photosynthèse) :\n- Chlorella sp. : algue verte unicellulaire\n- Navicula sp. : diatomée (Bacillariophyta)\n- Microcystis aeruginosa : cyanobactérie (procaryote)\nZooplancton (consommateurs) :\n- Daphnia sp. : microcrustacé (Cladocère)\n- Cyclops sp. : copépode (Crustacé)\n- Rotifera sp. : rotifère (métazoaire)",res:"Phytoplancton : 3 espèces · Zooplancton : 3 espèces"},
+    {t:"Densités totales",txt:"Phytoplancton total = 2450 + 1820 + 3200 = 7470 ind/L\nZooplancton total = 45 + 28 + 112 = 185 ind/L\nRapport Phyto/Zoo = 7470/185 = 40,4 (dominance phytoplanctonique)",res:"Phytoplancton : 7 470 ind/L · Zooplancton : 185 ind/L"},
+    {t:"Microcystis aeruginosa — qualité eau",txt:"NON. Microcystis aeruginosa est une cyanobactérie productrice de cyanotoxines (microcystines). Sa prolifération (bloom) indique :\n• Eutrophisation (excès de nutriments N et P)\n• Eau chaude et peu brassée\n• Risques : toxicité pour la faune, la flore et l'homme\n• Coloration verdâtre et mousse en surface",res:"Signe d'eutrophisation et de pollution — qualité dégradée"},
+    {t:"Indice de Shannon H' (phytoplancton)",txt:"N_total = 7470, p1=2450/7470=0,328, p2=1820/7470=0,244, p3=3200/7470=0,428\nH' = -(p1·ln(p1) + p2·ln(p2) + p3·ln(p3))\nH' = -(0,328×(-1,114) + 0,244×(-1,409) + 0,428×(-0,848))\nH' = -(−0,365 − 0,344 − 0,363) = 1,072 bits\nH'max = ln(3) = 1,099 · Équitabilité J = 1,072/1,099 = 0,975",res:"H' = 1,07 bits · Diversité modérée, distribution relativement équitable"}
+   ]},
+  {num:"Exercice 2 (6 pts)",titre:"Cycle du plancton et paramètres environnementaux",
+   texte:"Expliquez les relations entre le plancton et les paramètres physicochimiques de l'eau dans les écosystèmes lagunaires du Bénin.",
+   data:"Paramètres à analyser : température, lumière, nutriments (N, P), salinité, pH, oxygène dissous",
+   questions:["1. Quels paramètres favorisent la prolifération du phytoplancton ?","2. Quel est le rôle écologique du zooplancton dans la chaîne alimentaire ?","3. Définir l'eutrophisation et ses conséquences sur le plancton."],
+   corr:[
+    {t:"Facteurs de croissance phytoplancton",txt:"Facteurs favorables :\n• Lumière (zone photique) : photosynthèse active\n• Température : 20–30°C optimum en zone tropicale\n• Nutriments : azote (NO₃⁻, NH₄⁺) et phosphore (PO₄³⁻) — facteurs limitants\n• pH 7–9 : zone optimale\n• Faible turbidité : pénétration lumineuse\nFacteurs limitants : carence en N ou P, profondeur (zone aphotique), prédation",res:"Lumière + nutriments + température = facteurs clés"},
+    {t:"Rôle écologique du zooplancton",txt:"Le zooplancton est le maillon central de la chaîne trophique aquatique :\n• Consomme le phytoplancton (broutage) → régule les blooms algaux\n• Est consommé par les larves de poissons, crevettes, mollusques\n• Participe au cycle des nutriments (excrétion N et P)\n• Indicateur de qualité biologique de l'eau (bioindicateur)",res:"Maillon trophique essentiel entre phytoplancton et poissons"},
+    {t:"Eutrophisation",txt:"L'eutrophisation = enrichissement excessif en nutriments (N, P) d'un milieu aquatique.\nConséquences :\n• Prolifération massive de phytoplancton et cyanobactéries (blooms)\n• Turbidité accrue → mort des macrophytes immergés\n• Décomposition bactérienne → consommation O₂ → anoxie\n• Mort des poissons et invertébrés (morts-poissons)\n• Libération de cyanotoxines (santé publique)",res:"Enrichissement N-P → blooms → anoxie → dégradation de l'écosystème"}
+   ]}
+ ]},
+
+{id:8,annee:"2021–2022",titre:"Hydrologie Descriptive — Eaux de Surface",matieres:["Hydrologie descriptive","Régimes hydrologiques"],duree:"2h",tags:[{t:"Régimes",c:"badge-bilan"},{t:"Jaugeage",c:"badge-morpho"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Analyse du régime hydrologique de l'Ouémé à Bétérou",
+   texte:"Les débits moyens mensuels (m³/s) de l'Ouémé à Bétérou (période 1960–2000) sont :",
+   data:"Jan:  8,2 · Fév:  4,5 · Mar:  3,1 · Avr:  5,8 · Mai: 18,4\nJun: 42,3 · Jul: 68,9 · Aoû: 125,4 · Sep: 148,2 · Oct: 89,5\nNov: 35,2 · Déc: 15,8",
+   questions:["1. Calculer le module interannuel (débit moyen annuel).","2. Calculer le coefficient d'irrégularité mensuel Kₘ pour chaque mois.","3. Identifier le régime hydrologique et le type climatique associé.","4. Calculer le débit spécifique moyen (A = 10 250 km²)."],
+   corr:[
+    {t:"Module interannuel",txt:"Q_moy = (8,2+4,5+3,1+5,8+18,4+42,3+68,9+125,4+148,2+89,5+35,2+15,8)/12\n= 565,3/12 = 47,1 m³/s",res:"Module = 47,1 m³/s"},
+    {t:"Coefficients d'irrégularité Kₘ = Qₘ/Q_moy",txt:"Jan: 8,2/47,1=0,17 · Fév: 0,10 · Mar: 0,07 · Avr: 0,12 · Mai: 0,39\nJun: 0,90 · Jul: 1,46 · Aoû: 2,66 · Sep: 3,15 · Oct: 1,90\nNov: 0,75 · Déc: 0,34\nMois de crue : Sep (Kₘ=3,15) · Mois d'étiage : Mar (Kₘ=0,07)",res:"Mois de crue : Septembre (Kₘ=3,15) · Étiage : Mars (Kₘ=0,07)"},
+    {t:"Régime hydrologique",txt:"Type : Régime tropical unimodal (une seule saison des pluies) avec :\n• Une crue principale de Juillet à Octobre\n• Un étiage sévère de Janvier à Avril\n• Saison sèche de 5–6 mois\nClimat soudano-guinéen (Nord-Bénin, latitude ~9°N)\nRégime fluvial : transitoire (influencé par la zone de convergence intertropicale ZCIT)",res:"Régime tropical unimodal — ZCIT — Climat soudanien"},
+    {t:"Débit spécifique",txt:"q = Q_moy / A = 47,1 / (10 250 × 10⁶ m²) × 10⁶ = 47,1 / 10 250 m³/s/km²\nq = 0,00459 m³/s/km² = 4,59 L/s/km²\nLame d'eau annuelle : L = q × 31,56×10⁶ s = 4,59×10⁻³ × 31,56×10⁶ = 144 900 mm = 144,9 mm/an",res:"q = 4,59 L/s/km² · Lame écoulée = 145 mm/an"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Jaugeage et courbe de tarage",
+   texte:"Un jaugeage au moulinet réalisé à la station de Domè (Ouémé) donne les mesures suivantes pour une cote H = 1,85 m :",
+   data:"Section transversale divisée en 5 bandes :\nBande 1 : largeur=8m, profondeur moy=1,2m, vitesse=0,65 m/s\nBande 2 : largeur=10m, profondeur moy=1,8m, vitesse=1,12 m/s\nBande 3 : largeur=10m, profondeur moy=2,1m, vitesse=1,35 m/s\nBande 4 : largeur=8m, profondeur moy=1,6m, vitesse=0,98 m/s\nBande 5 : largeur=6m, profondeur moy=0,9m, vitesse=0,42 m/s",
+   questions:["1. Calculer le débit partiel de chaque bande.","2. Calculer le débit total Q pour H = 1,85 m.","3. Avec les données de tarage précédentes : Q(H=1m)=120, Q(H=1,5m)=285, Q(H=2m)=512, Q(H=2,5m)=847 m³/s, ajuster la loi puissance Q=a(H-H₀)^b."],
+   corr:[
+    {t:"Débits partiels (méthode des jauges)",txt:"q = vitesse × surface = v × (largeur × profondeur)\nq1 = 0,65 × (8×1,2) = 0,65×9,6 = 6,24 m³/s\nq2 = 1,12 × (10×1,8) = 1,12×18,0 = 20,16 m³/s\nq3 = 1,35 × (10×2,1) = 1,35×21,0 = 28,35 m³/s\nq4 = 0,98 × (8×1,6) = 0,98×12,8 = 12,54 m³/s\nq5 = 0,42 × (6×0,9) = 0,42×5,4 = 2,27 m³/s",res:"q1=6,24 · q2=20,16 · q3=28,35 · q4=12,54 · q5=2,27 m³/s"},
+    {t:"Débit total",txt:"Q = q1+q2+q3+q4+q5 = 6,24+20,16+28,35+12,54+2,27 = 69,56 m³/s",res:"Q(H=1,85m) = 69,6 m³/s"},
+    {t:"Ajustement courbe de tarage Q=a(H-H₀)^b",txt:"En prenant H₀=0, régression log-log :\nln(Q) = ln(a) + b·ln(H)\nAvec les 4 points : ln(120)=4,787 pour H=1, ln(285)=5,652 pour H=1,5, etc.\nPar régression : b ≈ 2,35 (exposant), a ≈ 112\nQ = 112·H^2,35 (H₀=0)",res:"Q = 112·H^2,35 m³/s · R² ≈ 0,998"}
+   ]}
+ ]},
+
+{id:9,annee:"2022–2023",titre:"Outils de Calcul — Programmation R",matieres:["Langage R","Statistiques appliquées"],duree:"2h",tags:[{t:"R/RStudio",c:"badge-stat"},{t:"Pluviométrie",c:"badge-bilan"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Analyse statistique d'une série pluviométrique sous R",
+   texte:"On dispose du vecteur de pluies annuelles (mm) de la station de Bohicon (1985–2015) sous R. Écrire le code R commenté pour réaliser les analyses demandées.",
+   data:"pluies <- c(1082,956,1134,1045,1201,978,1056,1189,932,1078,\n            1156,1023,1098,945,1167,1034,1089,1143,967,1112,\n            1078,1034,1189,1056,1023,1098,1167,945,1112,1023,1189)",
+   questions:["1. Calculer les paramètres statistiques : moyenne, écart-type, Cv, médiane, min, max.","2. Tracer un boxplot et un histogramme avec courbe de densité.","3. Tester la normalité avec le test de Kolmogorov-Smirnov.","4. Calculer la corrélation de Pearson entre les pluies et le rang (tendance temporelle)."],
+   corr:[
+    {t:"Paramètres statistiques",txt:"# Saisie des données\npluies <- c(1082,956,1134,1045,1201,978,1056,1189,932,1078,\n            1156,1023,1098,945,1167,1034,1089,1143,967,1112,\n            1078,1034,1189,1056,1023,1098,1167,945,1112,1023,1189)\n\n# Paramètres de base\nn     <- length(pluies)          # n = 31\nmoy   <- mean(pluies)           # 1066,7 mm\nsd_p  <- sd(pluies)             # 81,5 mm\nCv    <- sd_p / moy * 100       # 7,6 %\nmediane <- median(pluies)       # 1078 mm\ncat('n =', n, '\\n')\ncat('Moyenne =', round(moy,1), 'mm\\n')\ncat('Ecart-type =', round(sd_p,1), 'mm\\n')\ncat('Cv =', round(Cv,1), '%\\n')\ncat('Mediane =', mediane, 'mm\\n')\ncat('Min =', min(pluies), '| Max =', max(pluies), 'mm\\n')",res:"x̄=1066,7mm · s=81,5mm · Cv=7,6% · Me=1078mm"},
+    {t:"Boxplot et histogramme",txt:"# Boxplot\nboxplot(pluies,\n  main = 'Pluies annuelles - Bohicon (1985-2015)',\n  ylab = 'Pluie (mm)',\n  col  = '#1565c0',\n  border = '#0a1f3c')\n\n# Histogramme avec courbe de densité\nhist(pluies, prob = TRUE, col = '#e8f4fd', border = '#1565c0',\n  main = 'Histogramme - Bohicon',\n  xlab = 'Pluie annuelle (mm)')\nlines(density(pluies), col = 'red', lwd = 2)\nlegend('topright', legend = 'Densité lissée', col = 'red', lwd = 2)",res:"Graphiques produits avec hist() et boxplot()"},
+    {t:"Test de Kolmogorov-Smirnov",txt:"# Test KS pour la normalité\nks_test <- ks.test(pluies, 'pnorm',\n           mean = mean(pluies),\n           sd   = sd(pluies))\nprint(ks_test)\n# Résultat attendu :\n# D = 0,0987, p-value = 0,9132\n# Conclusion : p > 0,05 → on ne rejette pas H0\n# La distribution normale est ACCEPTÉE au seuil 5%",res:"p-value ≈ 0,91 > 0,05 → Loi normale acceptée"},
+    {t:"Corrélation de Pearson (tendance)",txt:"# Test de tendance linéaire\nrang <- 1:length(pluies)\ncor_test <- cor.test(rang, pluies, method = 'pearson')\nprint(cor_test)\n# Régression linéaire\nmodele <- lm(pluies ~ rang)\nsummary(modele)\nplot(rang, pluies, xlab='Année (rang)', ylab='Pluie (mm)',\n  main='Tendance pluviométrique Bohicon')\nabline(modele, col='red', lwd=2)\n# Résultat : r ≈ 0,05, p > 0,05 → pas de tendance significative",res:"r ≈ 0,05 (p > 0,05) → Pas de tendance significative"}
+   ]},
+  {num:"Exercice 2 (12 pts)",titre:"Import de fichiers Excel et analyse sous R",
+   texte:"Écrire les codes R pour importer un fichier Excel et réaliser une analyse pluviométrique complète.",
+   data:"Fichier : 'donnees_pluies.xlsx'\nColonnes : Annee, Station_A, Station_B, Station_C\nTâches : import, nettoyage, corrélation inter-stations, graphiques",
+   questions:["1. Importer le fichier Excel avec le package readxl.","2. Calculer les statistiques descriptives pour chaque station.","3. Calculer la matrice de corrélation entre les 3 stations.","4. Exporter les résultats dans un nouveau fichier Excel avec openxlsx."],
+   corr:[
+    {t:"Import Excel et statistiques",txt:"# Installation et chargement des packages\ninstall.packages(c('readxl','openxlsx'))\nlibrary(readxl)\nlibrary(openxlsx)\n\n# Import du fichier Excel\ndata <- read_excel('donnees_pluies.xlsx', sheet = 1)\nhead(data)       # Aperçu des premières lignes\nstr(data)        # Structure du jeu de données\nsummary(data)    # Statistiques descriptives rapides\n\n# Statistiques par station\nfor(col in c('Station_A','Station_B','Station_C')){\n  cat('\\n--- ', col, ' ---\\n')\n  cat('Moy =', round(mean(data[[col]], na.rm=TRUE),1), '\\n')\n  cat('Sd  =', round(sd(data[[col]], na.rm=TRUE),1), '\\n')\n}",res:"Import avec read_excel() · na.rm=TRUE pour valeurs manquantes"},
+    {t:"Matrice de corrélation et export",txt:"# Sélectionner uniquement les colonnes numériques\nnum_data <- data[, c('Station_A','Station_B','Station_C')]\n\n# Matrice de corrélation\nmatrice_cor <- cor(num_data, use = 'complete.obs', method = 'pearson')\nprint(round(matrice_cor, 3))\n\n# Export dans Excel\nwb <- createWorkbook()\naddWorksheet(wb, 'Statistiques')\naddWorksheet(wb, 'Correlations')\nwriteData(wb, 'Statistiques', data.frame(summary(num_data)))\nwriteData(wb, 'Correlations', matrice_cor)\nsaveWorkbook(wb, 'resultats_pluies.xlsx', overwrite = TRUE)\ncat('Fichier exporte avec succes\\n')",res:"Matrice cor() · Export saveWorkbook() vers Excel"}
+   ]}
+ ]},
+
+{id:10,annee:"2021",titre:"Analyse Numérique — Méthodes de Calcul",matieres:["Analyse numérique","Mathématiques appliquées"],duree:"3h",tags:[{t:"Interpolation",c:"badge-stat"},{t:"Équations",c:"badge-hydraul"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Interpolation polynomiale de Lagrange",
+   texte:"La courbe de tarage d'une station hydrométrique est donnée par les points (H en m, Q en m³/s) suivants :",
+   data:"H (m) :  0,5    1,0    1,5    2,0    2,5\nQ (m³/s): 12,3   45,8   98,4   178,2  289,5",
+   questions:["1. Construire le polynôme d'interpolation de Lagrange de degré 2 en utilisant les 3 premiers points.","2. Estimer Q pour H = 1,25 m par interpolation linéaire (entre H=1,0 et H=1,5).","3. Estimer Q pour H = 1,25 m par le polynôme de Lagrange. Comparer avec la valeur linéaire.","4. Calculer l'erreur relative entre les deux estimations."],
+   corr:[
+    {t:"Interpolation linéaire (H=1,25 m)",txt:"Entre (H₁=1,0, Q₁=45,8) et (H₂=1,5, Q₂=98,4) :\nQ_lin = Q₁ + (H−H₁)/(H₂−H₁) × (Q₂−Q₁)\nQ_lin = 45,8 + (1,25−1,0)/(1,5−1,0) × (98,4−45,8)\nQ_lin = 45,8 + 0,5 × 52,6 = 45,8 + 26,3 = 72,1 m³/s",res:"Q_linéaire(H=1,25m) = 72,1 m³/s"},
+    {t:"Polynôme de Lagrange (3 points)",txt:"Points : (0,5;12,3), (1,0;45,8), (1,5;98,4)\nL₁(H) = (H−1,0)(H−1,5)/((0,5−1,0)(0,5−1,5)) = (H−1,0)(H−1,5)/0,5\nL₂(H) = (H−0,5)(H−1,5)/((1,0−0,5)(1,0−1,5)) = (H−0,5)(H−1,5)/(−0,25)\nL₃(H) = (H−0,5)(H−1,0)/((1,5−0,5)(1,5−1,0)) = (H−0,5)(H−1,0)/0,5\nPour H=1,25 :\nL₁ = (0,25)(−0,25)/0,5 = −0,125\nL₂ = (0,75)(−0,25)/(−0,25) = 0,75\nL₃ = (0,75)(0,25)/0,5 = 0,375\nQ_Lag = 12,3×(−0,125) + 45,8×0,75 + 98,4×0,375\nQ_Lag = −1,538 + 34,35 + 36,90 = 69,71 m³/s",res:"Q_Lagrange(H=1,25m) = 69,7 m³/s"},
+    {t:"Comparaison et erreur relative",txt:"Erreur relative = |Q_lin − Q_Lag| / Q_Lag × 100\n= |72,1 − 69,7| / 69,7 × 100 = 2,4/69,7 × 100 = 3,4%\nConclusion : Lagrange plus précis car il intègre la courbure de la relation H-Q (puissance). L'interpolation linéaire surestime Q ici.",res:"Erreur = 3,4% · Lagrange > linéaire pour courbe de tarage"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Méthode de Newton-Raphson — Dimensionnement hydraulique",
+   texte:"On cherche la hauteur d'eau h dans un canal rectangulaire (b=3m, K=40, I=0,003) transportant Q=10 m³/s. Résoudre par Newton-Raphson.",
+   data:"b=3m · K=40 · I=0,003 · Q=10 m³/s\nf(h) = Q − K·(b·h)·(b·h/(b+2h))^(2/3)·√I = 0",
+   questions:["1. Écrire la fonction f(h) dont on cherche le zéro.","2. Dériver f(h) pour obtenir f'(h).","3. Appliquer 3 itérations de Newton-Raphson avec h₀=1,0 m.","4. Vérifier la solution obtenue en recalculant Q."],
+   corr:[
+    {t:"Fonction et dérivée",txt:"A = b·h = 3h · Pm = b+2h = 3+2h · Rh = A/Pm = 3h/(3+2h)\nf(h) = 10 − 40·(3h)·(3h/(3+2h))^(2/3)·√0,003\n√I = 0,05477\nf(h) = 10 − 40×0,05477×3h×(3h/(3+2h))^(2/3)\nf(h) = 10 − 6,572×h×(3h/(3+2h))^(2/3)",res:"f(h) = 10 − 6,572·h·(3h/(3+2h))^(2/3)"},
+    {t:"Itérations Newton-Raphson",txt:"h₀ = 1,0 m :\nA₀=3, Pm₀=5, Rh₀=0,60, Q₀=40×3×0,60^(2/3)×0,05477=40×3×0,7114×0,05477=7,426\nf(1,0) = 10 − 7,426 = 2,574\n\nh₁ = 1,0 + 0,1 (pas simple) → h₁ = 1,2 m :\nA₁=3,6, Pm₁=5,4, Rh₁=0,667, Q₁=40×3,6×0,667^(2/3)×0,05477=9,16\nf(1,2) = 10 − 9,16 = 0,84\n\nh₂ = 1,3 m :\nA₂=3,9, Pm₂=5,6, Rh₂=0,696, Q₂=40×3,9×0,696^(2/3)×0,05477=10,08\nf(1,3) = 10 − 10,08 = −0,08 ≈ 0",res:"h ≈ 1,29 m (convergence en 3 itérations)"},
+    {t:"Vérification",txt:"h = 1,29 m · A = 3×1,29 = 3,87 m² · Pm = 3+2×1,29 = 5,58 m\nRh = 3,87/5,58 = 0,694 m\nQ = 40 × 3,87 × (0,694)^(2/3) × √0,003 = 40 × 3,87 × 0,784 × 0,05477 = 9,98 m³/s ≈ 10 m³/s ✅",res:"h = 1,29 m vérifié → Q = 9,98 ≈ 10 m³/s ✅"}
+   ]}
+ ]},
+
+{id:11,annee:"2020–2021",titre:"Algèbre & Mathématiques pour Hydrologues",matieres:["Algèbre","Mathématiques appliquées"],duree:"3h",tags:[{t:"Matrices",c:"badge-stat"},{t:"Systèmes",c:"badge-hydraul"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Systèmes d'équations linéaires — Réseau hydraulique",
+   texte:"Un réseau de distribution d'eau comporte 3 nœuds. Les bilans de masse et les équations de charge donnent le système suivant :",
+   data:"Système à résoudre :\n2Q₁ + Q₂       = 120\n Q₁ + 3Q₂ + Q₃ = 180\n      Q₂ + 4Q₃ = 96\n\n(Q₁, Q₂, Q₃ en m³/h)",
+   questions:["1. Écrire le système sous forme matricielle A·X = B.","2. Calculer le déterminant de la matrice A.","3. Résoudre le système par la méthode de Gauss (élimination).","4. Vérifier la solution en la réinjectant dans les 3 équations."],
+   corr:[
+    {t:"Forme matricielle",txt:"A = [[2,1,0],[1,3,1],[0,1,4]] · X = [Q1,Q2,Q3]^T · B = [120,180,96]^T\n\nA·X = B soit :\n[2  1  0] [Q1]   [120]\n[1  3  1]·[Q2] = [180]\n[0  1  4] [Q3]   [96]",res:"Système A·X = B avec A(3×3)"},
+    {t:"Déterminant de A",txt:"det(A) = 2·det([[3,1],[1,4]]) − 1·det([[1,1],[0,4]]) + 0\n= 2·(3×4−1×1) − 1·(1×4−1×0)\n= 2·(12−1) − 1·(4−0)\n= 2×11 − 4 = 22 − 4 = 18",res:"det(A) = 18 ≠ 0 → système admet une solution unique"},
+    {t:"Méthode de Gauss",txt:"Système augmenté [A|B] :\n[2  1  0 | 120]\n[1  3  1 | 180]\n[0  1  4 | 96 ]\n\nL2 ← L2 − (1/2)L1 :\n[2    1    0  | 120]\n[0   2,5   1  | 120]\n[0    1    4  | 96 ]\n\nL3 ← L3 − (1/2,5)×L2 = L3 − 0,4×L2 :\n[2    1    0    | 120]\n[0   2,5   1    | 120]\n[0    0    3,6  | 48 ]\n\nRemontée :\nQ3 = 48/3,6 = 13,33 m³/h\nQ2 = (120−1×13,33)/2,5 = 106,67/2,5 = 42,67 m³/h\nQ1 = (120−1×42,67)/2 = 77,33/2 = 38,67 m³/h",res:"Q1=38,67 · Q2=42,67 · Q3=13,33 m³/h"},
+    {t:"Vérification",txt:"Éq.1: 2×38,67 + 42,67 = 77,34+42,67 = 120,01 ≈ 120 ✅\nÉq.2: 38,67 + 3×42,67 + 13,33 = 38,67+128,01+13,33 = 180,01 ≈ 180 ✅\nÉq.3: 42,67 + 4×13,33 = 42,67+53,32 = 95,99 ≈ 96 ✅",res:"Vérification OK — Solution correcte"}
+   ]},
+  {num:"Exercice 2 (8 pts)",titre:"Calcul vectoriel et produit scalaire — Gradient hydraulique",
+   texte:"Dans un aquifère, la surface piézométrique est définie par la fonction h(x,y) = 50 − 0,003x − 0,005y (m). Analyser le gradient hydraulique.",
+   data:"h(x,y) = 50 − 0,003x − 0,005y\nx, y en mètres · h en mètres NGT",
+   questions:["1. Calculer le gradient hydraulique vectoriel ∇h = (∂h/∂x, ∂h/∂y).","2. Calculer la norme du gradient (pente piézométrique).","3. Déterminer la direction d'écoulement (opposée au gradient).","4. Calculer le débit spécifique q si K = 5×10⁻⁴ m/s (loi de Darcy vectorielle)."],
+   corr:[
+    {t:"Gradient hydraulique vectoriel",txt:"∂h/∂x = −0,003 (perte de charge vers x positif)\n∂h/∂y = −0,005 (perte de charge vers y positif)\n∇h = (−0,003 ; −0,005) (m/m, sans dimension)",res:"∇h = (−0,003 ; −0,005)"},
+    {t:"Norme du gradient",txt:"|∇h| = √((−0,003)² + (−0,005)²)\n= √(9×10⁻⁶ + 25×10⁻⁶)\n= √(34×10⁻⁶) = 5,83×10⁻³ m/m",res:"Pente piézométrique i = 5,83×10⁻³ m/m"},
+    {t:"Direction d'écoulement",txt:"L'écoulement se fait dans le sens −∇h (gradient de potentiel décroissant) :\nDirection = −(−0,003 ; −0,005) = (0,003 ; 0,005)\nAngle par rapport à l'axe x : θ = arctan(0,005/0,003) = arctan(1,667) = 59,0°\nL'eau s'écoule vers le nord-est (x positif, y positif)",res:"Direction : angle 59° par rapport à Ox (vers nord-est)"},
+    {t:"Débit spécifique (Darcy vectoriel)",txt:"q⃗ = −K·∇h = −5×10⁻⁴ × (−0,003 ; −0,005)\nq⃗ = (1,5×10⁻⁶ ; 2,5×10⁻⁶) m²/s/m\n|q⃗| = K·|∇h| = 5×10⁻⁴ × 5,83×10⁻³ = 2,915×10⁻⁶ m/s = 2,92×10⁻⁶ m²/s par mètre de largeur",res:"q = 2,92×10⁻⁶ m²/s (débit par unité de largeur)"}
+   ]},
+  {num:"Exercice 3 (4 pts)",titre:"Séries numériques — Convergence et approximations",
+   texte:"La fonction de puits W(u) en hydrogéologie est définie par la série : W(u) = −0,5772 − ln(u) + u − u²/4 + u³/18 − ...",
+   data:"W(u) = −γ − ln(u) + Σₙ₌₁^∞ (−1)^(n+1) · uⁿ/(n·n!)\nγ = 0,5772 (constante d'Euler)",
+   questions:["1. Calculer W(0,01) en utilisant les 3 premiers termes de la série (après −γ−ln(u)).","2. Comparer avec la valeur tabulée W(0,01) = 4,038.","3. Calculer l'erreur relative et conclure sur la convergence."],
+   corr:[
+    {t:"Calcul W(0,01)",txt:"W(0,01) ≈ −0,5772 − ln(0,01) + 0,01 − (0,01)²/4 + ...\nln(0,01) = −4,6052\nTerme 1 : −0,5772 − (−4,6052) = −0,5772 + 4,6052 = 4,028\nTerme 2 : +u = +0,01\nTerme 3 : −u²/4 = −0,000025\nW(0,01) ≈ 4,028 + 0,01 − 0,000025 = 4,038",res:"W(0,01) ≈ 4,038 (3 termes suffisent)"},
+    {t:"Erreur relative",txt:"Valeur tabulée = 4,038\nErreur = |4,038 − 4,038|/4,038 × 100 = 0%\nLa série converge très rapidement pour u = 0,01 (petit u)\nPour u > 0,1, il faut plus de termes ou utiliser des tables",res:"Convergence rapide pour u petit (u < 0,05)"}
+   ]}
+ ]},
+
+{id:12,annee:"2022",titre:"Microbiologie de l'Eau — Analyse et Risques Sanitaires",matieres:["Microbiologie","Qualité bactériologique"],duree:"2h",tags:[{t:"Bactériologie",c:"badge-qualite"},{t:"HACCP",c:"badge-gire"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Dénombrement et interprétation des indicateurs fécaux",
+   texte:"L'analyse bactériologique d'un échantillon d'eau de forage prélevé à Cotonou donne les résultats suivants (méthode membranaire, filtration sur 100 mL) :",
+   data:"Coliformes totaux : 48 UFC/100 mL\nE. coli (coliformes fécaux) : 12 UFC/100 mL\nEntérocoques fécaux : 8 UFC/100 mL\nClostridium perfringens : 2 UFC/100 mL\nGerminations à 22°C : 320 UFC/mL\nNormes OMS eau potable : E. coli = 0 UFC/100 mL · Coliformes totaux = 0 UFC/100 mL",
+   questions:["1. Interpréter chaque paramètre par rapport aux normes OMS. L'eau est-elle potable ?","2. Quelle est la signification épidémiologique de la présence d'E. coli dans l'eau ?","3. Que signifie la présence de Clostridium perfringens et quelle est sa valeur indicatrice ?","4. Proposer un traitement adapté pour rendre l'eau potable. Justifier les étapes."],
+   corr:[
+    {t:"Interprétation et conformité OMS",txt:"Coliformes totaux = 48 UFC/100mL > 0 → NON CONFORME\nE. coli = 12 UFC/100mL > 0 → NON CONFORME (contamination fécale avérée)\nEntérocoques = 8 UFC/100mL > 0 → NON CONFORME\nClostridium = 2 UFC/100mL (valeur indicatrice de pollution ancienne)\nConclusion : EAU NON POTABLE — risque sanitaire élevé",res:"Eau non potable — E. coli = 12 UFC/100mL > norme 0 UFC/100mL"},
+    {t:"Signification épidémiologique E. coli",txt:"E. coli (Escherichia coli) est le principal indicateur de contamination fécale :\n• Origine : matières fécales humaines et animales\n• Indique la présence potentielle de pathogènes entériques :\n  - Vibrio cholerae (choléra)\n  - Salmonella typhi (typhoïde)\n  - Virus de l'hépatite A\n  - Cryptosporidium (protozaire)\n• Risques : diarrhées, gastro-entérites, dysenterie\n• Au Bénin : 1ère cause de mortalité infantile liée à l'eau",res:"Indicateur de contamination fécale — risque choléra, typhoïde, hépatite A"},
+    {t:"Clostridium perfringens",txt:"Clostridium perfringens = indicateur de pollution fécale ANCIENNE :\n• Forme des spores très résistantes à la chaleur et au chlore\n• Sa présence alors qu'E. coli est absent = pollution ancienne traitée mais spores persistantes\n• Indique une contamination passée et une contamination profonde de l'aquifère\n• Valeur indicatrice pour les virus entériques (résistance similaire)\nIci : présent avec E. coli → pollution récente ET ancienne",res:"Indicateur de pollution ancienne et de contamination profonde de l'aquifère"},
+    {t:"Traitement proposé",txt:"Étapes de traitement recommandées :\n1. COAGULATION-FLOCULATION : ajout sulfate d'aluminium → agrégats (flocs)\n2. DÉCANTATION : sédimentation des flocs et matières en suspension\n3. FILTRATION : sur sable et gravier → élimination turbidité et protozoaires\n4. DÉSINFECTION AU CHLORE : Cl₂ ou eau de Javel\n   • Dose : 0,5–1 mg/L de chlore résiduel\n   • Contact : 30 min minimum\n   • Élimine 99% des bactéries et virus\n5. CONTRÔLE : mesure du chlore résiduel libre > 0,2 mg/L au robinet",res:"Coagulation → Décantation → Filtration → Chloration (0,5–1 mg/L Cl)"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Maladies hydriques et prévention — WASH au Bénin",
+   texte:"Dans une commune rurale du Bénin, une épidémie de choléra éclate après les inondations. Analyser la situation et proposer des mesures préventives.",
+   data:"Données épidémiques :\n• 45 cas de choléra recensés en 2 semaines\n• Source d'eau principale : puits traditionnels non protégés\n• Défécation à l'air libre pratiquée par 70% des ménages\n• Taux d'accès à l'eau potable dans la commune : 38%",
+   questions:["1. Identifier l'agent pathogène responsable du choléra et son mode de transmission.","2. Expliquer le lien entre les inondations et l'épidémie de choléra.","3. Proposer des mesures d'urgence immédiates (< 48h).","4. Proposer des mesures préventives à long terme dans le cadre des ODD."],
+   corr:[
+    {t:"Agent pathogène et transmission",txt:"Agent : Vibrio cholerae (bacille gram-négatif, flagellé)\nSérogroupes pathogènes : O1 (biotypes El Tor et classique) et O139\nMode de transmission : FÉCO-ORALE\n• Eau contaminée (principale voie) · Aliments souillés · Mains sales\nIncubation : 6h à 5 jours\nSymptômes : diarrhées 'eau de riz' abondantes → déshydratation sévère → décès\nDose infectante : 10⁶–10⁸ bactéries (réduite à 10²–10⁴ si pH gastrique élevé)",res:"Vibrio cholerae O1/O139 — transmission féco-orale via eau contaminée"},
+    {t:"Lien inondations-choléra",txt:"Mécanismes :\n1. Submersion des latrines → contamination des puits et points d'eau\n2. Débordement des systèmes d'assainissement → eau de surface chargée en V. cholerae\n3. Turbidité accrue → protection des bactéries contre la chloration\n4. Déplacement de populations → regroupement → transmission inter-humaine\n5. Destruction des infrastructures d'eau potable\n→ Le vecteur principal est l'eau de boisson contaminée par les matières fécales",res:"Inondations → contamination puits → consommation eau non traitée → épidémie"},
+    {t:"Mesures d'urgence (< 48h)",txt:"1. Fermeture immédiate des puits contaminés et signalisation\n2. Distribution d'eau embouteillée ou de sachets d'eau chlorée\n3. Distribution de chlore granulé (HTH) ou comprimés Aquatabs aux ménages\n4. Installation de points d'eau d'urgence (citernes mobiles)\n5. Installation de latrines d'urgence en dehors des zones inondées\n6. Traitement oral de réhydratation (SRO) pour les malades\n7. Information des populations : lavage des mains au savon (5 moments clés)",res:"Fermeture puits + distribution eau chlorée + SRO + latrines d'urgence"},
+    {t:"Mesures préventives long terme (ODD)",txt:"ODD 6.1 : Construction de forages équipés de pompes à motricité humaine\nODD 6.2 : Construction de latrines améliorées (VIP) — fin défécation à l'air libre\nODD 6.3 : Mise en place d'unités de potabilisation (chloration)\nFormation : agents de santé communautaires en hygiène et WASH\nSurveillance : réseau sentinelle qualité eau (contrôles bactériologiques trimestriels)\nFinancement : appui DG-Eau + UNICEF + OMS + communautés\nObjectif : porter le taux d'accès eau potable de 38% à 80% d'ici 2030",res:"Forages protégés + latrines VIP + chloration + surveillance — Objectif ODD 6"}
+   ]}
+ ]},
+
+{id:13,annee:"2021–2022",titre:"Coupe Géologique et Stratigraphie",matieres:["Géologie","Stratigraphie"],duree:"2h",tags:[{t:"Stratigraphie",c:"badge-morpho"},{t:"Coupe géol.",c:"badge-hydrogeo"}],
+ exercices:[
+  {num:"Exercice 1 (12 pts)",titre:"Construction et interprétation d'une coupe géologique au Bénin",
+   texte:"Une coupe géologique réalisée dans la région de Pobè (Sud-Est Bénin) révèle la succession stratigraphique suivante de haut en bas :",
+   data:"Couche 1 : Sables argileux latéritiques — 0 à 8 m — Quaternaire\nCouche 2 : Argiles sableuses grises — 8 à 25 m — Éocène\nCouche 3 : Calcaires marneux — 25 à 45 m — Paléocène\nCouche 4 : Sables grossiers saturés — 45 à 85 m — Crétacé supérieur\nCouche 5 : Argiles noires compactes — 85 à 120 m — Crétacé inférieur\nCouche 6 : Socle cristallin (granite) — > 120 m — Précambrien\nPendage général : 5° vers le Sud",
+   questions:["1. Dresser la colonne stratigraphique et ordonner les couches de la plus ancienne à la plus récente.","2. Identifier les couches aquifères potentielles et justifier.","3. Quel type d'aquifère constitue la couche 4 ? Expliquer son mode de recharge.","4. Interpréter le pendage de 5° vers le sud en termes de structure géologique."],
+   corr:[
+    {t:"Colonne stratigraphique (ancien → récent)",txt:"1. Socle Précambrien (granite) > 120m — PLUS ANCIEN\n2. Crétacé inférieur (argiles noires) 85–120m\n3. Crétacé supérieur (sables grossiers) 45–85m\n4. Paléocène (calcaires marneux) 25–45m\n5. Éocène (argiles sableuses) 8–25m\n6. Quaternaire (latérites) 0–8m — PLUS RÉCENT\nSéquence conforme au principe de superposition (Sténon, 1669)",res:"Précambrien → Crétacé inf. → Crétacé sup. → Paléocène → Éocène → Quaternaire"},
+    {t:"Couches aquifères potentielles",txt:"Couche 4 : Sables grossiers saturés (45–85m) = AQUIFÈRE PRINCIPAL\n• Porosité et perméabilité élevées (sables grossiers)\n• Saturé en eau → nappe captive (confinée entre argiles C.inf et calcaires Paléocène)\n• Épaisseur 40m = ressource importante pour l'alimentation en eau\nCouche 1 : Sables latéritiques (0–8m) = Aquifère superficiel (nappe libre)\n• Nappe phréatique de faible profondeur, vulnérable à la pollution\nCouche 3 : Calcaires marneux = aquifère karstique secondaire possible",res:"Couche 4 (sables Crétacé) = aquifère captif principal · Couche 1 = nappe libre"},
+    {t:"Type d'aquifère couche 4",txt:"Type : AQUIFÈRE CAPTIF (ou confiné)\n• Toit imperméable : argiles noires (couche 5)\n• Mur imperméable : socle granitique ou limite de la couche\n• Nappe sous pression artésienne possible\nMode de recharge :\n• Zone de recharge en affleurement du Crétacé (affleurements en zone plus au Nord)\n• Infiltration par les calcaires fissurés de la couche 3\n• Recharge lente (temps de transit : dizaines à centaines d'années)\n• Isotopes ¹⁴C et tritium utilisés pour dater l'eau souterraine",res:"Aquifère captif — recharge par affleurements en zone amont (Nord) — recharge lente"},
+    {t:"Interprétation du pendage",txt:"Pendage 5° vers le Sud = STRUCTURE MONOCLINALE\n• Toutes les couches s'inclinent uniformément vers le sud\n• Indique une déformation tectonique douce (bassin sédimentaire côtier)\n• Conséquences hydrogéologiques :\n  - Les nappes captives s'approfondissent vers le Sud (mer)\n  - L'eau sous-terraine s'écoule préférentiellement vers le Sud\n  - Zone côtière : risque d'intrusion saline dans les aquifères\n• Contexte : bassin sédimentaire côtier du Bénin (bassin de Porto-Novo/Cotonou)",res:"Structure monoclinale — inclinaison vers le bassin côtier — risque intrusion saline"}
+   ]},
+  {num:"Exercice 2 (8 pts)",titre:"Principes stratigraphiques et datation relative",
+   texte:"Appliquer les principes stratigraphiques fondamentaux à l'analyse d'une coupe géologique.",
+   data:"Principes à mobiliser : Superposition, Horizontalité originelle, Continuité latérale, Recoupement, Inclusion",
+   questions:["1. Énoncer et illustrer le principe de superposition de Sténon.","2. Si un filon de dolérite recoupe les couches 2, 3 et 4, quel est son âge relatif ?","3. Quelle méthode de datation absolue utiliser pour les sables de la couche 4 ?"],
+   corr:[
+    {t:"Principe de superposition",txt:"Principe de Sténon (1669) : Dans une série stratigraphique non déformée, les couches les plus profondes sont les plus anciennes.\nApplication : Couche 6 (socle, Précambrien) est la plus ancienne car elle est à la base. Couche 1 (Quaternaire) est la plus récente car elle est au sommet.\nException : en cas de renversement tectonique, le principe est inversé.",res:"Couche profonde = plus ancienne · Couche superficielle = plus récente"},
+    {t:"Âge du filon de dolérite",txt:"Principe de recoupement : un corps géologique qui recoupe une couche est postérieur à cette couche.\nLe filon recoupe les couches 2, 3 et 4 (Éocène, Paléocène, Crétacé sup.)\n→ Le filon est POSTÉRIEUR à l'Éocène (couche la plus récente recoupée)\n→ Le filon est donc d'âge Oligocène, Miocène ou plus récent\n→ Il est antérieur aux couches non recoupées (couche 1, Quaternaire)",res:"Filon postérieur à l'Éocène → âge Oligocène à Pliocène"},
+    {t:"Datation absolue couche 4",txt:"Couche 4 = Sables Crétacé supérieur (~65–100 Ma)\nMéthodes adaptées :\n• K-Ar (potassium-argon) : sur minéraux argileux diagénétiques (illite)\n• Rb-Sr (rubidium-strontium) : géochronologie des minéraux\n• Thermoluminescence (TL) ou OSL : si sables non trop anciens\n• Paléontologie : microfossiles (foraminifères) = biostratigraphie\nPour des sédiments quaternaires récents : ¹⁴C (radiocarbone), limite ~50 000 ans",res:"K-Ar ou biostratigraphie (foraminifères) pour Crétacé · ¹⁴C pour Quaternaire"}
+   ]}
+ ]},
+
+{id:14,annee:"2021",titre:"Pétrologie Sédimentaire — Roches et Diagenèse",matieres:["Pétrologie","Sédimentologie"],duree:"2h",tags:[{t:"Sédiments",c:"badge-morpho"},{t:"Diagenèse",c:"badge-hydrogeo"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Classification et propriétés des roches sédimentaires",
+   texte:"Décrire et classer les roches sédimentaires rencontrées dans le bassin sédimentaire côtier du Bénin.",
+   data:"Roches à analyser : grès, calcaire, argile, marne, laterite\nCritères : origine, texture, composition minérale, propriétés hydrogéologiques",
+   questions:["1. Classer ces roches selon leur origine (détritique, chimique, biogène, résiduelle).","2. Décrire le processus de diagenèse qui transforme le sable en grès.","3. Quelle est la porosité typique d'un grès bien trié ? D'une argile compactée ?","4. Expliquer la formation des latérites en climat tropical humide (altération)."],
+   corr:[
+    {t:"Classification des roches sédimentaires",txt:"DÉTRITIQUES (débris de roches préexistantes) :\n• Grès : grains de quartz cimentés (diagenèse) — sables lithifiés\n• Argile : phyllosilicates fins (<2µm) — altération des feldspaths\nCHIMIQUES (précipitation chimique) :\n• Calcaire : CaCO₃ précipité en milieu marin (biochimique)\n• Marne : mélange calcite + argile (30–65% CaCO₃)\nRÉSIDUELLES (altération sur place) :\n• Latérite : cuirasse ferrugineuse tropicale (Fe₂O₃ + Al₂O₃)",res:"Grès=détritique · Calcaire=chimique-biogène · Argile=détritique · Latérite=résiduelle"},
+    {t:"Diagenèse : sable → grès",txt:"La diagenèse transforme les sédiments meubles en roches consolidées :\nÉtape 1 — COMPACTION : enfouissement → pression → réduction de la porosité initiale (40–50% → 20–30%)\nÉtape 2 — CIMENTATION : circulation de fluides chargés → précipitation de ciment\n• Ciments siliceux (quartz en surcroissance)\n• Ciments carbonatés (calcite, dolomie)\n• Ciments ferrugineux (goethite, hématite)\nÉtape 3 — RECRISTALLISATION : modification des minéraux argileux (illitisation)\nRésultat : roche cohérente, dure, avec porosité réduite",res:"Compaction + cimentation + recristallisation → consolidation et réduction porosité"},
+    {t:"Porosité grès et argile",txt:"Grès bien trié (granulométrie homogène) :\n• Porosité totale : 20–35%\n• Porosité efficace (drainage) : 15–25%\n• Perméabilité K : 10⁻¹³ à 10⁻¹² m² (0,1 à 1 Darcy)\nArgile compactée :\n• Porosité totale élevée : 40–60% (mais eau liée !)\n• Porosité efficace très faible : < 2%\n• Perméabilité K : 10⁻²⁰ à 10⁻¹⁶ m² (imperméable en pratique)\n→ L'argile est imperméable malgré une porosité totale élevée",res:"Grès : porosité 20–35%, K=10⁻¹³m² · Argile : porosité 40–60% mais imperméable"},
+    {t:"Formation des latérites (altération tropicale)",txt:"Processus : Altération latéritique = hydrolyse intense en climat chaud et humide\n1. HYDROLYSE des silicates (feldspaths, pyroxènes) :\n   Feldspath + H₂O → kaolinite + silice en solution + cations (K⁺, Ca²⁺, Na⁺)\n2. LESSIVAGE : exportation de SiO₂ soluble et des bases (K, Ca, Na, Mg) vers les nappes\n3. CONCENTRATION RÉSIDUELLE : accumulation de Fe₂O₃ (goethite, hématite) + Al₂O₃ (gibbsite)\n4. CUIRASSEMENT : induration ferrugineuse → latérite (cuirasse)\nConditions : T > 25°C, P > 1000 mm/an, alternance sec/humide, drainage vertical\nImportance au Bénin : zone guinéenne et soudanienne",res:"Hydrolyse feldspaths → lessivage bases → accumulation Fe-Al → cuirasse latéritique"}
+   ]}
+ ]},
+
+{id:15,annee:"2020",titre:"Pétrographie Magmatique et Métamorphique",matieres:["Pétrographie","Géologie cristalline"],duree:"2h30",tags:[{t:"Magmatisme",c:"badge-hydrogeo"},{t:"Métamorphisme",c:"badge-morpho"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Classification et description des roches magmatiques du socle béninois",
+   texte:"Le socle cristallin du Bénin (Précambrien) comprend plusieurs types de roches magmatiques. On vous soumet la description suivante d'un échantillon :",
+   data:"Roche A : texture grenue, cristaux visibles à l'oeil nu, feldspaths roses et blancs abondants (60%), quartz grisâtre (25%), biotite noire (10%), hornblende verte (5%). Couleur générale : gris rosâtre.\nRoche B : texture microlithique, phénocristaux de feldspaths dans une mésostase sombre, bulles de gaz (vacuoles). Couleur : noire à grise.",
+   questions:["1. Identifier la roche A et la roche B. Justifier par la texture et la composition.","2. Donner la classification de la roche A selon CIPW ou le diagramme QAP.","3. Décrire le contexte géodynamique de formation de la roche B.","4. Comment les roches magmatiques du socle influencent-elles la qualité des eaux souterraines ?"],
+   corr:[
+    {t:"Identification des roches",txt:"Roche A : GRANITE\n• Texture GRENUE (refroidissement lent, en profondeur = pluton)\n• Composition : quartz (25%) + feldspaths alcalins+plagioclases (60%) + biotite + hornblende\n• Couleur claire (roche leucocrate), gris rosâtre selon feldspaths\n• Roche plutonique acide (SiO₂ > 65%)\n\nRoche B : BASALTE\n• Texture MICROLITHIQUE (refroidissement rapide en surface = volcanite)\n• Phénocristaux dans une mésostase = porphyrique\n• Vacuoles = dégazage lors de l'éruption\n• Couleur sombre = roche mélanocrate (SiO₂ < 50%, riche en Fe-Mg)",res:"Roche A = Granite (plutonique acide) · Roche B = Basalte (volcanique basique)"},
+    {t:"Classification granite — Diagramme QAP",txt:"Q = Quartz = 25%\nA = Feldspath alcalin (orthose, microcline) ≈ 35%\nP = Plagioclase (albite, oligoclase) ≈ 25%\nTotal Q+A+P = 85% (minéraux felsiques) · M = minéraux mafiques = 15%\nRecalcul en % de Q+A+P :\nQ' = 25/85 = 29% · A' = 35/85 = 41% · P' = 25/85 = 29%\nDans le diagramme QAP de Streckeisen : Q'=29%, A'>P' → GRANITE (ou Granodiorite si P>A)",res:"GRANITE dans le diagramme QAP (Q≈29%, A>P)"},
+    {t:"Contexte géodynamique basalte",txt:"Formation des basaltes en contexte de :\n1. DORSALES OCÉANIQUES (Mid-Ocean Ridge) : décompression adiabatique du manteau → MORB\n2. POINTS CHAUDS (Hot spots) : panaches mantelliques → basaltes alcalins (ex : Canaries, Hawaii)\n3. RIFTS CONTINENTAUX : amincissement lithosphérique (ex : Rift Est-Africain)\n4. MARGES ACTIVES : subduction → basaltes d'arc\nAu Bénin : basaltes rares, associés au volcanisme cénozoïque du Rift de Cameroun (extension vers l'Ouest africain). Roches pauvres en silice, riches en Fe, Mg, Ca.",res:"Dorsales océaniques ou points chauds — décompression mantellique"},
+    {t:"Influence roches magmatiques sur eau souterraine",txt:"Les roches magmatiques du socle béninois influencent la qualité des eaux :\n• Granite : altération → libération de SiO₂, K⁺, Na⁺, F⁻ (fluorures)\n  - Eaux faiblement minéralisées, pH légèrement acide (5,5–6,5)\n  - Risque : teneurs en fluorures F⁻ > 1,5 mg/L dans certains forages\n  - Faciès hydrochimique : Na-HCO₃ ou Ca-HCO₃\n• Amphibolites et gneiss : libération de Ca²⁺, Mg²⁺\n  - Eaux plus dures, alcalines\n• Basaltes : dissolution → Ca²⁺, Mg²⁺, Fe²⁺ → eaux ferrugineuses\n  - Risque : Fe > 0,3 mg/L (norme OMS dépassée)",res:"Granite → eaux Na-HCO₃ avec risque fluor · Basalte → eaux ferrugineuses"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Métamorphisme et roches métamorphiques",
+   texte:"Le socle précambrien du Bénin renferme des roches métamorphiques associées à l'orogénèse panafricaine (~600 Ma).",
+   data:"Roches à décrire : gneiss, schiste, quartzite, marbre\nFacies métamorphiques de Barrow : zéolite → prehnite → chlorite → biotite → grenat → staurotide → sillimanite",
+   questions:["1. Classer les 4 roches selon leur protolithe (roche mère) et le degré de métamorphisme.","2. Quelle est la différence entre métamorphisme de contact et métamorphisme régional ?","3. Identifier les roches métamorphiques sur la coupe géologique du Bénin."],
+   corr:[
+    {t:"Classification roches métamorphiques",txt:"SCHISTE : protolithe = argile ou shale · Degré = faible à moyen (zone chlorite-biotite)\n• Foliation schisteuse bien développée · Minéraux : chlorite, biotite, muscovite\nGNEISS : protolithe = granite ou arkose · Degré = élevé (zone grenat-sillimanite)\n• Rubanement gneissique (lits clairs/sombres alternés) · Minéraux : quartz, feldspath, biotite, grenat\nQUARTZITE : protolithe = grès quartzeux · Degré = faible à élevé\n• Recristallisation du quartz → roche très dure · Pas de foliation marquée\nMARBRE : protolithe = calcaire · Degré = faible à élevé\n• Recristallisation de la calcite · Grains interloqués · Roche carbonatée cristalline",res:"Schiste < Quartzite ≈ Marbre < Gneiss (degré métamorphisme croissant)"},
+    {t:"Métamorphisme contact vs régional",txt:"MÉTAMORPHISME DE CONTACT (thermal) :\n• Cause : intrusion d'un magma chaud (pluton)\n• T élevée, P faible → auréole de contact (hornfels)\n• Étendue : quelques km autour du pluton\n• Roches : cornéenne (hornfels), skarn (si calcaire)\n\nMÉTAMORPHISME RÉGIONAL (dynamothermique) :\n• Cause : collision de plaques (orogénèse)\n• T ET P élevés → grandes profondeurs\n• Étendue : milliers de km² (chaînes de montagne)\n• Roches : schiste, gneiss, éclogite\n• Au Bénin : lié à l'orogénèse panafricaine (~600 Ma) → gneiss de la zone de Kandi",res:"Contact = pluton local (T>P) · Régional = orogénèse (T+P) — Bénin : panafricain"},
+    {t:"Identification coupe géologique",txt:"Dans la coupe de Pobè (couche 6 = socle Précambrien) :\n• Gneiss migmatitiques : zones profondes, métamorphisme élevé (>600°C, >0,5 GPa)\n• Schistes verts : zones moins profondes, métamorphisme faible (chlorite-biotite)\n• Quartzites : anciens grès quartzeux recristallisés\n• Auréoles de contact : autour des granites intrusifs\nImportance hydrogéologique : le socle est un aquifère de fissures\n• Porosité de fissure, non intergranulaire\n• Productivité des forages variable : dépend de l'intensité de la fracturation",res:"Gneiss + schistes + quartzites dans le socle Précambrien — aquifère de fissures"}
+   ]}
+ ]},
+
+{id:16,annee:"2022",titre:"Géophysique Appliquée — Prospection et Imagerie",matieres:["Géophysique","Hydrogéologie"],duree:"2h",tags:[{t:"Sismique",c:"badge-morpho"},{t:"Électrique",c:"badge-hydrogeo"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Prospection électrique — Sondage électrique vertical (SEV)",
+   texte:"Un sondage électrique vertical (SEV) est réalisé à l'emplacement d'un forage projeté dans la région de Natitingou (Atacora, Bénin) avec un dispositif Schlumberger.",
+   data:"Résistivités apparentes mesurées :\nAB/2 (m) :  1    2    4    6    10   15   25   40   60   100\nρa (Ω.m) : 180  165  140  95   65   45   38   52   68   95\n\nInterprétation visuelle : la courbe montre une forme en 'H'",
+   questions:["1. Décrire le dispositif Schlumberger et le principe de mesure.","2. Interpréter la courbe de sondage (forme H). Quelles couches sont présentes ?","3. Identifier la profondeur probable d'un aquifère et sa résistivité.","4. Quelle méthode complémentaire recommanderiez-vous avant d'implanter le forage ?"],
+   corr:[
+    {t:"Dispositif Schlumberger",txt:"Dispositif Schlumberger : 4 électrodes alignées\n• A et B : électrodes d'émission (courant I) → espacées AB\n• M et N : électrodes de mesure (potentiel ΔV) → espacées MN\n• Condition : MN << AB (MN ≤ AB/5)\nMesure : ρa = K × ΔV/I\nCoefficient K (Schlumberger) = π × ((AB/2)² − (MN/2)²) / MN\nSondage électrique vertical (SEV) : on augmente AB progressivement → exploration en profondeur croissante\n• Faible AB : couches superficielles · Grand AB : couches profondes",res:"4 électrodes AMNB · MN fixe · AB croissant → investigation en profondeur"},
+    {t:"Interprétation courbe H",txt:"Courbe en 'H' = profil résistivimétrique à 3 couches :\n• Zone 1 (AB/2 < 5m) : ρa ≈ 150–180 Ω.m → COUCHE RÉSISTANTE superficielle\n  → Sables latéritiques/grès secs → résistants car peu d'eau\n• Zone 2 (AB/2 = 5–30m) : ρa diminue jusqu'à ~38 Ω.m → COUCHE CONDUCTRICE\n  → Argiles ou roches altérées humides → conducteurs car argileux\n• Zone 3 (AB/2 > 30m) : ρa remonte à ~95 Ω.m → COUCHE RÉSISTANTE profonde\n  → Socle rocheux ou sables grossiers (si aquifère) → résistant\nForte H : conducteur encadré par deux résistants = couche argileuse",res:"Couche H : résistant-conducteur-résistant → argile imperméable encadrée"},
+    {t:"Identification aquifère",txt:"D'après la courbe et le contexte géologique de l'Atacora :\n• La couche profonde résistante (ρ ≈ 65–95 Ω.m à AB/2 > 40m) peut correspondre à :\n  - Socle granitique fissuré (ρ > 500 Ω.m si sec, 50–200 Ω.m si saturé)\n  - Arènes granitiques aquifères (ρ = 50–150 Ω.m)\n• Profondeur estimée de la transition : ~30–40 m\n• L'aquifère de fissures dans le socle se situe probablement à 40–80 m\n• Résistivité aquifère : 50–100 Ω.m (eau salée < 10 Ω.m, eau douce 30–200 Ω.m)",res:"Aquifère probable à 40–80 m de profondeur · ρ = 50–100 Ω.m (socle fissuré)"},
+    {t:"Méthode complémentaire recommandée",txt:"Méthodes complémentaires avant forage :\n1. PANNEAUX ÉLECTRIQUES (ERT - Electrical Resistivity Tomography) :\n   → Image 2D du sous-sol, identification des fractures\n2. ELECTROMAGNÉTISME (EM) — VLF ou TDEM :\n   → Cartographie des fractures conductrices en surface\n3. SISMIQUE RÉFRACTION :\n   → Profondeur du toit du socle, identification des couches\n4. CARTOGRAPHIE STRUCTURALE (lineaments) sur image satellite :\n   → Identification des fractures en surface (QGIS + Sentinel-2)\nRecommandation pour Atacora : panneaux ERT + cartographie linéaments = meilleur rapport coût/efficacité",res:"ERT + VLF + cartographie linéaments satellitaires → optimisation implantation forage"}
+   ]},
+  {num:"Exercice 2 (6 pts)",titre:"Sismique réfraction — profondeur du toit du socle",
+   texte:"Un profil sismique réfraction est réalisé pour estimer la profondeur du socle. Les temps d'arrivée des premières ondes (P) en fonction de la distance sont :",
+   data:"Distance x (m) :  5    10   20   30   40   60   80   100\nTemps t (ms)  :  7    13   26   38   42   52   62   72",
+   questions:["1. Tracer le hodochrone et identifier les deux droites (couverture + réfracteur).","2. Calculer les vitesses V1 (couverture) et V2 (réfracteur).","3. Calculer la profondeur du toit du réfracteur (socle)."],
+   corr:[
+    {t:"Hodochrone et vitesses",txt:"Droite 1 (couverture, x < 30m) : pente = Δt/Δx\nPoints (5ms;7ms) et (30ms;38ms) → pente = (38-7)/(30-5) = 31/25 = 1,24 ms/m\nV1 = 1/pente = 1/0,00124 = 806 m/s ≈ 800 m/s (alluvions, sables)\n\nDroite 2 (réfracteur, x > 30m) : points (40ms;42ms) et (100ms;72ms)\nPente = (72-42)/(100-40) = 30/60 = 0,5 ms/m\nV2 = 1/0,0005 = 2000 m/s (socle altéré ou sables consolidés)",res:"V1 ≈ 800 m/s (couverture meuble) · V2 ≈ 2000 m/s (socle)"},
+    {t:"Profondeur du réfracteur",txt:"Temps intercept ti = ordonnée à l'origine de la droite 2\nProlonger la droite 2 vers x=0 : t(x=0) = 42 - 0,5×40 = 42-20 = 22 ms\nti = 22 ms = 0,022 s\n\nProfondeur : h = (ti/2) × V1×V2/√(V2²-V1²)\n= (0,022/2) × (800×2000)/√(2000²-800²)\n= 0,011 × 1 600 000/√(4 000 000-640 000)\n= 0,011 × 1 600 000/√3 360 000\n= 0,011 × 1 600 000/1833\n= 0,011 × 872,6 = 9,6 m",res:"Profondeur toit réfracteur h ≈ 9,6 m (couverture meuble sur socle)"}
+   ]}
+ ]},
+
+{id:17,annee:"2023",titre:"SIG et Télédétection — Applications Hydrologiques",matieres:["SIG","Télédétection"],duree:"2h30",tags:[{t:"QGIS",c:"badge-gire"},{t:"Sentinel",c:"badge-bilan"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Utilisation de QGIS pour l'analyse d'un bassin versant",
+   texte:"Décrire le workflow complet pour délimiter un bassin versant et calculer ses paramètres morphométriques sous QGIS à partir d'un MNT SRTM.",
+   data:"Données disponibles :\n• MNT SRTM 30m (EarthExplorer USGS)\n• Exutoire : station hydrométrique de Bétérou (lat=9,20°N, lon=2,27°E)\n• Logiciel : QGIS 3.x + plugin SAGA",
+   questions:["1. Décrire les 6 étapes du workflow de délimitation sous QGIS/SAGA.","2. Expliquer pourquoi il faut 'remplir les dépressions' du MNT avant l'analyse.","3. Calculer la superficie du bassin en km² si le raster de délimitation compte 112 450 cellules de 30×30m.","4. Quels indices de végétation et d'eau peut-on calculer avec Sentinel-2 ?"],
+   corr:[
+    {t:"Workflow QGIS/SAGA — 6 étapes",txt:"Étape 1 : IMPORT ET PROJECTION\n→ Charger MNT SRTM · Reprojeter en UTM 31N (EPSG:32631) pour le Bénin\n\nÉtape 2 : REMPLISSAGE DES DÉPRESSIONS (Fill Sinks)\n→ SAGA : Terrain Analysis → Preprocessing → Fill Sinks\n→ Élimine les artefacts du MNT (dépressions artificielles qui bloquent l'écoulement)\n\nÉtape 3 : DIRECTION D'ÉCOULEMENT (Flow Direction)\n→ SAGA : Terrain Analysis → Hydrology → Flow Direction\n→ Algorithme D8 : chaque cellule s'écoule vers l'une des 8 voisines la plus basse\n\nÉtape 4 : ACCUMULATION D'ÉCOULEMENT (Flow Accumulation)\n→ Compte le nombre de cellules contribuant à chaque point\n→ Réseau hydrographique = cellules avec forte accumulation (seuil > 500 cellules)\n\nÉtape 5 : DÉLIMITATION DU BASSIN\n→ Placer l'exutoire sur le réseau → SAGA : Watershed basins\n→ Le bassin = toutes les cellules qui drainent vers l'exutoire\n\nÉtape 6 : CALCUL DES PARAMÈTRES\n→ Superficie (outil statistiques raster) · Périmètre (vectorisation → longueur)\n→ Pente (Terrain Analysis → Slope) · Altitude (Raster Statistics)",res:"6 étapes : Import → Fill Sinks → Flow Dir → Flow Acc → Watershed → Paramètres"},
+    {t:"Pourquoi remplir les dépressions",txt:"Les MNT ont des artefacts (erreurs d'interpolation) créant des 'puits' artificiels :\n• Une dépression artificielle bloque le flux d'eau → accumulation anormale → bassin versant incorrect\n• L'algorithme D8 ne peut pas acheminer l'eau hors d'une dépression fermée\n• Fill Sinks (Planchon-Darboux) élève les cellules dépressionnaires jusqu'au seuil de débordement\nException : Les vraies dépressions endoréiques (ex : sebkhas, lacs endoréiques) ne doivent PAS être remplies → à traiter séparément",res:"Artefacts MNT créent des puits bloquant le D8 → Fill Sinks corrige avant modélisation"},
+    {t:"Calcul superficie bassin",txt:"Nombre de cellules = 112 450\nRésolution spatiale = 30 m × 30 m = 900 m² par cellule\nSuperficie = 112 450 × 900 = 101 205 000 m² = 101,2 km²\nRemarque : comparer avec la superficie connue de Bétérou = 10 250 km²\n→ 112 450 cellules serait sous-estimé → vérifier la projection (UTM requis pour surfaces exactes)",res:"A = 112 450 × 900 m² = 101,2 km² (vérifier si données réelles → 10 250 km² pour Bétérou)"},
+    {t:"Indices Sentinel-2",txt:"NDVI (Normalized Difference Vegetation Index) :\n• NDVI = (NIR − Rouge)/(NIR + Rouge) = (B8 − B4)/(B8 + B4)\n• Valeurs : -1 (eau) à +1 (végétation dense) · > 0,3 = végétation saine\n• Utilisation : cartographie occupation des sols, CN de ruissellement\n\nNDWI (Normalized Difference Water Index) :\n• NDWI = (Vert − NIR)/(Vert + NIR) = (B3 − B8)/(B3 + B8)\n• Valeurs > 0 : surfaces en eau · Excellent pour cartographier les inondations\n\nMNDWI (Modified NDWI) : (B3 − B11)/(B3 + B11) → meilleur en milieu bâti\nNBR (Burned area) · BSI (Bare Soil) → érosion et occupation des sols",res:"NDVI=(B8-B4)/(B8+B4) végétation · NDWI=(B3-B8)/(B3+B8) eau/inondations"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Cartographie des zones inondées par télédétection",
+   texte:"Utiliser des images Sentinel-1 (SAR) et Sentinel-2 (optique) pour cartographier les inondations dans la plaine inondable de Malanville (Nord-Bénin) après la crue de 2022.",
+   data:"Images disponibles :\n• Sentinel-1 GRD (polarisation VV+VH, résolution 10m) : avant et après crue\n• Sentinel-2 MSI (13 bandes, résolution 10-20m) : image post-crue\nObjectif : cartographie zones inondées + estimation superficie",
+   questions:["1. Pourquoi Sentinel-1 (SAR) est-il préférable à Sentinel-2 (optique) pour cartographier les inondations ?","2. Quelle méthode de détection de changement utiliser avec les images SAR ?","3. Calculer le pourcentage de superficie inondée si la plaine fait 450 km² et que 12 800 pixels de 10m×10m sont inondés.","4. Quels sont les enjeux hydrologiques et humanitaires des inondations à Malanville ?"],
+   corr:[
+    {t:"SAR vs optique pour inondations",txt:"Avantages de Sentinel-1 (SAR — Synthetic Aperture Radar) :\n• TOUT TEMPS : fonctionne sous nuages, pluie, nuit → crucial lors des crues (ciel couvert)\n• L'eau calme a une faible rétrodiffusion (signal radar faible) → détection facile\n• Sentinel-2 optique : bloqué par les nuages → inutilisable lors de la plupart des crues\nMéthode SAR inondation :\n• Avant crue : ρ_avant élevée (végétation/sol)\n• Après crue : ρ_après très faible (eau = miroir → réflexion spéculaire hors capteur)\n• Zone inondée = zone où ρ a fortement DIMINUÉ",res:"SAR tout-temps (nuages+nuit) · Eau = faible rétrodiffusion → detection inondation facile"},
+    {t:"Méthode détection changement SAR",txt:"Méthode de ratio (Change Detection) :\n• Ratio = ρ_avant / ρ_après (en dB : ρ_avant_dB − ρ_après_dB)\n• Zone inondée : ratio élevé (backscatter très diminué après)\n• Seuillage : pixel inondé si ratio > seuil critique (typiquement 3–5 dB)\nAlternative : classification avec Random Forest ou SVM\nSteps dans QGIS :\n1. Prétraitement SAR : calibration + filtrage Speckle (Lee 5×5)\n2. Calcul ratio (Calculatrice raster)\n3. Seuillage → raster binaire (0=sec, 1=inondé)\n4. Vectorisation → polygones zones inondées\n5. Calcul superficie (Field Calculator)",res:"Ratio ρ_avant/ρ_après → seuillage dB → raster binaire inondé/non-inondé"},
+    {t:"Calcul superficie inondée",txt:"Pixels inondés = 12 800\nRésolution : 10m × 10m = 100 m² par pixel\nSuperficie inondée = 12 800 × 100 = 1 280 000 m² = 1,28 km²\nSuperficie plaine = 450 km²\nPourcentage inondé = 1,28/450 × 100 = 0,28%\n⚠️ Si résolution 10m et 12 800 pixels → superficie faible : vérifier si 12 800 ha de pixels\nSi 12 800 pixels de 100m×100m : 12 800 × 10 000 = 128 000 000 m² = 128 km² = 28,4%",res:"A_inondée = 12 800 × 100m² = 1,28 km² → 0,28% de la plaine (pixels 10m)"},
+    {t:"Enjeux inondations Malanville",txt:"Enjeux hydrologiques :\n• Malanville = zone de confluence Niger-Alibori → forte susceptibilité aux crues\n• Régime sahélien unimodal : crues de septembre-octobre (pluies amont Burkina)\n• Changement climatique : fréquence et intensité des crues en augmentation\n\nEnjeux humanitaires :\n• Zone agricole (cultures de décrue = culture de rente : oignons, riz)\n• Axes commerciaux transfrontaliers (Bénin-Niger) coupés\n• Destruction des cultures, maisons en banco inondées\n• Prolifération de maladies hydriques (paludisme, choléra, bilharziose)\n• Déplacement de populations (plusieurs milliers en 2022)\n\nActions recommandées : SAS (Système d'Alerte Précoce) + GloFAS + DG-Eau Bénin",res:"Zone inondable NIger-Alibori · Agriculture + commerce + santé + déplacements"}
+   ]}
+ ]},
+
+{id:18,annee:"2021",titre:"Thermodynamique Appliquée aux Fluides",matieres:["Thermodynamique","Physique"],duree:"3h",tags:[{t:"Enthalpie",c:"badge-stat"},{t:"Cycles",c:"badge-hydraul"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Thermodynamique de l'évaporation — application à l'hydrologie",
+   texte:"L'évaporation est un processus thermodynamique fondamental du cycle hydrologique. Analyser les échanges d'énergie liés à l'évaporation de l'eau.",
+   data:"Chaleur latente de vaporisation : Lv = 2,45 MJ/kg (à 20°C)\nChaleur spécifique de l'eau : cp = 4186 J/(kg·K)\nMasse volumique de l'eau : ρ = 1000 kg/m³\nSurface d'un lac : A = 50 km²\nETP journalière : 5 mm/jour",
+   questions:["1. Calculer l'énergie nécessaire pour évaporer 5 mm d'eau sur 50 km².","2. Énoncer le 1er principe de la thermodynamique et l'appliquer au bilan d'énergie d'un lac.","3. Calculer l'élévation de température de 1 kg d'eau liquide nécessitant 1000 J.","4. Expliquer pourquoi l'ETP diminue quand l'humidité relative HR augmente."],
+   corr:[
+    {t:"Énergie d'évaporation",txt:"Volume d'eau évaporé = 5 mm × 50 km² = 0,005 m × 50×10⁶ m² = 250 000 m³\nMasse d'eau = 250 000 m³ × 1000 kg/m³ = 2,5×10⁸ kg\nÉnergie = m × Lv = 2,5×10⁸ kg × 2,45×10⁶ J/kg = 6,125×10¹⁴ J = 612,5 TJ\nPuissance sur 24h = 612,5×10¹² J / (24×3600 s) = 7,09×10⁹ W = 7,09 GW\nFlux d'énergie = Puissance/Aire = 7,09×10⁹/50×10⁶ = 141,8 W/m²",res:"Énergie = 612,5 TJ/jour · Flux = 142 W/m² (compatible rayonnement solaire net)"},
+    {t:"1er principe thermodynamique — bilan énergétique lac",txt:"1er principe : ΔU = Q − W (variation énergie interne = chaleur reçue − travail fourni)\nPour un lac (système ouvert, fluide incompressible) : W ≈ 0\nBilan d'énergie du lac :\nRn (rayonnement net) = LE (chaleur latente évaporation) + H (flux chaleur sensible) + G (flux sol)\nRn = Rg×(1−α) − RL_net\nOù α = albédo (eau ≈ 0,06) · RL_net = flux infrarouge net\nL'évaporation LE consomme en général 60–80% du rayonnement net disponible\n→ La thermodynamique gouverne directement le cycle de l'eau",res:"Rn = LE + H + G · L'énergie solaire nette alimente principalement l'évaporation"},
+    {t:"Élévation de température",txt:"Q = m × cp × ΔT\n1000 J = 1 kg × 4186 J/(kg·K) × ΔT\nΔT = 1000 / 4186 = 0,239 K ≈ 0,24°C\nInterprétation : il faut 10× plus d'énergie pour évaporer 1g d'eau (2450 J) que pour le chauffer de 1°C (4,186 J). C'est pourquoi l'évaporation est le principal puits d'énergie dans le bilan hydrique tropical.",res:"ΔT = 0,24°C pour 1000 J/kg · Évaporation = 2450 J/g >> chauffage = 4,2 J/g/°C"},
+    {t:"ETP et humidité relative",txt:"L'ETP diminue quand HR augmente car :\n• HR = pression vapeur actuelle ea / pression vapeur saturante es(T)\n• Le flux d'évaporation E = f(es − ea) = f(déficit de saturation)\n• Quand HR → 100% : ea → es → déficit ≈ 0 → E → 0\n• L'atmosphère saturée ne peut plus accepter davantage de vapeur d'eau\nFormule Penman-Monteith : comporte le terme (es − ea) au numérateur\nET₀ = [...γ·(900/(T+273))·u₂·(es−ea)] / [Δ+γ(1+0,34u₂)]\n→ Si HR=100% : es−ea=0 → seul le terme radiatif Rn contribue à ET₀",res:"HR élevée → ea proche de es → déficit vapeur ≈ 0 → flux d'évaporation nul"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Équation d'état des gaz et atmosphère",
+   texte:"Application de la thermodynamique à l'atmosphère pour comprendre la formation des précipitations.",
+   data:"Gaz parfait : PV = nRT avec R = 8,314 J/(mol·K)\nConstante des gaz pour l'air sec : Ra = 287 J/(kg·K)\nPression atmosphérique standard : P₀ = 101 325 Pa\nTemperature : T = 293 K (20°C)",
+   questions:["1. Calculer la masse volumique de l'air sec à T=20°C, P=101 325 Pa.","2. Appliquer la loi de Laplace-Poisson pour expliquer le refroidissement adiabatique.","3. Définir le gradient adiabatique sec (DALR) et son importance pour la formation des précipitations.","4. Expliquer le mécanisme de formation des précipitations convectives au Bénin."],
+   corr:[
+    {t:"Masse volumique de l'air",txt:"Équation d'état des gaz parfaits pour l'air : P = ρ × Ra × T\nρ = P/(Ra × T) = 101 325 / (287 × 293) = 101 325 / 84 091 = 1,205 kg/m³\nVérification : à 0°C → ρ = 101325/(287×273) = 1,292 kg/m³ (valeur standard connue)\nL'air chaud est moins dense → ascendance → refroidissement → condensation → précipitations",res:"ρ_air(20°C) = 1,205 kg/m³ (air chaud moins dense que air froid → convection)"},
+    {t:"Refroidissement adiabatique",txt:"Un processus ADIABATIQUE n'échange pas de chaleur avec l'extérieur (Q=0)\nLoi de Laplace-Poisson : T×P^(-γ-1/γ) = constante avec γ = Cp/Cv = 1,4 (air)\nQuand une masse d'air monte :\n1. Pression diminue (atmosphère moins pesante)\n2. La masse d'air se détend (expansion)\n3. Cette expansion est adiabatique → température diminue\n4. Si T < point de rosée → condensation → formation nuage\nFormule simplifiée : ΔT = (γ-1)/γ × T/P × ΔP",res:"Ascendance → détente adiabatique → refroidissement → condensation si T < T_rosée"},
+    {t:"DALR — Gradient Adiabatique Sec",txt:"DALR (Dry Adiabatic Lapse Rate) = taux de refroidissement adiabatique sec\n• Valeur : ΓS = g/Cp = 9,81/1005 ≈ 9,8°C/km ≈ 1°C/100m\n• Valable pour air non saturé (humidité < 100%)\n• MALR (Moist) = 6°C/km (condensation libère chaleur latente → refroidissement plus lent)\nImportance :\n• Si ΓS < gradient atmosphérique réel → atmosphère INSTABLE → convection forcée\n• Condition d'instabilité : dT/dz_atmosphère > DALR → thunderstorm, précipitations intenses\n• Au Bénin : instabilité convective fréquente en saison des pluies (ZCIT)",res:"DALR ≈ 1°C/100m · Instabilité si gradient atmosphère > DALR → convection → pluies"},
+    {t:"Précipitations convectives au Bénin",txt:"Mécanisme des pluies convectives (orages) au Bénin :\n1. INSOLATION INTENSE : surface fortement chauffée → air chaud et humide près du sol\n2. ASCENDANCE : air moins dense → courant ascendant\n3. REFROIDISSEMENT ADIABATIQUE : T diminue à 1°C/100m (DALR)\n4. CONDENSATION : à la hauteur du niveau de condensation convective (LCL)\n   LCL ≈ 120 m × (T − Td) en mètres (T = température, Td = point de rosée)\n5. FORMATION NUAGES Cb (Cumulonimbus) → sommet jusqu'à 15 km\n6. PRÉCIPITATIONS INTENSES et ÉCLAIR (décharge électrique)\nContext béninois : ZCIT (Zone de Convergence Intertropicale) migre vers le Nord en été\n→ 2 passages au sud (régime bimodal) · 1 passage au nord (unimodal)",res:"Chauffage surface → ascendance → DALR → LCL → Cumulonimbus → pluies convectives intenses"}
+   ]}
+ ]},
+
+{id:19,annee:"2020–2021",titre:"Mécanique du Point — Dynamique et Cinématique",matieres:["Mécanique","Physique"],duree:"3h",tags:[{t:"Dynamique",c:"badge-stat"},{t:"Cinématique",c:"badge-hydraul"}],
+ exercices:[
+  {num:"Exercice 1 (8 pts)",titre:"Chute libre d'une goutte d'eau — Application hydrologique",
+   texte:"Une goutte de pluie tombe depuis un nuage situé à h = 2000 m d'altitude. Analyser son mouvement en négligeant d'abord la résistance de l'air, puis en la prenant en compte.",
+   data:"h = 2000 m · g = 9,81 m/s² · masse goutte = 0,1 g = 10⁻⁴ kg\nCœfficient de traînée : Cd = 0,45 · ρ_air = 1,2 kg/m³\nDiamètre goutte : d = 2 mm = 0,002 m · Section S = π×(0,001)² = 3,14×10⁻⁶ m²",
+   questions:["1. Sans résistance de l'air, calculer la vitesse d'impact et le temps de chute.","2. En réalité, la goutte atteint une vitesse limite. Calculer cette vitesse terminale.","3. Écrire l'équation différentielle du mouvement avec résistance de l'air.","4. Quelle est l'importance de la vitesse terminale pour l'érosion des sols ?"],
+   corr:[
+    {t:"Chute libre sans résistance",txt:"Vitesse d'impact : v = √(2gh) = √(2×9,81×2000) = √39240 = 198 m/s ≈ 198 m/s\nTemps de chute : t = v/g = 198/9,81 = 20,2 s\nOu : t = √(2h/g) = √(2×2000/9,81) = √407,7 = 20,2 s\n⚠️ 198 m/s ≈ 712 km/h → vitesse complètement irréaliste (sonic speed ≈ 340 m/s)\nSans air, une goutte serait destructrice. La résistance de l'air est cruciale.",res:"v_théorique = 198 m/s (irréaliste) · t = 20,2 s → démontrant l'importance du frottement"},
+    {t:"Vitesse terminale",txt:"À la vitesse terminale : Poids = Traînée aérodynamique\nm×g = ½×Cd×ρ_air×S×v_t²\nv_t = √(2mg/(Cd×ρ_air×S))\n= √(2×10⁻⁴×9,81/(0,45×1,2×3,14×10⁻⁶))\n= √(1,962×10⁻³ / 1,696×10⁻⁶)\n= √(1157) = 34,0 m/s ≈ 34 m/s ≈ 122 km/h\nNote : En réalité les grosses gouttes (d > 2mm) se déforment et se fragmentent\nVitesse terminale réelle observée : 6–9 m/s pour gouttes 2–5 mm",res:"v_terminale théorique = 34 m/s · Valeur réelle (déformation) : 6–9 m/s"},
+    {t:"Équation différentielle avec frottement",txt:"Forces sur la goutte (axe vertical, positif vers le bas) :\nF_poids = mg (↓)\nF_frottement = ½Cd·ρ_air·S·v² (↑, opposée au mouvement)\n\nNewton 2 : m·dv/dt = mg − ½Cd·ρ_air·S·v²\nm·dv/dt = mg(1 − v²/v_t²)\n\nSolution : v(t) = v_t × tanh(g·t/v_t)\nÀ t → ∞ : v → v_t (tanh → 1)\nLa goutte atteint 95% de v_t après t = (v_t/g)×artanh(0,95) ≈ 2×v_t/g",res:"m·dv/dt = mg − ½CdρSv² → v(t) = v_t·tanh(gt/v_t)"},
+    {t:"Importance vitesse terminale — érosion",txt:"L'érosion hydrique (splash) dépend directement de la vitesse d'impact des gouttes :\n• Énergie cinétique à l'impact : Ec = ½mv_t²\n• Pour v_t = 9 m/s : Ec = ½×10⁻⁴×81 = 4,05×10⁻³ J par goutte\n• Billions de gouttes par ha et par orage → énergie érosive considérable\n• KE (érosivité) pluie : R dans l'équation USLE = f(Σ(Ec × I))\n• Gouttes à v_t > 6 m/s : désagrègent les agrégats du sol → transport par ruissellement\nMesures anti-érosives : couvert végétal (intercepte les gouttes), mulch, haies vives\nApplication : calcul du facteur R de l'USLE pour la cartographie de l'érosion au Bénin",res:"Énergie impact = ½mv_t² → érosion splash → facteur R de l'USLE → conservation des sols"}
+   ]},
+  {num:"Exercice 2 (8 pts) + Exercice 3 (4 pts)",titre:"Projectile et travail/énergie",
+   texte:"Analyser le mouvement d'un objet sur un plan incliné (modèle simplifié d'un grain de sédiment en mouvement).",
+   data:"Plan incliné : α = 30° · μ = 0,4 (coeff. frottement cinétique) · m = 0,5 kg\nVitesse initiale v₀ = 8 m/s (en bas du plan) · L = 5 m (longueur plan)",
+   questions:["1. Calculer l'accélération du grain sur le plan incliné (frottement inclus).","2. Calculer la vitesse en haut du plan par le théorème énergie-travail.","3. Le grain atteint-il le sommet ? Justifier.","4. Calculer la puissance dissipée par frottement."],
+   corr:[
+    {t:"Accélération sur plan incliné",txt:"Forces parallèles au plan (positif = montée) :\nF_poids_parallèle = −mg·sin(α) = −0,5×9,81×sin(30°) = −0,5×9,81×0,5 = −2,453 N\nN = mg·cos(α) = 0,5×9,81×0,866 = 4,248 N\nF_frottement = −μ·N = −0,4×4,248 = −1,699 N (s'oppose au mouvement)\nForce totale = −2,453 − 1,699 = −4,152 N\na = F/m = −4,152/0,5 = −8,30 m/s²",res:"a = −8,30 m/s² (décélération)"},
+    {t:"Vitesse en haut par théorème énergie-travail",txt:"Théorème énergie-travail : ΔEc = ΣW\n½mv_f² − ½mv₀² = W_poids + W_frottement\nW_poids = −mgh = −mg·L·sin(α) = −0,5×9,81×5×0,5 = −12,26 J\nW_frottement = −μ·N·L = −0,4×4,248×5 = −8,50 J\nΣW = −12,26 − 8,50 = −20,76 J\n½mv_f² = ½×0,5×64 + (−20,76) = 16 − 20,76 = −4,76 J < 0\n→ IMPOSSIBLE : le grain s'arrête avant le sommet !",res:"½mv_f² < 0 → le grain n'atteint pas le sommet"},
+    {t:"Distance d'arrêt",txt:"Le grain s'arrête quand ½mv_f² = 0 :\nd = v₀²/(2×|a|) = 64/(2×8,30) = 64/16,60 = 3,86 m\nLe grain s'arrête à 3,86 m < L = 5 m → n'atteint pas le sommet\nPosition d'arrêt : 3,86 m depuis le bas du plan",res:"Grain s'arrête à d = 3,86 m < 5 m → n'atteint PAS le sommet"},
+    {t:"Puissance dissipée par frottement",txt:"Puissance instantanée à v₀ = 8 m/s :\nP_frottement = F_frottement × v₀ = 1,699 × 8 = 13,6 W\nTravail total frottement sur 3,86 m :\nW_f = −μ·N·d = −0,4×4,248×3,86 = −6,56 J\nCette énergie est dissipée en chaleur (dégradation irréversible)\nApplication sédimentologie : contrôle du transport des sédiments sur les versants",res:"P_frottement = 13,6 W · W_f total = 6,56 J dissipés en chaleur"}
+   ]}
+ ]},
+
+{id:20,annee:"2022–2023",titre:"Mécanique des Fluides — Statique et Dynamique",matieres:["Mécanique des fluides","Hydraulique"],duree:"3h",tags:[{t:"Bernoulli",c:"badge-hydraul"},{t:"Hydrostatique",c:"badge-hydrogeo"}],
+ exercices:[
+  {num:"Exercice 1 (10 pts)",titre:"Hydrostatique — Pression et poussée d'Archimède",
+   texte:"Un barrage en béton retient un lac. Analyser les forces exercées par l'eau sur le parement amont du barrage.",
+   data:"Hauteur d'eau h = 15 m · Largeur du barrage L = 40 m\nρ_eau = 1000 kg/m³ · g = 9,81 m/s²\nPression atmosphérique P₀ = 101 325 Pa",
+   questions:["1. Donner la loi fondamentale de la statique des fluides et calculer la pression au fond.","2. Calculer la résultante des forces de pression sur le parement vertical du barrage.","3. Déterminer la position du centre de poussée.","4. Un bloc de béton de 2m³ est immergé dans l'eau. Calculer sa poussée d'Archimède."],
+   corr:[
+    {t:"Loi de la statique des fluides + pression au fond",txt:"Loi fondamentale : P(z) = P₀ + ρ·g·h\nOù h = profondeur depuis la surface libre\nP(fond) = P₀ + ρ·g·h = 101 325 + 1000×9,81×15\n= 101 325 + 147 150 = 248 475 Pa ≈ 2,48 bar\nPression relative (manométrique) = ρ·g·h = 147 150 Pa = 1,47 bar\nLa pression augmente linéairement avec la profondeur (gradient = ρg = 9810 Pa/m ≈ 1 m.c.e/m)",res:"P_fond = 248 475 Pa (2,48 bar) · P_relative = 147 150 Pa = 1,47 bar"},
+    {t:"Résultante des forces de pression sur parement",txt:"Parement vertical, surface rectangulaire h×L = 15×40 = 600 m²\nDistribution de pression triangulaire : 0 en surface → ρgh en fond\nRésultante F = pression au centroïde × Surface\nPression au centroïde (mi-hauteur h/2 = 7,5m) :\nP_G = ρ·g·h/2 = 1000×9,81×7,5 = 73 575 Pa\nF = P_G × A = 73 575 × 600 = 44 145 000 N = 44,15 MN ≈ 44 MN\nAlternative : F = ½ρgh² × L = ½×1000×9,81×225×40 = 44,1 MN",res:"F = 44,1 MN (force poussée hydrostatique sur le parement 15m×40m)"},
+    {t:"Centre de poussée (point d'application)",txt:"Pour une surface rectangulaire verticale :\nLe centre de poussée est à 2/3 de la hauteur depuis la surface libre\n(ou 1/3 depuis le fond)\nh_cp = 2h/3 = 2×15/3 = 10 m depuis la surface libre\n= 5 m depuis le fond\nLe moment est : M = F × h_cp = 44,1 MN × 10 m = 441 MN·m\nC'est ce moment qui tend à renverser le barrage → vérification de stabilité au retournement",res:"Centre de poussée à h_cp = 10 m depuis la surface (2h/3) · Moment renversant = 441 MN·m"},
+    {t:"Poussée d'Archimède",txt:"Théorème d'Archimède : Fa = ρ_fluide × g × V_immergé\nFa = 1000 × 9,81 × 2 = 19 620 N = 19,62 kN\nPoids béton (ρ_béton ≈ 2400 kg/m³) : P = 2400×9,81×2 = 47 088 N = 47,1 kN\nPoids apparent dans l'eau = P − Fa = 47 100 − 19 620 = 27 480 N\nRatio : Fa/P = 19620/47088 = 41,7% → le béton immergé pèse 58% de son poids dans l'air",res:"Fa = 19,62 kN · Poids apparent dans l'eau = 27,5 kN (béton ne flotte pas, ρ > ρ_eau)"}
+   ]},
+  {num:"Exercice 2 (10 pts)",titre:"Équation de Bernoulli — Application aux conduites et déversoirs",
+   texte:"Appliquer l'équation de Bernoulli à l'écoulement d'eau dans un système de conduites.",
+   data:"Conduite en charge : D₁=0,3m, V₁=2 m/s, z₁=10 m, P₁=200 000 Pa\nSection aval : D₂=0,15m, z₂=8 m\nρ_eau=1000 kg/m³ · g=9,81 m/s²",
+   questions:["1. Énoncer l'équation de Bernoulli et ses hypothèses.","2. Calculer la vitesse V₂ en aval (continuité).","3. Calculer la pression P₂ en aval (Bernoulli).","4. Application : déversoir rectangulaire avec h=0,5m de lame déversante, L=2m. Calculer le débit (formule de Francis)."],
+   corr:[
+    {t:"Équation de Bernoulli",txt:"Bernoulli (fluide parfait, écoulement permanent, incompressible) :\nP + ½ρV² + ρgz = constante le long d'une ligne de courant\nOu : P/ρg + V²/2g + z = H (charge hydraulique totale = constante)\n• P/ρg = charge de pression (m)\n• V²/2g = charge cinétique (m)\n• z = charge de position (m)\nHypothèses : fluide parfait (pas de viscosité), écoulement permanent et irrotationnel, fluide incompressible",res:"P + ½ρV² + ρgz = Cste · Hypothèses : parfait + permanent + incompressible"},
+    {t:"Vitesse V₂ (équation de continuité)",txt:"Continuité : A₁V₁ = A₂V₂ (débit constant)\nA₁ = π×(0,15)² = 0,07069 m² · A₂ = π×(0,075)² = 0,01767 m²\nV₂ = (A₁/A₂) × V₁ = (D₁/D₂)² × V₁ = (0,3/0,15)² × 2 = 4 × 2 = 8 m/s\nQ = A₁V₁ = 0,07069×2 = 0,1414 m³/s = 141,4 L/s",res:"V₂ = 8 m/s (×4 car section divisée par 4) · Q = 141,4 L/s"},
+    {t:"Pression P₂ (Bernoulli)",txt:"P₁/ρg + V₁²/2g + z₁ = P₂/ρg + V₂²/2g + z₂\n200000/(1000×9,81) + 4/(2×9,81) + 10 = P₂/(9810) + 64/(19,62) + 8\n20,39 + 0,204 + 10 = P₂/9810 + 3,26 + 8\n30,59 = P₂/9810 + 11,26\nP₂/9810 = 19,33 m\nP₂ = 19,33 × 9810 = 189 600 Pa ≈ 189,6 kPa",res:"P₂ = 189 600 Pa (1,90 bar) · La pression diminue malgré z₂<z₁ car V₂ augmente beaucoup"},
+    {t:"Déversoir rectangulaire — Formule de Francis",txt:"Formule de Francis (déversoir rectangulaire à seuil mince) :\nQ = (2/3) × Cd × L × √(2g) × h^(3/2)\nAvec Cd = 0,42 (coefficient de débit empirique)\nQ = (2/3) × 0,42 × 2 × √(2×9,81) × (0,5)^(3/2)\n= (2/3) × 0,42 × 2 × 4,429 × 0,3536\n= 0,667 × 0,42 × 2 × 4,429 × 0,3536\n= 0,667 × 0,42 × 3,13 = 0,877 m³/s\nAlternative simplifiée : Q = 1,84 × L × h^(3/2) = 1,84 × 2 × 0,354 = 1,30 m³/s",res:"Q ≈ 0,88–1,30 m³/s selon le coefficient Cd utilisé (0,42 ou 0,611)"}
+   ]}
+ ]}
+];
+
+const EXERCICES = [
+{id:1,icon:'📈',titre:'Ajustement de Gumbel pas à pas',subtitle:'Statistiques fréquentielles · Difficulté : ★★★',cat:'stat',
+ enonce:'Une série de 12 pluies maximales journalières annuelles (mm) est disponible : 88, 65, 112, 75, 134, 95, 108, 145, 72, 98, 125, 82. Ajuster la loi de Gumbel et calculer la pluie de période de retour T=50 ans.',
+ donnees:'Données : 88, 65, 112, 75, 134, 95, 108, 145, 72, 98, 125, 82 mm\nn = 12 valeurs',
+ steps:[
+  {t:'Calcul de x̄ et s',f:'x̄ = Σxi / n',txt:'Σxi = 88+65+112+75+134+95+108+145+72+98+125+82 = 1199\nx̄ = 1199/12 = 99,92 mm\nΣ(xi-x̄)² = (88-99,92)²+(65-99,92)²+... = 6561,0\ns = √(6561,0/(12-1)) = √596,5 = 24,42 mm',res:'x̄ = 99,92 mm · s = 24,42 mm'},
+  {t:'Paramètres Gumbel',f:'α = s·√6/π | u = x̄ − 0,5772·α',txt:'α = 24,42 × √6/π = 24,42 × 0,7797 = 19,04 mm\nu = 99,92 − 0,5772 × 19,04 = 99,92 − 10,99 = 88,93 mm',res:'u = 88,93 mm · α = 19,04 mm'},
+  {t:'Variable réduite pour T=50 ans',f:'y(T) = −ln(−ln(1−1/T))',txt:'y(50) = −ln(−ln(1−1/50)) = −ln(−ln(0,98)) = −ln(−(−0,0202)) = −ln(0,0202) = 3,902',res:'y(50) = 3,902'},
+  {t:'Quantile X(50)',f:'X(T) = u + α · y(T)',txt:'X(50) = 88,93 + 19,04 × 3,902 = 88,93 + 74,30 = 163,23 mm',res:'X(50) = 163,2 mm'}]},
+{id:2,icon:'🌱',titre:'Bilan de Thornthwaite simplifié',subtitle:'Bilan hydrologique · Difficulté : ★★☆',cat:'bilan',
+ enonce:'Pour une station à lat=10°N, calculer l\'ETP corrigée du mois de juin avec : T=27,5°C, I=135, a=3,98, durée du jour N=12,8h, d=30 jours.',
+ donnees:'T = 27,5°C · I = 135 · a = 3,98 · N = 12,8 h · d = 30 jours',
+ steps:[
+  {t:'ETP non corrigée',f:'ETP_nc = 16 · (10T/I)^a',txt:'10T/I = 10×27,5/135 = 2,037\nETP_nc = 16 × (2,037)^3,98 = 16 × 16,83 = 269,3 mm',res:'ETP_nc = 269,3 mm'},
+  {t:'Correction photoperiodique',f:'ETP = ETP_nc × (N/360) × (d/30)',txt:'ETP = 269,3 × (12,8/360) × (30/30) = 269,3 × 0,03556 × 1,0 = 9,58 mm',res:'ETP(juin) ≈ 9,6 mm/jour → 287 mm/mois'},
+  {t:'Remarque importante',f:'N est la durée du jour en heures',txt:'La correction finale est : ETP_mois = 16×(10T/I)^a×(N/360)×(d/30)\nSi N = 12,8h : ETP = 269,3 × 12,8/360 × 30/30 = 269,3 × 0,0356 = 9,58 mm/j → 287 mm/mois',res:'ETP mensuelle = 287 mm'}]},
+{id:3,icon:'🏗️',titre:'Formule de Manning-Strickler',subtitle:'Hydraulique · Difficulté : ★★☆',cat:'hydraul',
+ enonce:'Un canal trapézoïdal avec b=2m, h=1,2m, m=1,5, K=40 m^(1/3)/s, I=0,002. Calculer le débit et la vitesse.',
+ donnees:'b = 2 m · h = 1,2 m · m = 1,5 (fruit) · K = 40 · I = 0,002',
+ steps:[
+  {t:'Section mouillée A',f:'A = (b + m·h) · h',txt:'A = (2 + 1,5×1,2) × 1,2 = (2+1,8) × 1,2 = 3,8 × 1,2 = 4,56 m²',res:'A = 4,56 m²'},
+  {t:'Périmètre mouillé Pm',f:'Pm = b + 2h·√(1+m²)',txt:'Pm = 2 + 2×1,2×√(1+1,5²) = 2 + 2,4×√3,25 = 2 + 2,4×1,803 = 2 + 4,327 = 6,327 m',res:'Pm = 6,33 m'},
+  {t:'Rayon hydraulique Rh',f:'Rh = A/Pm',txt:'Rh = 4,56/6,327 = 0,721 m',res:'Rh = 0,721 m'},
+  {t:'Vitesse et débit',f:'V = K·Rh^(2/3)·√I | Q = A·V',txt:'V = 40 × (0,721)^(2/3) × √0,002 = 40 × 0,806 × 0,04472 = 1,442 m/s\nQ = 4,56 × 1,442 = 6,575 m³/s',res:'V = 1,44 m/s · Q = 6,58 m³/s'}]},
+{id:4,icon:'💧',titre:'Recharge de nappe par bilan chlorure',subtitle:'Hydrogéologie · Difficulté : ★★☆',cat:'hydrogeo',
+ enonce:'Dans la plaine alluviale du Bénin : P=1050 mm/an, [Cl]pluies=0,6 mg/L, [Cl]nappe=24 mg/L. Calculer le taux de recharge et le volume annuel sur A=200 km².',
+ donnees:'P = 1050 mm/an · [Cl]p = 0,6 mg/L · [Cl]e = 24 mg/L · A = 200 km²',
+ steps:[
+  {t:'Taux de recharge',f:'R = P × [Cl]p / [Cl]e',txt:'R = 1050 × 0,6/24 = 1050 × 0,025 = 26,25 mm/an',res:'R = 26,25 mm/an'},
+  {t:'Pourcentage des précipitations',f:'R/P × 100',txt:'R/P = 26,25/1050 × 100 = 2,5%',res:'2,5% des pluies rechargent la nappe'},
+  {t:'Volume annuel',f:'Vol = R × A',txt:'Vol = 26,25×10⁻³ m × 200×10⁶ m² = 5,25×10⁶ m³ = 5,25 Mm³/an',res:'Volume recharge = 5,25 Mm³/an'}]},
+{id:5,icon:'🌊',titre:'Méthode SCS-CN — Calcul du débit de pointe',subtitle:'Hydrologie de surface · Difficulté : ★★★',cat:'morpho',
+ enonce:'Bassin versant de 25 km², CN=78, pluie de projet P=90 mm, tc=3h. Calculer le débit de pointe et le volume ruisselé.',
+ donnees:'A = 25 km² · CN = 78 · P = 90 mm · tc = 3 h',
+ steps:[
+  {t:'Rétention potentielle S',f:'S = 25400/CN − 254',txt:'S = 25400/78 − 254 = 325,6 − 254 = 71,8 mm',res:'S = 71,8 mm'},
+  {t:'Abstractions initiales Ia',f:'Ia = 0,2·S',txt:'Ia = 0,2 × 71,8 = 14,36 mm',res:'Ia = 14,4 mm < P → il y a ruissellement'},
+  {t:'Pluie nette Pe',f:'Pe = (P−Ia)² / (P−Ia+S)',txt:'Pe = (90−14,36)² / (90−14,36+71,8) = (75,64)² / 147,44 = 5721,4/147,44 = 38,8 mm',res:'Pe = 38,8 mm (43,1% de P)'},
+  {t:'Débit de pointe Qp',f:'Qp = 0,208 · Pe · A / Tp',txt:'Tp = tc/2 + 0,6·tc = 1,5 + 1,8 = 3,3 h\nQp = 0,208 × 38,8 × 25 / 3,3 = 0,208 × 970/3,3 = 61,3 m³/s',res:'Qp = 61,3 m³/s'}]}
+];
+
+const FICHES = [
+{id:1,emoji:'📈',titre:'Hydrologie Statistique',count:'8 formules clés',
+ tags:['Gumbel','Normale','KS','Fréquences'],
+ preview:'Lois de distribution, paramètres, test d\'adéquation et périodes de retour.',
+ sections:[
+  {t:'Formules essentielles',content:[
+    {type:'formula',txt:'Gumbel : X(T) = u + α·y(T) avec y(T) = −ln(−ln(1−1/T))'},
+    {type:'formula',txt:'Paramètres moments : α = s·√6/π | u = x̄ − 0,5772·α'},
+    {type:'formula',txt:'Loi Normale : X(T) = x̄ + z(T)·s avec z(T) = normINV(1−1/T)'},
+    {type:'formula',txt:'Pearson III : X(T) = x̄ + K(T,Cs)·s (Wilson-Hilferty)'},
+    {type:'formula',txt:'Test KS : Dn = max|F(xi)−F̂(xi)| | Dcrit(5%) = 1,36/√n'}]},
+  {t:'Choix de la loi',content:[
+    {type:'key',txt:'Cs ≈ 0 : Loi Normale · Cs > 0,5 : Gumbel ou Log-Normale · Cs élevé : Pearson III'},
+    {type:'key',txt:'Toujours vérifier avec le test KS ou χ² au seuil 5%'},
+    {type:'key',txt:'Pour les pluies au Bénin : Gumbel est généralement bien ajustée'}]},
+  {t:'Périodes de retour — Variables réduites Gumbel',content:[
+    {type:'table',headers:['T (ans)','2','5','10','20','50','100','1000'],
+     rows:[['y(T)','-0,367','0,720','1,305','1,866','2,970','3,902','6,907'],
+           ['Prob.','0,500','0,800','0,900','0,950','0,980','0,990','0,999']]}]}]},
+{id:2,emoji:'🌱',titre:'Bilan Hydrologique',count:'6 méthodes',
+ tags:['Thornthwaite','Turc','ETP','ETR'],
+ preview:'Calcul de l\'ETP par différentes méthodes et établissement du bilan mensuel.',
+ sections:[
+  {t:'Méthodes de calcul ETP',content:[
+    {type:'formula',txt:'Thornthwaite : ETP = 16·(10T/I)^a · (N/360) · (d/30)'},
+    {type:'formula',txt:'Indice I = Σᵢ(Tᵢ/5)^1,514 · a = 6,75×10⁻⁷I³−7,71×10⁻⁵I²+1,79×10⁻²I+0,49'},
+    {type:'formula',txt:'Turc : ETP = 0,4·T/(T+15)·(Rg+50) si HR≥50%'},
+    {type:'formula',txt:'Penman-Monteith FAO-56 : ET₀ = [0,408Δ(Rn−G)+γ(900/(T+273))u₂(es−ea)]/[Δ+γ(1+0,34u₂)]'}]},
+  {t:'Bilan mensuel de Thornthwaite',content:[
+    {type:'key',txt:'Si P ≥ ETP : ETR = ETP, excédent = P − ETP (recharge RU puis écoulement)'},
+    {type:'key',txt:'Si P < ETP : ETR = P + drainage(RU), déficit = ETP − ETR'},
+    {type:'key',txt:'RU standard = 100 mm (ajuster selon type de sol et végétation)'},
+    {type:'key',txt:'Mois sec biologique (Gaussen) : P < 2T'}]}]},
+{id:3,emoji:'🏗️',titre:'Hydraulique — Écoulements',count:'5 formules',
+ tags:['Manning','Froude','Reynolds','Canaux'],
+ preview:'Formules d\'écoulement en charge et à surface libre pour le dimensionnement.',
+ sections:[
+  {t:'Formules hydrauliques fondamentales',content:[
+    {type:'formula',txt:'Manning-Strickler : Q = K·A·Rh^(2/3)·I^(1/2) | V = K·Rh^(2/3)·I^(1/2)'},
+    {type:'formula',txt:'Froude : Fr = V/√(g·h) — Fluvial : Fr<1 · Critique : Fr=1 · Torrentiel : Fr>1'},
+    {type:'formula',txt:'Reynolds : Re = V·D/ν — Laminaire : Re<2000 · Turbulent : Re>4000'},
+    {type:'formula',txt:'Section rect. optimale : b = 2h · Rh = h/2'},
+    {type:'formula',txt:'Section trap. optimale : b + 2mh = 2h√(1+m²)'}]},
+  {t:'Valeurs de K (Strickler)',content:[
+    {type:'table',headers:['Matériau','K (m^(1/3)/s)'],
+     rows:[['Béton lisse','75–90'],['Maçonnerie','50–65'],['Terre compactée','25–40'],['Rivière naturelle','20–35'],['Rivière avec végétation','15–25']]}]}]},
+{id:4,emoji:'💧',titre:'Hydrogéologie',count:'7 formules',
+ tags:['Darcy','Theis','Jacob','Aquifères'],
+ preview:'Loi de Darcy, essais de pompage, paramètres hydrauliques des aquifères.',
+ sections:[
+  {t:'Formules fondamentales',content:[
+    {type:'formula',txt:'Loi de Darcy : Q = K·A·i = T·l·i (T=K·e)'},
+    {type:'formula',txt:'Theis : s = Q/(4πT)·W(u) | u = r²S/(4Tt)'},
+    {type:'formula',txt:'Jacob (u<0,05) : s = (2,303Q/4πT)·log(2,25Tt/r²S)'},
+    {type:'formula',txt:'Recharge Cl⁻ : R = P·[Cl]pluies/[Cl]nappe'}]},
+  {t:'Classification des aquifères',content:[
+    {type:'key',txt:'Nappe libre : surface libre, S = porosité efficace (0,05–0,25)'},
+    {type:'key',txt:'Nappe captive : confinée entre 2 couches imperméables, S = 10⁻⁵ à 10⁻³'},
+    {type:'key',txt:'T (m²/s) : mauvais <10⁻⁵ · moyen 10⁻⁴ · bon >10⁻³'}]}]},
+{id:5,emoji:'🔬',titre:'Qualité des Eaux',count:'Normes OMS',
+ tags:['Normes','pH','Nitrates','Faciès'],
+ preview:'Paramètres physico-chimiques, normes OMS, faciès hydrochimiques et diagramme de Piper.',
+ sections:[
+  {t:'Normes OMS — Eau potable (principales)',content:[
+    {type:'table',headers:['Paramètre','Valeur limite','Unité'],
+     rows:[['pH','6,5–8,5','—'],['CE','<2500','µS/cm'],['NO₃⁻','<50','mg/L'],['NO₂⁻','<3','mg/L'],['Fe','<0,3','mg/L'],['Mn','<0,4','mg/L'],['F⁻','<1,5','mg/L'],['As','<0,01','mg/L'],['E. coli','0','UFC/100mL']]}]},
+  {t:'Faciès hydrochimiques',content:[
+    {type:'key',txt:'Ca-HCO₃ : eau jeune, peu minéralisée, terrain calcaire (courant au Bénin)'},
+    {type:'key',txt:'Na-Cl : eau profonde, marine ou évaporitique'},
+    {type:'key',txt:'Mg-SO₄ : terrains dolomitiques ou évaporitiques'},
+    {type:'key',txt:'Conversion méq/L : mg/L ÷ poids équivalent = mg/L × valence ÷ M'}]}]},
+{id:6,emoji:'🌍',titre:'GIRE & Institutions',count:'Principes & acteurs',
+ tags:['Dublin','ODD 6','Bénin','SONEB'],
+ preview:'Principes de la GIRE, ODD 6, institutions nationales et internationales de l\'eau.',
+ sections:[
+  {t:'Les 4 Principes de Dublin (1992)',content:[
+    {type:'key',txt:'1. L\'eau est une ressource naturelle finie et vulnérable, essentielle à la vie'},
+    {type:'key',txt:'2. La gestion de l\'eau doit être participative (tous les acteurs)'},
+    {type:'key',txt:'3. Les femmes jouent un rôle central dans la gestion de l\'eau'},
+    {type:'key',txt:'4. L\'eau a une valeur économique dans tous ses usages concurrents'}]},
+  {t:'ODD 6 — Principales cibles',content:[
+    {type:'key',txt:'6.1 : Accès universel à l\'eau potable sûre et abordable (2030)'},
+    {type:'key',txt:'6.2 : Accès universel à l\'assainissement (fin défécation à l\'air libre)'},
+    {type:'key',txt:'6.3 : Améliorer la qualité de l\'eau (réduire la pollution)'},
+    {type:'key',txt:'6.5 : Mettre en œuvre la GIRE à tous les niveaux'}]},
+  {t:'Institutions de l\'eau au Bénin',content:[
+    {type:'table',headers:['Institution','Rôle'],
+     rows:[['DG-Eau','Gestion et surveillance ressources en eau'],['SONEB','Distribution eau potable (urbain)'],['ABE','Évaluation environnementale'],['INE/UAC','Formation et recherche en hydrologie'],['GWP-AO','Partenariat eau Afrique Ouest']]}]}]},
+{id:7,emoji:'🗺️',titre:'Morphométrie des Bassins',count:'8 paramètres',
+ tags:['Gravelius','Morphométrie','SIG','MNT'],
+ preview:'Paramètres de forme, pente et drainage pour la caractérisation des bassins versants.',
+ sections:[
+  {t:'Paramètres de forme',content:[
+    {type:'formula',txt:'Gravelius : Kc = 0,28·P/√A (P en km, A en km²)'},
+    {type:'formula',txt:'Rectangle équivalent : L = (Kc·√A/1,12)·(1+√(1−(1,12/Kc)²))'},
+    {type:'formula',txt:'Rapport de forme : Rf = A/L² | Rapport d\'élongation : Re = 2√(A/π)/L'}]},
+  {t:'Paramètres de relief',content:[
+    {type:'formula',txt:'Pente globale : Ig = (Zmax−Zmin)/L (m/km)'},
+    {type:'formula',txt:'Pente Roche : Ip = (Σlᵢ·iᵢ)/L (pente pondérée par les longueurs)'},
+    {type:'formula',txt:'Densité drainage : Dd = ΣL/A (km/km²)'}]},
+  {t:'Interprétation Kc',content:[
+    {type:'table',headers:['Kc','Forme','Sensibilité crues'],
+     rows:[['1,0–1,25','Ramassé (quasi-circulaire)','Très élevée'],['1,25–1,50','Ovale-ramassé','Élevée'],['1,50–1,75','Ovale-allongé','Modérée'],['> 1,75','Très allongé','Faible']]}]}]}
+];
+
+let state = {
+  answers:{}, submitted:false, startTime:null,
+  timerInterval:null, timerSeconds:0, timerRunning:false,
+  currentFilter:'all', currentEpreuve:null, currentFiche:null
+};
+let PROGRESS = JSON.parse(localStorage.getItem('rev_progress')||'{"correct":0,"total":0,"sessions":0}');
+
+const notify = (msg,dur=2500) => {const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),dur);};
+window.addEventListener('scroll',()=>document.getElementById('btt').classList.toggle('visible',window.scrollY>300));
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('epreuveDetail').classList.remove('show');
+  document.getElementById('ficheDetail').classList.remove('show');
+}
+
+function getFilteredQuestions(){
+  if(state.currentFilter==='all') return QUESTIONS;
+  return QUESTIONS.filter(q=>q.cat===state.currentFilter);
+}
+
+function renderQCM(){
+  const qs = getFilteredQuestions();
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  document.getElementById('resultScreen').classList.remove('show');
+
+  qs.forEach((q,qi)=>{
+    const letters=['A','B','C','D'];
+    const diffClass = q.diff==='easy'?'diff-easy':q.diff==='med'?'diff-med':'diff-hard';
+    const diffTxt = q.diff==='easy'?'Facile':q.diff==='med'?'Moyen':'Difficile';
+    const catLabels={'stat':'Statistiques','bilan':'Bilan hydrique','hydraul':'Hydraulique','hydrogeo':'Hydrogéologie','qualite':'Qualité eaux','gire':'GIRE','morpho':'Morphométrie'};
+
+    let optsHtml = q.opts.map((opt,oi)=>`
+      <div class="q-opt" id="opt_${q.id}_${oi}" onclick="selectOpt(${q.id},${oi})">
+        <span class="opt-letter">${letters[oi]}</span>
+        <span>${opt}</span>
+      </div>`).join('');
+
+    container.innerHTML += `
+      <div class="question-card" id="qcard_${q.id}">
+        <div class="q-meta">
+          <span class="q-num">Q${qi+1}</span>
+          <span class="q-badge badge-${q.cat}">${catLabels[q.cat]}</span>
+          <span class="q-diff ${diffClass}">${diffTxt}</span>
+        </div>
+        <div class="q-text">${q.q}</div>
+        <div class="q-options">${optsHtml}</div>
+        <div class="q-explanation" id="expl_${q.id}">
+          <strong>✅ Explication :</strong> ${q.exp}
+        </div>
+      </div>`;
+  });
+  state.answers = {}; state.submitted = false;
+  updateScoreBar();
+}
+
+function selectOpt(qid, oi){
+  if(state.submitted) return;
+  // Désélectionner autres options
+  const q = QUESTIONS.find(q=>q.id===qid);
+  q.opts.forEach((_,i)=>{
+    const el = document.getElementById(`opt_${qid}_${i}`);
+    if(el){ el.classList.remove('selected'); }
+  });
+  document.getElementById(`opt_${qid}_${oi}`).classList.add('selected');
+  state.answers[qid] = oi;
+  updateScoreBar();
+}
+
+function updateScoreBar(){
+  const qs = getFilteredQuestions();
+  const answered = Object.keys(state.answers).length;
+  const pct = qs.length>0 ? (answered/qs.length*100) : 0;
+  document.getElementById('progressTxt').textContent = `${answered}/${qs.length} question(s) répondue(s)`;
+  document.getElementById('spFill').style.width = pct+'%';
+  if(state.submitted){
+    const correct = qs.filter(q=>state.answers[q.id]===q.ans).length;
+    document.getElementById('scoreVal').textContent = `${correct}/${qs.length}`;
+  } else {
+    document.getElementById('scoreVal').textContent = `${answered}/${qs.length}`;
+  }
+}
+
+function submitQCM(){
+  const qs = getFilteredQuestions();
+  if(Object.keys(state.answers).length < qs.length){
+    notify('⚠️ Répondez à toutes les questions avant de valider.');
+    return;
+  }
+  state.submitted = true;
+  let correct=0;
+  qs.forEach(q=>{
+    const chosen = state.answers[q.id];
+    const isCorrect = chosen === q.ans;
+    if(isCorrect) correct++;
+    q.opts.forEach((_,oi)=>{
+      const el = document.getElementById(`opt_${q.id}_${oi}`);
+      if(!el) return;
+      el.classList.add('disabled');
+      if(oi===q.ans) el.classList.add('correct');
+      else if(oi===chosen && !isCorrect) el.classList.add('wrong');
+    });
+    document.getElementById(`expl_${q.id}`)?.classList.add('show');
+  });
+
+  const pct = Math.round(correct/qs.length*100);
+  const grade = pct>=80?'Très bien 🏆':pct>=60?'Bien 👍':pct>=50?'Moyen 📚':'À retravailler 💪';
+  const color = pct>=80?'var(--green)':pct>=60?'var(--blue)':pct>=50?'var(--gold)':'var(--red)';
+  const msg = pct>=80?'Excellent ! Tu maîtrises bien ces notions.':pct>=60?'Bon résultat ! Quelques révisions restent utiles.':pct>=50?'Résultat moyen. Consulte les fiches de révision.':'Ces thèmes nécessitent plus de travail. Relis le cours et réessaie.';
+  const elapsed = state.timerRunning ? `${Math.floor(state.timerSeconds/60)}:${String(state.timerSeconds%60).padStart(2,'0')}` : '—';
+  document.getElementById('resultScore').textContent = `${correct}/${qs.length} (${pct}%)`;
+  document.getElementById('resultScore').style.color = color;
+  document.getElementById('resultGrade').textContent = grade;
+  document.getElementById('resultGrade').style.color = color;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('rdCorrect').textContent = correct;
+  document.getElementById('rdWrong').textContent = qs.length - correct;
+  document.getElementById('rdTime').textContent = elapsed;
+  document.getElementById('resultScreen').classList.add('show');
+  stopTimer();
+  PROGRESS.correct += correct; PROGRESS.total += qs.length; PROGRESS.sessions++;
+  localStorage.setItem('rev_progress', JSON.stringify(PROGRESS));
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateScoreBar();
+}
+
+function resetQCM(){
+  document.getElementById('resultScreen').classList.remove('show');
+  state.submitted = false;
+  renderQCM();
+  stopTimer();
+  state.timerSeconds=0;
+  document.getElementById('timerDisplay').textContent='00:00';
+  document.getElementById('timerDisplay').className='timer-display';
+}
+
+function filterQCM(cat, btn){
+  document.querySelectorAll('.qf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  state.currentFilter = cat;
+  resetQCM();
+}
+
+function startTimer(){
+  if(state.timerRunning) return;
+  const dur = parseInt(document.getElementById('timerDuration').value);
+  state.timerSeconds = dur > 0 ? dur : 0;
+  state.timerRunning = true;
+  state.startTime = Date.now();
+  state.timerInterval = setInterval(()=>{
+    if(dur>0){
+      state.timerSeconds--;
+      if(state.timerSeconds<=0){ clearInterval(state.timerInterval); state.timerRunning=false; notify('⏰ Temps écoulé !'); submitQCM(); return; }
+    } else {
+      state.timerSeconds++;
+    }
+    updateTimerDisplay(dur);
+  },1000);
+  notify('⏱️ Minuteur démarré');
+}
+function stopTimer(){
+  clearInterval(state.timerInterval);
+  state.timerRunning = false;
+}
+function updateTimerDisplay(dur){
+  const s = Math.abs(state.timerSeconds);
+  const mm = Math.floor(s/60), ss = s%60;
+  const display = document.getElementById('timerDisplay');
+  display.textContent = String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+  if(dur>0){
+    if(s<=60) display.className='timer-display danger';
+    else if(s<=180) display.className='timer-display warning';
+    else display.className='timer-display';
+  }
+}
+
+function renderEpreuves(){
+  const grid = document.getElementById('epreuveGrid');
+  grid.innerHTML = EPREUVES.map(ep=>`
+    <div class="ep-card">
+      <div class="ep-header">
+        <div class="ep-year">${ep.annee}</div>
+        <div class="ep-title">${ep.titre}</div>
+      </div>
+      <div class="ep-body">
+        <div class="ep-meta">${ep.tags.map(t=>`<span class="ep-tag ${t.c}">${t.t}</span>`).join('')}</div>
+        <div class="ep-duration">⏱️ Durée : ${ep.duree}</div>
+        <div class="ep-btn">
+          <button class="btn-view" onclick="showEpreuve(${ep.id})">📄 Voir l'épreuve</button>
+          <button class="btn-corr" onclick="showEpreuve(${ep.id},true)">✅ Correction</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function showEpreuve(id, withCorr=false){
+  const ep = EPREUVES.find(e=>e.id===id);
+  if(!ep) return;
+  const detail = document.getElementById('epreuveDetail');
+  let html = `<div class="ed-header"><div class="ed-title">${ep.titre} — ${ep.annee}</div><div style="font-size:.78rem;color:var(--g500)">⏱️ ${ep.duree} · Toutes les réponses sont développées ci-dessous.</div></div>`;
+  ep.exercices.forEach(ex=>{
+    html+=`<div class="exercise">
+      <div class="ex-num">${ex.num} — ${ex.titre}</div>
+      <div class="ex-text">${ex.texte}</div>
+      <div class="ex-data">${ex.data.replace(/\n/g,'<br/>')}</div>
+      <div class="ex-text" style="font-size:.82rem;margin-bottom:.6rem"><em>${ex.questions.map(q=>'• '+q).join('<br/>')}</em></div>`;
+    if(withCorr){
+      html+=`<div class="correction show">`;
+      ex.corr.forEach((c,i)=>{
+        html+=`<div class="corr-step"><span class="step-num">${i+1}</span><div><strong>${c.t}</strong><br/><span style="font-size:.8rem;line-height:1.65;white-space:pre-line">${c.txt}</span></div></div>
+        <div class="corr-result">✅ ${c.res}</div>`;
+      });
+      html+=`</div>`;
+    } else {
+      html+=`<button class="corr-btn" onclick="toggleCorr(this)">✅ Voir la correction</button>
+      <div class="correction">`;
+      ex.corr.forEach((c,i)=>{
+        html+=`<div class="corr-step"><span class="step-num">${i+1}</span><div><strong>${c.t}</strong><br/><span style="font-size:.8rem;line-height:1.65;white-space:pre-line">${c.txt}</span></div></div>
+        <div class="corr-result">✅ ${c.res}</div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  detail.innerHTML=html;
+  detail.classList.add('show');
+  detail.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCorr(btn){
+  const corr = btn.nextElementSibling;
+  corr.classList.toggle('show');
+  btn.textContent = corr.classList.contains('show')?'🔼 Masquer la correction':'✅ Voir la correction';
+}
+
+function renderExercices(){
+  const list = document.getElementById('exoList');
+  list.innerHTML = EXERCICES.map(ex=>`
+    <div class="exo-card" id="exo${ex.id}">
+      <div class="exo-header" onclick="toggleExo(${ex.id})">
+        <div class="exo-icon ci${ex.id}">${ex.icon}</div>
+        <div class="exo-title-wrap">
+          <div class="exo-title">${ex.titre}</div>
+          <div class="exo-subtitle">${ex.subtitle}</div>
+        </div>
+        <div class="exo-toggle">▼</div>
+      </div>
+      <div class="exo-body">
+        <div class="exo-enonce">${ex.enonce}</div>
+        <div class="exo-donnees"><strong>📊 Données :</strong>${ex.donnees.replace(/\n/g,'<br/>')}</div>
+        <button class="solution-btn" onclick="toggleSol(this)">📐 Voir la solution étape par étape</button>
+        <div class="solution">
+          ${ex.steps.map((s,i)=>`
+          <div class="sol-step">
+            <div class="sol-step-title">Étape ${i+1} — ${s.t}</div>
+            <div class="sol-formula">${s.f}</div>
+            <div class="sol-text" style="white-space:pre-line">${s.txt}</div>
+            <div class="sol-result">✅ ${s.res}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleExo(id){
+  document.getElementById('exo'+id).classList.toggle('open');
+}
+function toggleSol(btn){
+  const sol=btn.nextElementSibling;
+  sol.classList.toggle('show');
+  btn.textContent=sol.classList.contains('show')?'🔼 Masquer la solution':'📐 Voir la solution étape par étape';
+}
+
+function renderFiches(){
+  const grid = document.getElementById('fichesGrid');
+  grid.innerHTML = FICHES.map(f=>`
+    <div class="fiche-card" onclick="showFiche(${f.id})">
+      <div class="fiche-top">
+        <span class="fiche-emoji">${f.emoji}</span>
+        <div class="fiche-title">${f.titre}</div>
+        <span class="fiche-count">${f.count}</span>
+      </div>
+      <div class="fiche-body">
+        <div class="fiche-tags">${f.tags.map(t=>`<span class="fiche-tag">${t}</span>`).join('')}</div>
+        <div class="fiche-preview">${f.preview}</div>
+      </div>
+    </div>`).join('');
+}
+
+function showFiche(id){
+  const f = FICHES.find(f=>f.id===id);
+  if(!f) return;
+  const det = document.getElementById('ficheDetail');
+  let html = `<div class="fd-title">${f.emoji} ${f.titre}</div>`;
+  f.sections.forEach(sec=>{
+    html+=`<div class="fd-section"><div class="fd-section-title">${sec.t}</div>`;
+    sec.content.forEach(c=>{
+      if(c.type==='formula') html+=`<code class="fd-formula">${c.txt}</code>`;
+      else if(c.type==='key') html+=`<div class="fd-key-point">${c.txt}</div>`;
+      else if(c.type==='table'){
+        html+=`<table class="fd-table"><thead><tr>${c.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+        c.rows.forEach(r=>{html+=`<tr>${r.map(cell=>`<td>${cell}</td>`).join('')}</tr>`;});
+        html+=`</tbody></table>`;
+      }
+    });
+    html+=`</div>`;
+  });
+  html+=`<button class="solution-btn" style="margin-top:1rem" onclick="document.getElementById('ficheDetail').classList.remove('show')">✕ Fermer la fiche</button>`;
+  det.innerHTML=html;
+  det.classList.add('show');
+  det.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+renderQCM();
+renderEpreuves();
+renderExercices();
+renderFiches();
+</script>
+</body>
+</html>

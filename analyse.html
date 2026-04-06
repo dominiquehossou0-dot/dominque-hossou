@@ -1,0 +1,1067 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Analyse de Données Hydrologiques — INE/UAC</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a1f3c'/><text y='.9em' font-size='72' x='10'>📊</text></svg>"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0a1f3c;--blue:#1565c0;--sky:#2196f3;--cyan:#00b4d8;
+  --light:#e8f4fd;--white:#fff;--g50:#f8fafc;--g100:#f1f5f9;
+  --g200:#e2e8f0;--g300:#cbd5e1;--g500:#64748b;--g700:#334155;--g900:#0f172a;
+  --green:#16a34a;--red:#dc2626;--gold:#d97706;--orange:#ea580c;--purple:#7c3aed;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--g50);color:var(--g700);min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97);
+    backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,180,216,.2);
+    display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;flex-wrap:wrap}
+.nav-back{color:var(--cyan);text-decoration:none;font-size:.75rem;font-weight:600;
+          padding:.3rem .75rem;border-radius:6px;border:1px solid var(--cyan);
+          transition:all .2s;white-space:nowrap}
+.nav-back:hover{background:var(--cyan);color:var(--navy)}
+.nav-brand{font-weight:700;font-size:.95rem;color:#fff;margin-right:auto}
+.nav-brand span{color:var(--cyan)}
+.nav-pills{display:flex;gap:.2rem;flex-wrap:wrap}
+.nav-pills a{font-size:.7rem;color:rgba(255,255,255,.55);text-decoration:none;
+             padding:.3rem .65rem;border-radius:5px;transition:all .15s;white-space:nowrap}
+.nav-pills a:hover{background:rgba(0,180,216,.15);color:var(--cyan)}
+
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a6e 60%,#0d3b6e 100%);
+      padding:5.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 70% 40%,rgba(33,150,243,.12) 0%,transparent 60%),
+  linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:auto,50px 50px,50px 50px}
+.hero-inner{position:relative;z-index:1;max-width:700px;margin:0 auto}
+.hero-badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.18em;
+            text-transform:uppercase;color:var(--cyan);background:rgba(0,180,216,.12);
+            border:1px solid rgba(0,180,216,.25);border-radius:100px;
+            padding:.3rem 1rem;margin-bottom:1rem}
+.hero h1{font-family:Georgia,serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;
+         color:#fff;line-height:1.2;margin-bottom:.7rem}
+.hero h1 span{color:var(--cyan)}
+.hero p{font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.7}
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;z-index:1}
+
+.app{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 160px);margin-top:0}
+.sidebar{background:var(--white);border-right:1px solid var(--g200);padding:1.5rem;
+         position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.content{padding:1.5rem;overflow-x:hidden}
+
+.sb-section{margin-bottom:1.5rem}
+.sb-title{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+          color:var(--g500);margin-bottom:.8rem;padding-bottom:.4rem;
+          border-bottom:1px solid var(--g200)}
+
+.upload-zone{border:2px dashed var(--g300);border-radius:12px;padding:1.5rem;
+             text-align:center;cursor:pointer;transition:all .2s;background:var(--g50);
+             position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:var(--light)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:1.8rem;display:block;margin-bottom:.4rem}
+.uz-text{font-size:.78rem;color:var(--g500);line-height:1.4}
+.uz-text strong{color:var(--blue);display:block;font-size:.85rem}
+
+.paste-area{width:100%;border:1.5px solid var(--g200);border-radius:8px;
+            padding:.65rem .85rem;font-size:.78rem;font-family:'Courier New',monospace;
+            color:var(--g900);background:var(--white);resize:vertical;min-height:90px;
+            outline:none;transition:border-color .2s}
+.paste-area:focus{border-color:var(--blue)}
+
+.sb-select{width:100%;padding:.5rem .8rem;border:1.5px solid var(--g200);border-radius:7px;
+           font-size:.8rem;font-family:inherit;color:var(--g900);background:var(--white);
+           outline:none;cursor:pointer;transition:border-color .2s;margin-bottom:.5rem}
+.sb-select:focus{border-color:var(--blue)}
+
+.sb-btn{width:100%;padding:.6rem;border:none;border-radius:8px;font-size:.82rem;
+        font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-bottom:.4rem}
+.sb-btn-primary{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;
+                box-shadow:0 3px 10px rgba(21,101,192,.3)}
+.sb-btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(21,101,192,.4)}
+.sb-btn-success{background:linear-gradient(135deg,var(--green),#15803d);color:#fff}
+.sb-btn-success:hover{transform:translateY(-1px)}
+.sb-btn-warn{background:linear-gradient(135deg,var(--orange),var(--gold));color:#fff}
+.sb-btn-outline{background:transparent;color:var(--g500);border:1px solid var(--g200)}
+.sb-btn-outline:hover{background:var(--g100);color:var(--g700)}
+
+.col-list{display:flex;flex-direction:column;gap:.3rem;max-height:160px;overflow-y:auto}
+.col-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;
+          background:var(--g50);border:1px solid var(--g200);border-radius:6px;
+          font-size:.75rem;cursor:pointer;transition:all .15s;user-select:none}
+.col-item:hover{background:var(--light);border-color:var(--blue)}
+.col-item.selected{background:var(--light);border-color:var(--blue);color:var(--blue);font-weight:600}
+.col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.file-info{background:var(--light);border:1px solid rgba(21,101,192,.2);border-radius:8px;
+           padding:.7rem .9rem;font-size:.75rem;color:var(--blue);margin-bottom:.8rem;display:none}
+.file-info.show{display:block}
+
+.panel{background:var(--white);border:1px solid var(--g200);border-radius:14px;
+       margin-bottom:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.05);overflow:hidden}
+.panel-header{display:flex;align-items:center;gap:.8rem;padding:1rem 1.3rem;
+              border-bottom:1px solid var(--g100);background:var(--g50)}
+.ph-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;
+         justify-content:center;font-size:1rem;flex-shrink:0}
+.phi1{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+.phi2{background:linear-gradient(135deg,#d1fae5,#a7f3d0)}
+.phi3{background:linear-gradient(135deg,#fef3c7,#fde68a)}
+.phi4{background:linear-gradient(135deg,#ede9fe,#ddd6fe)}
+.phi5{background:linear-gradient(135deg,#fee2e2,#fecaca)}
+.phi6{background:linear-gradient(135deg,#e0f7fa,#b2ebf2)}
+.phi7{background:linear-gradient(135deg,#f3e5f5,#e1bee7)}
+.panel-title{font-weight:700;font-size:.9rem;color:var(--navy)}
+.panel-sub{font-size:.72rem;color:var(--g500);margin-top:.05rem}
+.panel-body{padding:1.2rem}
+
+.data-table-wrap{overflow:auto;max-height:300px;border-radius:8px;border:1px solid var(--g200)}
+.data-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.data-table th{position:sticky;top:0;background:var(--navy);color:#fff;
+               padding:.5rem .7rem;text-align:left;font-size:.7rem;
+               letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.data-table td{padding:.4rem .7rem;border-bottom:1px solid var(--g100);
+               color:var(--g700);white-space:nowrap}
+.data-table tr:hover td{background:var(--g50)}
+.data-table .missing{color:var(--red);font-weight:700;background:rgba(220,38,38,.08)}
+.data-table .outlier{color:var(--orange);font-weight:700;background:rgba(234,88,12,.08)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.stat-box{background:var(--g50);border:1px solid var(--g200);border-radius:10px;
+          padding:.9rem;text-align:center;transition:all .2s}
+.stat-box:hover{border-color:var(--blue);background:var(--light);transform:translateY(-2px)}
+.sb-val{font-family:Georgia,serif;font-size:1.4rem;font-weight:700;
+        color:var(--navy);line-height:1;display:block;margin-bottom:.2rem}
+.sb-lbl{font-size:.65rem;color:var(--g500);text-transform:uppercase;letter-spacing:.08em}
+
+.tests-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.test-result{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:1rem}
+.tr-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.tr-badge{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+          padding:.2rem .55rem;border-radius:100px}
+.badge-ok{background:rgba(22,163,74,.15);color:#15803d;border:1px solid rgba(22,163,74,.3)}
+.badge-ko{background:rgba(220,38,38,.12);color:#b91c1c;border:1px solid rgba(220,38,38,.25)}
+.badge-warn{background:rgba(217,119,6,.12);color:#b45309;border:1px solid rgba(217,119,6,.25)}
+.badge-info{background:rgba(21,101,192,.1);color:var(--blue);border:1px solid rgba(21,101,192,.25)}
+.tr-name{font-weight:700;font-size:.82rem;color:var(--navy)}
+.tr-details{font-size:.75rem;color:var(--g700);line-height:1.6}
+.tr-details span{display:block}
+.tr-interp{font-size:.73rem;color:var(--g500);margin-top:.4rem;
+           padding:.4rem .6rem;background:var(--white);border-radius:6px;
+           border:1px solid var(--g200);line-height:1.5}
+
+.quality-bar{height:10px;background:var(--g100);border-radius:100px;overflow:hidden;margin:.4rem 0}
+.qb-fill{height:100%;border-radius:100px;transition:width .8s ease}
+.qb-good{background:linear-gradient(90deg,var(--green),#4ade80)}
+.qb-warn{background:linear-gradient(90deg,var(--gold),#fbbf24)}
+.qb-bad{background:linear-gradient(90deg,var(--red),#f87171)}
+.quality-row{display:flex;justify-content:space-between;align-items:center;
+             font-size:.75rem;color:var(--g700);margin-bottom:.1rem}
+
+.chart-container{position:relative;height:280px;width:100%}
+
+.export-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}
+.exp-btn{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;
+         border:none;border-radius:7px;font-size:.75rem;font-weight:600;
+         font-family:inherit;cursor:pointer;transition:all .2s}
+.exp-csv{background:rgba(22,163,74,.1);color:#15803d;border:1px solid rgba(22,163,74,.25)}
+.exp-csv:hover{background:rgba(22,163,74,.2)}
+.exp-pdf{background:rgba(220,38,38,.1);color:#b91c1c;border:1px solid rgba(220,38,38,.25)}
+.exp-pdf:hover{background:rgba(220,38,38,.2)}
+.exp-png{background:rgba(21,101,192,.1);color:var(--blue);border:1px solid rgba(21,101,192,.25)}
+.exp-png:hover{background:rgba(21,101,192,.2)}
+
+.empty-state{text-align:center;padding:3rem 2rem;color:var(--g500)}
+.es-icon{font-size:3rem;display:block;margin-bottom:1rem;opacity:.4}
+.es-text{font-size:.9rem;line-height:1.6}
+
+.notif{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;
+       border-radius:10px;padding:.8rem 1.2rem;font-size:.8rem;z-index:999;
+       transform:translateY(80px);opacity:0;transition:all .3s;
+       border-left:4px solid var(--cyan);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.notif.show{transform:translateY(0);opacity:1}
+
+.auto-interp{background:linear-gradient(135deg,rgba(21,101,192,.05),rgba(0,180,216,.05));
+             border:1px solid rgba(21,101,192,.15);border-radius:10px;
+             padding:1rem 1.2rem;font-size:.8rem;color:var(--g700);line-height:1.7;
+             margin-top:.8rem}
+.ai-title{font-weight:700;color:var(--navy);font-size:.82rem;margin-bottom:.4rem;
+          display:flex;align-items:center;gap:.4rem}
+
+#btt{position:fixed;bottom:1.8rem;right:1.8rem;width:40px;height:40px;border-radius:50%;
+     background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff;border:none;
+     cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;
+     justify-content:center;opacity:0;transform:translateY(20px);
+     transition:opacity .3s,transform .3s;z-index:998}
+#btt.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .tests-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr}.nav-pills{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-back">← Hydrologie</a>
+  <div class="nav-brand">Analyse<span>Hydro</span></div>
+  <div class="nav-pills">
+    <a href="#import">Import</a>
+    <a href="#apercu">Aperçu</a>
+    <a href="#stats">Statistiques</a>
+    <a href="#graphiques">Graphiques</a>
+    <a href="#tests">Tests</a>
+    <a href="#tendance">Tendance</a>
+    <a href="#debits">Débits</a>
+  </div>
+  <a href="calculator.html" style="color:var(--cyan);font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid var(--cyan);padding:.28rem .65rem;border-radius:5px;white-space:nowrap">🧮 Calc</a>
+  <a href="BiblioHydro.html" style="color:rgba(255,255,255,.6);font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.2);padding:.28rem .65rem;border-radius:5px;white-space:nowrap">📚 Biblio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">📊 Analyse de données · INE–UAC · </div>
+    <h1>Analyse de Données <span>Hydrologiques</span></h1>
+    <p>Importez vos données CSV/Excel, visualisez, nettoyez, testez et exportez vos résultats en quelques clics.</p>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1440 50" preserveAspectRatio="none">
+    <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#f8fafc"/>
+  </svg>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar">
+
+    <div class="sb-section" id="import">
+      <div class="sb-title">📂 Importer des données</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.txt" onchange="loadFile(this)"/>
+        <span class="uz-icon">📁</span>
+        <div class="uz-text">
+          <strong>Cliquer ou glisser un fichier</strong>
+          CSV, Excel (.xlsx), TXT
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:.72rem;color:var(--g500);margin:.6rem 0">— ou saisir manuellement —</div>
+
+      <textarea class="paste-area" id="pasteArea" placeholder="Coller vos données ici...&#10;Exemple :&#10;Annee,Pluie&#10;2000,1082&#10;2001,956&#10;2002,1134"></textarea>
+
+      <select class="sb-select" id="sepSelect">
+        <option value=",">Séparateur : virgule (,)</option>
+        <option value=";">Séparateur : point-virgule (;)</option>
+        <option value="\t">Séparateur : tabulation</option>
+        <option value=" ">Séparateur : espace</option>
+      </select>
+
+      <button class="sb-btn sb-btn-primary" onclick="loadPaste()">⚡ Analyser les données</button>
+      <button class="sb-btn sb-btn-outline" onclick="loadDemo()">🎯 Charger données démo</button>
+    </div>
+
+    <div class="file-info" id="fileInfo"></div>
+
+    <div class="sb-section" id="col-section" style="display:none">
+      <div class="sb-title">📋 Colonnes disponibles</div>
+      <div class="col-list" id="colList"></div>
+    </div>
+
+    <div class="sb-section" id="cfg-section" style="display:none">
+      <div class="sb-title">⚙️ Colonne à analyser</div>
+      <select class="sb-select" id="colSelect" onchange="runAnalysis()"></select>
+      <div class="sb-title" style="margin-top:.8rem">📅 Colonne date/année (optionnel)</div>
+      <select class="sb-select" id="dateSelect" onchange="runAnalysis()">
+        <option value="">Aucune</option>
+      </select>
+      <div class="sb-title" style="margin-top:.8rem">🔧 Options</div>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;cursor:pointer;margin-bottom:.4rem">
+        <input type="checkbox" id="chkOutlier" checked onchange="runAnalysis()"/> Détecter les valeurs aberrantes
+      </label>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;cursor:pointer">
+        <input type="checkbox" id="chkFill" onchange="runAnalysis()"/> Remplacer valeurs manquantes (par la moyenne)
+      </label>
+    </div>
+
+    <div class="sb-section" id="act-section" style="display:none">
+      <div class="sb-title">💾 Exporter</div>
+      <button class="sb-btn sb-btn-success" onclick="exportCSV()">📥 Exporter CSV</button>
+      <button class="sb-btn sb-btn-warn" onclick="exportPDF()">📄 Rapport PDF</button>
+      <button class="sb-btn sb-btn-outline" onclick="resetAll()">🗑️ Réinitialiser</button>
+    </div>
+
+  </aside>
+
+  <main class="content">
+
+    <div id="emptyState">
+      <div class="panel">
+        <div class="panel-body">
+          <div class="empty-state">
+            <span class="es-icon">📊</span>
+            <div class="es-text">
+              <strong style="color:var(--navy);font-size:1rem">Prêt à analyser vos données</strong><br/>
+              Importez un fichier CSV/Excel ou collez vos données dans le panneau gauche.<br/><br/>
+              <strong>Formats acceptés :</strong> CSV, Excel (.xlsx/.xls), données collées directement<br/>
+              <strong>Analyses disponibles :</strong> Statistiques descriptives, tests KS/Mann-Kendall/Pettitt, tendances, débits classés, graphiques interactifs
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" style="display:none">
+
+      <div class="panel" id="apercu">
+        <div class="panel-header">
+          <div class="ph-icon phi1">📋</div>
+          <div><div class="panel-title">Aperçu des Données</div><div class="panel-sub" id="dataSubTitle">—</div></div>
+          <div style="margin-left:auto;display:flex;gap:.5rem">
+            <button class="exp-btn exp-csv" onclick="exportCSV()">📥 CSV</button>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem">
+            <div>
+              <div class="quality-row"><span>Complétude</span><span id="q_complet">—</span></div>
+              <div class="quality-bar"><div class="qb-fill qb-good" id="qb_complet" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div class="quality-row"><span>Valeurs aberrantes</span><span id="q_outlier">—</span></div>
+              <div class="quality-bar"><div class="qb-fill qb-warn" id="qb_outlier" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div class="quality-row"><span>Données valides</span><span id="q_valid">—</span></div>
+              <div class="quality-bar"><div class="qb-fill qb-good" id="qb_valid" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="data-table-wrap"><table class="data-table" id="dataTable"></table></div>
+        </div>
+      </div>
+
+      <div class="panel" id="stats">
+        <div class="panel-header">
+          <div class="ph-icon phi2">📐</div>
+          <div><div class="panel-title">Statistiques Descriptives</div><div class="panel-sub">Paramètres calculés automatiquement</div></div>
+          <button class="exp-btn exp-pdf" style="margin-left:auto" onclick="exportPDF()">📄 PDF</button>
+        </div>
+        <div class="panel-body">
+          <div class="stats-grid" id="statsGrid"></div>
+          <div class="auto-interp" id="statsInterp"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="graphiques">
+        <div class="panel-header">
+          <div class="ph-icon phi3">📈</div>
+          <div><div class="panel-title">Visualisation</div><div class="panel-sub">Série temporelle, histogramme, boîte à moustaches</div></div>
+          <div style="margin-left:auto;display:flex;gap:.4rem">
+            <button class="exp-btn exp-png" onclick="exportChart('chartSerie','serie_temporelle')">🖼 Serie</button>
+            <button class="exp-btn exp-png" onclick="exportChart('chartHisto','histogramme')">🖼 Histo</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Série temporelle</div>
+              <div class="chart-container"><canvas id="chartSerie"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Histogramme</div>
+              <div class="chart-container"><canvas id="chartHisto"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Distribution cumulée (F empirique)</div>
+              <div class="chart-container"><canvas id="chartCDF"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Boîte à moustaches</div>
+              <div class="chart-container"><canvas id="chartBox"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="tests">
+        <div class="panel-header">
+          <div class="ph-icon phi4">🔬</div>
+          <div><div class="panel-title">Tests Statistiques</div><div class="panel-sub">KS, Mann-Kendall, Pettitt, Grubbs</div></div>
+        </div>
+        <div class="panel-body">
+          <div class="tests-grid" id="testsGrid"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="tendance">
+        <div class="panel-header">
+          <div class="ph-icon phi5">📉</div>
+          <div><div class="panel-title">Analyse de Tendance &amp; Rupture</div><div class="panel-sub">Régression linéaire, Mann-Kendall, Pettitt</div></div>
+          <button class="exp-btn exp-png" style="margin-left:auto" onclick="exportChart('chartTendance','tendance')">🖼 PNG</button>
+        </div>
+        <div class="panel-body">
+          <div class="chart-container"><canvas id="chartTendance"></canvas></div>
+          <div class="auto-interp" id="tendanceInterp" style="margin-top:.8rem"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="debits">
+        <div class="panel-header">
+          <div class="ph-icon phi6">🌊</div>
+          <div><div class="panel-title">Débits Classés &amp; Caractéristiques</div><div class="panel-sub">CDC, module, étiage, crue caractéristique</div></div>
+          <button class="exp-btn exp-png" style="margin-left:auto" onclick="exportChart('chartCDC','courbe_debits_classes')">🖼 PNG</button>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+            <div>
+              <div class="chart-container"><canvas id="chartCDC"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem">Débits caractéristiques</div>
+              <div id="debitsTable"></div>
+              <div class="auto-interp" id="debitsInterp" style="margin-top:.8rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="freq">
+        <div class="panel-header">
+          <div class="ph-icon phi7">🔄</div>
+          <div><div class="panel-title">Analyse Fréquentielle (Gumbel)</div><div class="panel-sub">Quantiles pour différentes périodes de retour</div></div>
+          <button class="exp-btn exp-png" style="margin-left:auto" onclick="exportChart('chartGumbel','gumbel')">🖼 PNG</button>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+            <div><div class="chart-container"><canvas id="chartGumbel"></canvas></div></div>
+            <div id="gumbelTable"></div>
+          </div>
+          <div class="auto-interp" id="gumbelInterp" style="margin-top:.8rem"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="notif" id="notif"></div>
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<footer style="background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:1.5rem;font-size:.75rem">
+  Analyse Hydro · <a href="index.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="calculator.html" style="color:var(--cyan);text-decoration:none">Calculateurs</a> · <a href="BiblioHydro.html" style="color:var(--cyan);text-decoration:none">Bibliothèque</a> · <a href="profil.html" style="color:var(--cyan);text-decoration:none">Profil</a> . INE–UAC · Bénin
+</footer>
+
+<script>
+
+let STATE = {
+  rawData: [],      // [{col1:val, col2:val, ...}]
+  headers: [],
+  colData: [],      // valeurs numériques de la colonne sélectionnée
+  colName: '',
+  dateData: [],     // valeurs de la colonne date
+  charts: {},
+  fileName: ''
+};
+
+const $ = id => document.getElementById(id);
+const notify = (msg, dur=3000) => {
+  const n=$('notif'); n.textContent=msg; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'), dur);
+};
+const R = (v,d=2) => isNaN(v)?'—':Math.round(v*10**d)/10**d;
+
+window.addEventListener('scroll',()=>$('btt').classList.toggle('visible',window.scrollY>200));
+
+const whiteBg = {id:'whiteBg',beforeDraw(c){const ctx=c.ctx;ctx.save();ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.restore()}};
+Chart.register(whiteBg);
+
+function loadFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  STATE.fileName = file.name;
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if(ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, {defval:''});
+      if(json.length) processData(json);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => parseCSV(e.target.result);
+    reader.readAsText(file);
+  }
+}
+
+function loadPaste() {
+  const txt = $('pasteArea').value.trim();
+  if(!txt){ notify('⚠️ Aucune donnée saisie.'); return; }
+  parseCSV(txt);
+}
+
+function parseCSV(text) {
+  const sep = $('sepSelect').value === '\\t' ? '\t' : $('sepSelect').value;
+  const lines = text.trim().split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length < 2){ notify('⚠️ Données insuffisantes (min 2 lignes).'); return; }
+  const headers = lines[0].split(sep).map(h=>h.trim().replace(/"/g,''));
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const vals = lines[i].split(sep).map(v=>v.trim().replace(/"/g,''));
+    if(vals.length < headers.length) continue;
+    const obj={};
+    headers.forEach((h,j)=>{ obj[h]=vals[j]||''; });
+    rows.push(obj);
+  }
+  processData(rows);
+}
+
+function loadDemo() {
+  const years=[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022];
+  const pluies=[1082,956,1134,1045,1201,978,1056,1189,932,1078,1156,1023,1098,945,1167,1034,1089,1143,967,1112,1078,1034,1189,1056,1023,1098,1167,945,1112,1023,1189,1067,1145];
+  const debits=[45.2,38.1,52.4,41.3,58.7,36.9,47.2,55.1,33.8,44.6,53.2,40.1,48.7,35.2,54.3,41.8,46.5,51.9,37.4,49.3,47.8,40.9,55.8,43.2,39.5,46.1,52.7,34.9,50.4,39.8,56.2,44.7,51.3];
+  const rows = years.map((y,i)=>({Annee:y, Pluie_mm:pluies[i], Debit_m3s:debits[i]}));
+  STATE.fileName = 'donnees_demo_benin.csv';
+  processData(rows);
+  notify('✅ Données démo chargées (33 ans)');
+}
+
+function processData(rows) {
+  if(!rows.length){ notify('⚠️ Aucune donnée trouvée.'); return; }
+  STATE.rawData = rows;
+  STATE.headers = Object.keys(rows[0]);
+
+  const fi = $('fileInfo');
+  fi.innerHTML = `📂 <strong>${STATE.fileName||'Données saisies'}</strong> · ${rows.length} lignes · ${STATE.headers.length} colonnes`;
+  fi.classList.add('show');
+
+  buildColList();
+  $('col-section').style.display='block';
+  $('cfg-section').style.display='block';
+  $('act-section').style.display='block';
+
+  const numCols = STATE.headers.filter(h=>rows.some(r=>!isNaN(parseFloat(r[h]))));
+  const dateCols = STATE.headers.filter(h=>h.toLowerCase().includes('ann')||h.toLowerCase().includes('date')||h.toLowerCase().includes('year'));
+
+  buildSelects(numCols, dateCols);
+
+  $('emptyState').style.display='none';
+  $('results').style.display='block';
+  runAnalysis();
+  notify('✅ Données chargées — analyse en cours...');
+}
+
+function buildColList() {
+  const list = $('colList');
+  list.innerHTML = '';
+  const colors = ['#1565c0','#d97706','#16a34a','#dc2626','#7c3aed','#0891b2'];
+  STATE.headers.forEach((h,i)=>{
+    const d = document.createElement('div');
+    d.className='col-item'; d.dataset.col=h;
+    d.innerHTML=`<span class="col-dot" style="background:${colors[i%colors.length]}"></span><span>${h}</span>`;
+    d.onclick=()=>{ $('colSelect').value=h; runAnalysis(); };
+    list.appendChild(d);
+  });
+}
+
+function buildSelects(numCols, dateCols) {
+  const cs=$('colSelect'),ds=$('dateSelect');
+  cs.innerHTML=''; ds.innerHTML='<option value="">Aucune</option>';
+  numCols.forEach(c=>{ cs.innerHTML+=`<option value="${c}">${c}</option>`; ds.innerHTML+=`<option value="${c}">${c}</option>`; });
+  if(dateCols.length){ ds.value=dateCols[0]; }
+}
+
+function runAnalysis() {
+  const col = $('colSelect').value;
+  const dcol = $('dateSelect').value;
+  if(!col||!STATE.rawData.length) return;
+
+  STATE.colName = col;
+
+  let raw = STATE.rawData.map(r=>parseFloat(r[col]));
+  const missing = raw.filter(isNaN).length;
+  const chkFill = $('chkFill').checked;
+
+  if(chkFill) {
+    const avg = raw.filter(v=>!isNaN(v)).reduce((a,b)=>a+b,0)/raw.filter(v=>!isNaN(v)).length;
+    raw = raw.map(v=>isNaN(v)?avg:v);
+  }
+  STATE.colData = raw.filter(v=>!isNaN(v));
+  STATE.dateData = dcol ? STATE.rawData.map(r=>r[dcol]) : STATE.rawData.map((_,i)=>i+1);
+
+  document.querySelectorAll('.col-item').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.col===col);
+  });
+
+  buildApercu(missing, raw.length);
+  buildStats();
+  buildCharts();
+  buildTests();
+  buildTendance();
+  buildDebits();
+  buildGumbel();
+}
+
+function buildApercu(missing, total) {
+  const d = STATE.colData;
+  const pct_complet = R((total-missing)/total*100,1);
+  const mean = d.reduce((a,b)=>a+b,0)/d.length;
+  const std = Math.sqrt(d.reduce((a,b)=>a+(b-mean)**2,0)/(d.length-1));
+  const chkOut = $('chkOutlier').checked;
+  const outliers = chkOut ? d.filter(v=>Math.abs(v-mean)>2.5*std).length : 0;
+  const pct_out = R(outliers/d.length*100,1);
+  const pct_valid = R((d.length-outliers)/d.length*100,1);
+
+  $('q_complet').textContent=pct_complet+'%';
+  $('qb_complet').style.width=pct_complet+'%';
+  $('q_outlier').textContent=outliers+' ('+pct_out+'%)';
+  $('qb_outlier').style.width=pct_out+'%';
+  $('q_valid').textContent=pct_valid+'%';
+  $('qb_valid').style.width=pct_valid+'%';
+  $('dataSubTitle').textContent=`${STATE.fileName||'Données'} · Colonne : ${STATE.colName} · ${d.length} observations`;
+
+  const tbl = $('dataTable');
+  const displayHeaders = STATE.headers.slice(0,6);
+  let html = '<tr>'+displayHeaders.map(h=>`<th>${h}</th>`).join('')+(STATE.headers.length>6?`<th>+${STATE.headers.length-6} cols</th>`:'')+'</tr>';
+  STATE.rawData.slice(0,50).forEach((row,i)=>{
+    const vals = displayHeaders.map(h=>{
+      const v=row[h]; const isM=v===''||v===null||v===undefined||isNaN(parseFloat(v));
+      const isO=chkOut&&!isM&&Math.abs(parseFloat(v)-mean)>2.5*std;
+      return `<td class="${isM?'missing':isO?'outlier':''}">${v===''||v===null?'N/A':v}</td>`;
+    });
+    html+=`<tr>${vals.join('')}${STATE.headers.length>6?`<td style="color:var(--g300)">…</td>`:''}</tr>`;
+  });
+  if(STATE.rawData.length>50) html+=`<tr><td colspan="10" style="text-align:center;color:var(--g500);padding:.6rem">… ${STATE.rawData.length-50} lignes supplémentaires</td></tr>`;
+  tbl.innerHTML=html;
+}
+
+function buildStats() {
+  const d = [...STATE.colData].sort((a,b)=>a-b);
+  const n=d.length, mean=d.reduce((a,b)=>a+b)/n;
+  const variance=d.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);
+  const std=Math.sqrt(variance), cv=R(std/mean*100,2);
+  const med=n%2===0?(d[n/2-1]+d[n/2])/2:d[Math.floor(n/2)];
+  const cs=R(d.reduce((a,b)=>a+(b-mean)**3,0)/(n*std**3),3);
+  const ck=R(d.reduce((a,b)=>a+(b-mean)**4,0)/(n*std**4),3);
+  const q1=d[Math.floor(n*0.25)], q3=d[Math.floor(n*0.75)];
+  const mode_approx=d[Math.round(n*0.5)];
+
+  const items = [
+    {val:n,           lbl:'Effectif (n)',          color:'#1565c0'},
+    {val:R(mean,2),   lbl:'Moyenne (x̄)',            color:'#1565c0'},
+    {val:R(med,2),    lbl:'Médiane',                color:'#0891b2'},
+    {val:R(std,2),    lbl:'Écart-type (s)',          color:'#7c3aed'},
+    {val:cv+'%',      lbl:'Coeff. variation (Cv)',  color:parseFloat(cv)>30?'#dc2626':parseFloat(cv)>15?'#d97706':'#16a34a'},
+    {val:cs,          lbl:'Asymétrie (Cs)',          color:Math.abs(cs)>1?'#d97706':'#16a34a'},
+    {val:ck,          lbl:'Aplatissement (Ck)',      color:'#64748b'},
+    {val:R(d[0],2),   lbl:'Minimum',                color:'#0891b2'},
+    {val:R(d[n-1],2), lbl:'Maximum',                color:'#dc2626'},
+    {val:R(q1,2),     lbl:'Q1 (25e percentile)',     color:'#64748b'},
+    {val:R(q3,2),     lbl:'Q3 (75e percentile)',     color:'#64748b'},
+    {val:R(q3-q1,2),  lbl:'IQR (Q3−Q1)',             color:'#7c3aed'},
+  ];
+
+  $('statsGrid').innerHTML = items.map(it=>`
+    <div class="stat-box">
+      <span class="sb-val" style="color:${it.color}">${it.val}</span>
+      <span class="sb-lbl">${it.lbl}</span>
+    </div>`).join('');
+
+  let interp=`<div class="ai-title">🤖 Interprétation automatique</div>`;
+  interp+=`La série <strong>${STATE.colName}</strong> (n=${n}) présente une moyenne de <strong>${R(mean,2)}</strong> et un coefficient de variation de <strong>${cv}%</strong> — `;
+  if(parseFloat(cv)<15) interp+='série <strong>très homogène</strong>, faible variabilité interannuelle.';
+  else if(parseFloat(cv)<30) interp+='variabilité <strong>modérée</strong>, régime hydrologique assez régulier.';
+  else interp+='<strong>forte irrégularité</strong> interannuelle — régime hydrologique très variable.';
+  interp+=` L'asymétrie Cs=${cs} indique une distribution `;
+  if(cs>0.5) interp+='<strong>étalée vers les grandes valeurs</strong> (queue droite).';
+  else if(cs<-0.5) interp+='<strong>étalée vers les petites valeurs</strong> (queue gauche).';
+  else interp+='<strong>quasi-symétrique</strong> autour de la moyenne.';
+  if(ck>3) interp+=' Distribution <strong>leptokurtique</strong> (queue lourde, valeurs extrêmes fréquentes).';
+  $('statsInterp').innerHTML=interp;
+
+  return {n,mean,std,cv,med,cs,ck,q1,q3,min:d[0],max:d[n-1]};
+}
+
+const chartInst = {};
+function mkC(id, cfg) {
+  if(chartInst[id]){chartInst[id].destroy();}
+  cfg.options = cfg.options||{};
+  cfg.options.responsive=true;
+  cfg.options.maintainAspectRatio=false;
+  cfg.options.animation={duration:500};
+  chartInst[id]=new Chart($(id).getContext('2d'),cfg);
+  setTimeout(()=>chartInst[id]?.resize(),60);
+}
+
+function buildCharts() {
+  const d=STATE.colData, dates=STATE.dateData;
+  const mean=d.reduce((a,b)=>a+b)/d.length;
+  const std=Math.sqrt(d.reduce((a,b)=>a+(b-mean)**2,0)/(d.length-1));
+
+  const colors=d.map(v=>Math.abs(v-mean)>2*std?'rgba(220,38,38,.8)':v>mean?'rgba(21,101,192,.7)':'rgba(100,116,139,.5)');
+  mkC('chartSerie',{type:'bar',data:{
+    labels:dates,
+    datasets:[
+      {label:STATE.colName,data:d,backgroundColor:colors,borderColor:colors,borderWidth:1,borderRadius:3},
+      {label:'Moyenne',data:Array(d.length).fill(mean),type:'line',borderColor:'#d97706',borderDash:[6,3],pointRadius:0,borderWidth:2}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{x:{ticks:{maxRotation:45,font:{size:10}}},y:{title:{display:true,text:STATE.colName}}}}
+  });
+
+  const mn=Math.min(...d),mx=Math.max(...d),nb=Math.max(7,Math.ceil(Math.sqrt(d.length)));
+  const bw=(mx-mn)/nb; const counts=Array(nb).fill(0);
+  d.forEach(v=>{const b=Math.min(Math.floor((v-mn)/bw),nb-1);counts[b]++;});
+
+  const normY=counts.map((_,i)=>{
+    const x=mn+(i+0.5)*bw;
+    return R(d.length*bw*(1/(std*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*((x-mean)/std)**2),2);
+  });
+  mkC('chartHisto',{type:'bar',data:{
+    labels:counts.map((_,i)=>R(mn+i*bw+bw/2,1)),
+    datasets:[
+      {label:'Fréquence',data:counts,backgroundColor:'rgba(21,101,192,.4)',borderColor:'#1565c0',borderWidth:1,borderRadius:2},
+      {label:'Normale théorique',data:normY,type:'line',borderColor:'#dc2626',pointRadius:0,tension:0.4,borderWidth:2}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{x:{title:{display:true,text:'Valeur'}},y:{title:{display:true,text:'Effectif'}}}}
+  });
+
+  const sorted=[...d].sort((a,b)=>a-b);
+  const empF=sorted.map((_,i)=>(i+1)/(d.length+1));
+  mkC('chartCDF',{type:'line',data:{
+    datasets:[
+      {label:'F empirique',data:sorted.map((v,i)=>({x:v,y:empF[i]})),borderColor:'#1565c0',backgroundColor:'rgba(21,101,192,.1)',fill:true,tension:0.3,pointRadius:2}
+    ]},
+    options:{scales:{x:{type:'linear',title:{display:true,text:STATE.colName}},y:{title:{display:true,text:'F(x)'},min:0,max:1}},plugins:{legend:{display:false}}}
+  });
+
+  const q1=sorted[Math.floor(d.length*0.25)],q3=sorted[Math.floor(d.length*0.75)];
+  const iqr=q3-q1,wl=q1-1.5*iqr,wh=q3+1.5*iqr;
+  const whiskerL=Math.max(Math.min(...d),wl),whiskerH=Math.min(Math.max(...d),wh);
+  mkC('chartBox',{type:'bar',data:{
+    labels:[STATE.colName],
+    datasets:[
+      {label:'Étendue whisker bas',data:[whiskerL],backgroundColor:'transparent',borderColor:'transparent'},
+      {label:'Q1 → Médiane',data:[sorted[Math.floor(d.length*0.50)]-q1],backgroundColor:'rgba(21,101,192,.3)',borderColor:'#1565c0',borderWidth:2,borderSkipped:false},
+      {label:'Médiane → Q3',data:[q3-sorted[Math.floor(d.length*0.50)]],backgroundColor:'rgba(33,150,243,.3)',borderColor:'#1565c0',borderWidth:2,borderSkipped:false}
+    ]},
+    options:{
+      indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{enabled:true}},
+      scales:{
+        x:{stacked:true,title:{display:true,text:STATE.colName}},
+        y:{stacked:true}
+      }
+    }
+  });
+}
+
+function normCDF(z){
+  const a=[0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429],p=0.3275911;
+  const s=z<0?-1:1; z=Math.abs(z)/Math.sqrt(2);
+  const t=1/(1+p*z);
+  const y=1-(((((a[4]*t+a[3])*t)+a[2])*t+a[1])*t+a[0])*t*Math.exp(-z*z);
+  return 0.5*(1+s*y);
+}
+
+function buildTests() {
+  const d=[...STATE.colData];
+  const n=d.length,mean=d.reduce((a,b)=>a+b)/n;
+  const std=Math.sqrt(d.reduce((a,b)=>a+(b-mean)**2,0)/(n-1));
+  const sorted=[...d].sort((a,b)=>a-b);
+
+  const tests=[];
+
+  let Dn=0;
+  sorted.forEach((x,i)=>{
+    const Fe=(i+1)/n, Ft=normCDF((x-mean)/std);
+    Dn=Math.max(Dn,Math.abs(Fe-Ft));
+  });
+  const Dcrit_ks=1.36/Math.sqrt(n);
+  tests.push({name:'Test de Kolmogorov-Smirnov',type:'normalité',
+    Dn:R(Dn,4),Dcrit:R(Dcrit_ks,4),ok:Dn<Dcrit_ks,
+    interp:Dn<Dcrit_ks?`✅ La loi normale est <strong>acceptable</strong> (Dn=${R(Dn,4)} < ${R(Dcrit_ks,4)}).`:`⚠️ La loi normale est <strong>rejetée</strong> (Dn=${R(Dn,4)} > ${R(Dcrit_ks,4)}). Essayer Gumbel ou Log-Normale.`
+  });
+
+  let S=0;
+  for(let i=0;i<n-1;i++) for(let j=i+1;j<n;j++) S+=Math.sign(d[j]-d[i]);
+  const varS=n*(n-1)*(2*n+5)/18;
+  const Zmk=S>0?(S-1)/Math.sqrt(varS):S<0?(S+1)/Math.sqrt(varS):0;
+  const pMK=2*(1-normCDF(Math.abs(Zmk)));
+  tests.push({name:'Test de Mann-Kendall',type:'tendance',
+    S:S,Z:R(Zmk,3),pval:R(pMK,4),ok:pMK>0.05,
+    interp:pMK<0.05?`📈 Tendance <strong>${S>0?'croissante':'décroissante'} significative</strong> (Z=${R(Zmk,3)}, p=${R(pMK,4)} < 0.05).`:`➡️ <strong>Pas de tendance significative</strong> détectée (p=${R(pMK,4)} > 0.05).`
+  });
+
+  const Uk=[];
+  for(let t=1;t<n;t++){
+    let sum=0;
+    for(let i=0;i<=t-1;i++) for(let j=t;j<n;j++) sum+=Math.sign(d[j]-d[i]);
+    Uk.push({t,U:Math.abs(sum)});
+  }
+  const maxU=Uk.reduce((a,b)=>b.U>a.U?b:a,{U:0,t:0});
+  const pPet=2*Math.exp(-6*maxU.U**2/(n**3+n**2));
+  tests.push({name:'Test de Pettitt',type:'rupture',
+    K:maxU.U,t_rupt:maxU.t,pval:R(pPet,4),ok:pPet>0.05,
+    interp:pPet<0.05?`🔴 Rupture <strong>significative</strong> détectée à l'observation <strong>${maxU.t}</strong> (K=${maxU.U}, p=${R(pPet,4)} < 0.05).`:`✅ <strong>Pas de rupture significative</strong> (p=${R(pPet,4)} > 0.05). Série homogène.`
+  });
+
+  const maxDev=Math.max(...d.map(v=>Math.abs(v-mean)));
+  const G=R(maxDev/std,3);
+  const Gcrit=R(2.557+0.028*n,3); // approx n=10-50
+  tests.push({name:'Test de Grubbs',type:'aberrantes',
+    G,Gcrit,ok:G<parseFloat(Gcrit),
+    interp:G>parseFloat(Gcrit)?`⚠️ <strong>Valeur aberrante détectée</strong> (G=${G} > Gcrit=${Gcrit}). Vérifier la valeur extrême.`:`✅ <strong>Pas de valeur aberrante</strong> significative (G=${G} < Gcrit=${Gcrit}).`
+  });
+
+  $('testsGrid').innerHTML = tests.map(t=>`
+    <div class="test-result">
+      <div class="tr-header">
+        <span class="tr-badge ${t.ok?'badge-ok':'badge-ko'}">${t.ok?'Accepté':'Rejeté'}</span>
+        <div>
+          <div class="tr-name">${t.name}</div>
+          <div style="font-size:.68rem;color:var(--g500)">${t.type}</div>
+        </div>
+      </div>
+      <div class="tr-details">
+        ${Object.entries(t).filter(([k])=>!['name','type','ok','interp'].includes(k))
+          .map(([k,v])=>`<span><strong>${k}</strong> = ${v}</span>`).join('')}
+      </div>
+      <div class="tr-interp">${t.interp}</div>
+    </div>`).join('');
+}
+
+function buildTendance() {
+  const d=STATE.colData, n=d.length;
+  const X=Array.from({length:n},(_,i)=>i+1);
+  const mx=X.reduce((a,b)=>a+b)/n, my=d.reduce((a,b)=>a+b)/n;
+  const a=(X.reduce((s,x,i)=>s+(x-mx)*(d[i]-my),0))/(X.reduce((s,x)=>s+(x-mx)**2,0));
+  const b=my-a*mx;
+  const r2=R(1-(d.reduce((s,v,i)=>s+(v-(a*X[i]+b))**2,0))/(d.reduce((s,v)=>s+(v-my)**2,0)),4);
+
+  let S=0;
+  for(let i=0;i<n-1;i++) for(let j=i+1;j<n;j++) S+=Math.sign(d[j]-d[i]);
+  const varS=n*(n-1)*(2*n+5)/18;
+  const Zmk=S>0?(S-1)/Math.sqrt(varS):S<0?(S+1)/Math.sqrt(varS):0;
+  const pMK=2*(1-normCDF(Math.abs(Zmk)));
+
+  mkC('chartTendance',{type:'scatter',data:{
+    datasets:[
+      {label:STATE.colName,data:X.map((x,i)=>({x:STATE.dateData[i]||x,y:d[i]})),backgroundColor:'rgba(21,101,192,.6)',pointRadius:5},
+      {label:`Tendance (y=${R(a,3)}x+${R(b,2)}, R²=${r2})`,data:[{x:STATE.dateData[0]||1,y:a*1+b},{x:STATE.dateData[n-1]||n,y:a*n+b}],type:'line',borderColor:'#dc2626',borderDash:[6,3],pointRadius:0}
+    ]},
+    options:{scales:{x:{title:{display:true,text:'Année'}},y:{title:{display:true,text:STATE.colName}}},plugins:{legend:{position:'bottom'}}}
+  });
+
+  let interp=`<div class="ai-title">📉 Analyse de tendance</div>`;
+  interp+=`Droite de régression : <strong>y = ${R(a,4)}·t + ${R(b,2)}</strong> (R²=${r2}).`;
+  if(Math.abs(a)<0.001) interp+=' Tendance <strong>neutre</strong> (pente ≈ 0).';
+  else if(a>0) interp+=` Tendance <strong>croissante</strong> de +${R(a,3)} unités/an.`;
+  else interp+=` Tendance <strong>décroissante</strong> de ${R(a,3)} unités/an.`;
+  interp+=` Mann-Kendall : ${pMK<0.05?`<strong>tendance significative</strong> (p=${R(pMK,4)})`:`pas de tendance significative (p=${R(pMK,4)})`}.`;
+  $('tendanceInterp').innerHTML=interp;
+}
+
+function buildDebits() {
+  const d=[...STATE.colData].sort((a,b)=>b-a);
+  const n=d.length;
+  const moy=R(d.reduce((a,b)=>a+b)/n,3);
+  const q10=d[Math.floor(n*0.10)], q50=d[Math.floor(n*0.50)];
+  const q90=d[Math.floor(n*0.90)], qmin=d[n-1], qmax=d[0];
+  const irr=qmin>0?R(qmax/qmin,1):'∞';
+
+  mkC('chartCDC',{type:'line',data:{
+    datasets:[{label:`CDC — ${STATE.colName}`,data:d.map((v,i)=>({x:R((i/(n-1))*100,1),y:v})),borderColor:'#1565c0',backgroundColor:'rgba(21,101,192,.08)',fill:true,tension:0.3,pointRadius:0,borderWidth:2}]},
+    options:{scales:{x:{type:'linear',min:0,max:100,title:{display:true,text:'Fréquence de dépassement (%)'}},y:{title:{display:true,text:STATE.colName}}},plugins:{legend:{display:false}}}
+  });
+
+  const rows=[
+    {lbl:'Maximum (Qmax)',val:R(qmax,3),color:'#dc2626'},
+    {lbl:'Q10% (haute hydraulicité)',val:R(q10,3),color:'#1565c0'},
+    {lbl:'Module (Q moyen)',val:moy,color:'#7c3aed'},
+    {lbl:'Q50% (médiane)',val:R(q50,3),color:'#0891b2'},
+    {lbl:'Q90% (étiage)',val:R(q90,3),color:'#d97706'},
+    {lbl:'Minimum (Qmin)',val:R(qmin,3),color:'#64748b'},
+    {lbl:'Irrégularité (Qmax/Qmin)',val:irr,color:'#ea580c'},
+  ];
+  $('debitsTable').innerHTML=rows.map(r=>`
+    <div style="display:flex;justify-content:space-between;padding:.45rem .7rem;border-bottom:1px solid var(--g100);font-size:.78rem">
+      <span style="color:var(--g700)">${r.lbl}</span>
+      <span style="font-weight:700;color:${r.color};font-family:Georgia,serif">${r.val}</span>
+    </div>`).join('');
+
+  let interp=`<div class="ai-title">🌊 Interprétation des débits</div>`;
+  interp+=`Module (Q moyen) = <strong>${moy}</strong>. Étiage Q90% = <strong>${R(q90,3)}</strong> (${R(q90/parseFloat(moy)*100,1)}% du module). `;
+  interp+=`Crue Q10% = <strong>${R(q10,3)}</strong>. Irrégularité = <strong>${irr}</strong> `;
+  if(parseFloat(irr)<3) interp+='→ régime <strong>régulier</strong>.';
+  else if(parseFloat(irr)<10) interp+='→ régime <strong>irrégulier</strong>.';
+  else interp+='→ régime <strong>très irrégulier</strong> (cours d\'eau temporaire probable).';
+  $('debitsInterp').innerHTML=interp;
+}
+
+function buildGumbel() {
+  const d=STATE.colData, n=d.length;
+  const mean=d.reduce((a,b)=>a+b)/n;
+  const std=Math.sqrt(d.reduce((a,b)=>a+(b-mean)**2,0)/(n-1));
+  const alpha=std*Math.sqrt(6)/Math.PI, u=mean-0.5772*alpha;
+  const sorted=[...d].sort((a,b)=>a-b);
+  const yVals=sorted.map((_,i)=>-Math.log(-Math.log((i+1)/(n+1))));
+
+  const periods=[2,5,10,20,50,100,200,1000];
+  const qts=periods.map(T=>{const y=-Math.log(-Math.log(1-1/T));return{T,y:R(y,3),X:R(u+alpha*y,2)};});
+
+  mkC('chartGumbel',{type:'scatter',data:{
+    datasets:[
+      {label:'Données',data:sorted.map((v,i)=>({x:yVals[i],y:v})),backgroundColor:'#1565c0',pointRadius:5},
+      {label:`Droite Gumbel (u=${R(u,2)}, α=${R(alpha,2)})`,data:[{x:-1,y:u-alpha},{x:7,y:u+7*alpha}],type:'line',borderColor:'#dc2626',borderDash:[5,3],pointRadius:0}
+    ]},
+    options:{scales:{x:{title:{display:true,text:'Variable réduite y'}},y:{title:{display:true,text:STATE.colName}}},plugins:{legend:{position:'bottom'}}}
+  });
+
+  $('gumbelTable').innerHTML=`
+    <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Quantiles Gumbel</div>
+    <div style="overflow:auto;border-radius:8px;border:1px solid var(--g200)">
+    <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+      <thead><tr style="background:var(--navy)">
+        <th style="color:#fff;padding:.4rem .6rem;text-align:center">T (ans)</th>
+        <th style="color:#fff;padding:.4rem .6rem;text-align:center">y(T)</th>
+        <th style="color:#fff;padding:.4rem .6rem;text-align:center">X(T)</th>
+      </tr></thead>
+      <tbody>${qts.map((q,i)=>`
+        <tr style="background:${i%2?'var(--g50)':'#fff'}">
+          <td style="padding:.4rem .6rem;text-align:center;font-weight:600">${q.T}</td>
+          <td style="padding:.4rem .6rem;text-align:center;color:var(--g500)">${q.y}</td>
+          <td style="padding:.4rem .6rem;text-align:center;font-weight:700;color:var(--navy)">${q.X}</td>
+        </tr>`).join('')}</tbody>
+    </table></div>`;
+
+  $('gumbelInterp').innerHTML=`<div class="ai-title">🔄 Analyse fréquentielle Gumbel</div>Paramètres : u=${R(u,2)}, α=${R(alpha,2)}. Crue décennale X(10)=<strong>${qts[2].X}</strong>, centennale X(100)=<strong>${qts[5].X}</strong>. Ces valeurs servent au dimensionnement des ouvrages hydrauliques.`;
+}
+
+function exportCSV() {
+  if(!STATE.rawData.length){notify('⚠️ Aucune donnée.');return;}
+  const h=STATE.headers.join(',');
+  const rows=STATE.rawData.map(r=>STATE.headers.map(c=>r[c]).join(','));
+  const blob=new Blob([[h,...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(STATE.fileName.replace(/\.[^.]+$/,'')||'donnees')+'_analyse.csv';
+  a.click();
+  notify('✅ CSV exporté');
+}
+
+function exportChart(canvasId, name) {
+  const canvas=$(canvasId);
+  if(!canvas||!chartInst[canvasId]){notify('⚠️ Graphique introuvable.');return;}
+  const tmp=document.createElement('canvas');
+  tmp.width=canvas.width; tmp.height=canvas.height;
+  const ctx=tmp.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,tmp.width,tmp.height);
+  ctx.drawImage(canvas,0,0);
+  ctx.fillStyle='#64748b'; ctx.font='11px Segoe UI,Arial,sans-serif';
+  ctx.fillText('INE–UAC · AnalyseHydro · '+new Date().toLocaleDateString('fr-FR'),10,tmp.height-6);
+  const a=document.createElement('a');
+  a.download=name+'.png'; a.href=tmp.toDataURL('image/png',1.0); a.click();
+  notify('✅ PNG exporté');
+}
+
+function exportPDF() {
+  if(!STATE.colData.length){notify('⚠️ Lancez d\'abord une analyse.');return;}
+  let jsPDFClass;
+  if(window.jspdf?.jsPDF) jsPDFClass=window.jspdf.jsPDF;
+  else if(window.jsPDF) jsPDFClass=window.jsPDF;
+  else{notify('⚠️ jsPDF non chargé.');return;}
+
+  const doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
+  const d=STATE.colData, n=d.length;
+  const mean=R(d.reduce((a,b)=>a+b)/n,2);
+  const std=R(Math.sqrt(d.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)),2);
+  const sorted=[...d].sort((a,b)=>a-b);
+  const med=n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+  const cv=R(parseFloat(std)/parseFloat(mean)*100,2);
+
+  let y=20;
+  const safe=s=>String(s).replace(/[^\x00-\x7F]/g,c=>({'é':'e','è':'e','ê':'e','à':'a','â':'a','î':'i','ô':'o','û':'u','ç':'c','É':'E','È':'E','Ê':'E','À':'A','Î':'I','Ô':'O','Û':'U','Ç':'C'}[c]||''));
+
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(10,31,60);
+  doc.text(safe('Rapport d\'Analyse Hydrologique'),15,y);y+=8;
+  doc.setFontSize(10);doc.setTextColor(100,116,139);
+  doc.text('INE-UAC · Hydrologie Quantitative · Licence S3A54',15,y);y+=4;
+  doc.text(safe('Colonne analysee : ')+STATE.colName+' · n='+n+' observations · '+new Date().toLocaleDateString('fr-FR'),15,y);y+=4;
+  doc.setDrawColor(21,101,192);doc.setLineWidth(0.5);doc.line(15,y,195,y);y+=8;
+
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(10,31,60);
+  doc.text('1. Statistiques descriptives',15,y);y+=7;
+  const stats=[['n',n],['Moyenne',mean],safe(['Mediane',R(med,2)]),['Ecart-type',std],['Cv (%)',cv],['Min',R(sorted[0],2)],['Max',R(sorted[n-1],2)]];
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(51,65,85);
+  stats.forEach(([k,v])=>{
+    doc.setFillColor(248,250,252);doc.rect(15,y-4,180,6,'F');
+    doc.setFont('helvetica','bold');doc.text(String(k)+' :',18,y);
+    doc.setFont('helvetica','normal');doc.text(String(v),80,y);y+=6;
+  });
+  y+=5;
+
+  const alpha_=parseFloat(std)*Math.sqrt(6)/Math.PI, u_=parseFloat(mean)-0.5772*alpha_;
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(10,31,60);
+  doc.text(safe('2. Analyse frequentielle (Gumbel)'),15,y);y+=7;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);
+  doc.setFillColor(21,101,192);doc.setTextColor(255,255,255);
+  doc.rect(15,y-4,180,7,'F');
+  ['T (ans)','y(T)','X(T)'].forEach((h,i)=>doc.text(h,18+i*40,y));y+=6;
+  doc.setFont('helvetica','normal');doc.setTextColor(51,65,85);
+  [2,5,10,20,50,100,200,1000].forEach((T,idx)=>{
+    const yt=-Math.log(-Math.log(1-1/T)),XT=R(u_+alpha_*yt,2);
+    if(idx%2===0){doc.setFillColor(248,250,252);doc.rect(15,y-4,180,6,'F');}
+    [''+T,R(yt,3),''+XT].forEach((v,i)=>doc.text(v,18+i*40,y));y+=6;
+  });
+  y+=5;
+
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(10,31,60);
+  doc.text(safe('3. Interpretation automatique'),15,y);y+=7;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,116,139);
+  const interpText=safe(`Serie ${STATE.colName} (n=${n}) : moyenne=${mean}, Cv=${cv}% → `+
+    (cv<15?'serie homogene':cv<30?'variabilite moderee':'forte irregularite')+
+    `. Gumbel : Q10=${R(u_+(-Math.log(-Math.log(0.9)))*alpha_,2)}, Q100=${R(u_+(-Math.log(-Math.log(0.99)))*alpha_,2)}.`);
+  const lines=doc.splitTextToSize(interpText,175);
+  doc.text(lines,15,y);
+
+  doc.setFontSize(8);doc.setTextColor(180);
+  doc.text('Analyse Hydro · INE-UAC · '+new Date().toLocaleDateString('fr-FR'),15,287);
+  doc.save((STATE.fileName.replace(/\.[^.]+$/,'')||'analyse')+'_rapport.pdf');
+  notify('✅ PDF exporté');
+}
+
+function resetAll() {
+  STATE={rawData:[],headers:[],colData:[],colName:'',dateData:[],charts:{},fileName:''};
+  $('pasteArea').value='';$('fileInput').value='';
+  $('fileInfo').classList.remove('show');
+  $('col-section').style.display='none';
+  $('cfg-section').style.display='none';
+  $('act-section').style.display='none';
+  $('emptyState').style.display='block';
+  $('results').style.display='none';
+  Object.values(chartInst).forEach(c=>c.destroy());
+  notify('🗑️ Données effacées');
+}
+
+const uz=$('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{
+  e.preventDefault();uz.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f){const dt=new DataTransfer();dt.items.add(f);$('fileInput').files=dt.files;loadFile($('fileInput'));}
+});
+</script>
+</body>
+</html>

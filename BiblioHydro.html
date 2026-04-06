@@ -1,0 +1,954 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Bibliothèque Hydrologique — INE/UAC</title>
+<meta name="description" content="Ressources hydrologiques : livres, articles, logiciels, portails de données et normes pour la filière Hydrologie Quantitative & GIRE — INE, UAC, Bénin."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23704214'/><text y='.9em' font-size='72' x='10'>📚</text></svg>"/>
+<style>
+:root {
+  --cream:   #fdf8f0;
+  --cream2:  #f7f0e4;
+  --cream3:  #ede4d3;
+  --gold:    #b8860b;
+  --gold2:   #d4a017;
+  --gold3:   #f0c040;
+  --brown:   #4a2c0a;
+  --brown2:  #6b3f1a;
+  --brown3:  #8b5e2e;
+  --ink:     #1a1208;
+  --ink2:    #3d2b0f;
+  --gray:    #7a6a55;
+  --white:   #ffffff;
+  --green:   #2d6a4f;
+  --blue:    #1a3a6e;
+  --red:     #7b1f1f;
+  --shadow:  0 4px 20px rgba(74,44,10,.1);
+  --shadow2: 0 8px 32px rgba(74,44,10,.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:Georgia,'Times New Roman',serif;
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(253,248,240,.97);
+  backdrop-filter:blur(12px);
+  border-bottom:2px solid var(--gold);
+  display:flex;align-items:center;gap:1.2rem;
+  padding:.8rem 2rem;
+  box-shadow:0 2px 16px rgba(74,44,10,.12);
+  flex-wrap:wrap;
+}
+.nav-back{
+  color:var(--brown);text-decoration:none;font-size:.75rem;font-weight:700;
+  font-family:'Segoe UI',Arial,sans-serif;
+  padding:.3rem .8rem;border-radius:5px;
+  border:1.5px solid var(--brown3);
+  transition:background-color .2s,color .2s;white-space:nowrap;letter-spacing:.04em;
+}
+.nav-back:hover{background:var(--brown);color:var(--cream)}
+.nav-brand{
+  font-family:Georgia,serif;font-weight:700;font-size:1.05rem;
+  color:var(--brown);margin-right:auto;letter-spacing:.03em;
+}
+.nav-brand span{color:var(--gold)}
+.nav-links{display:flex;gap:.2rem;flex-wrap:wrap}
+.nav-links a{
+  font-size:.72rem;font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--gray);text-decoration:none;
+  padding:.3rem .65rem;border-radius:4px;
+  transition:background-colors .15s,color .15s;white-space:nowrap;
+}
+.nav-links a:hover{background:var(--cream3);color:var(--brown);font-weight:600}
+.nav-search{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--cream2);border:1.5px solid var(--cream3);
+  border-radius:100px;padding:.35rem .9rem;
+}
+.nav-search input{
+  background:transparent;border:none;outline:none;
+  font-size:.78rem;font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--ink);width:160px;
+}
+.nav-search input::placeholder{color:var(--gray)}
+
+.hero{
+  background:linear-gradient(135deg,var(--brown) 0%,var(--brown2) 50%,var(--ink2) 100%);
+  padding:7rem 2rem 4rem;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 20% 50%,rgba(212,160,23,.12) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 30%,rgba(240,192,64,.08) 0%,transparent 55%),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 0,transparent 50%);
+  background-size:auto,auto,14px 14px;
+}
+
+.hero::after{
+  content:'📖';font-size:8rem;position:absolute;
+  right:5%;top:50%;transform:translateY(-50%);opacity:.06;
+}
+.hero-inner{position:relative;z-index:1;max-width:700px;margin:0 auto}
+.hero-eyebrow{
+  display:inline-block;font-size:.68rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold3);background:rgba(240,192,64,.12);
+  border:1px solid rgba(240,192,64,.3);border-radius:100px;
+  padding:.3rem 1rem;margin-bottom:1.2rem;
+  font-family:'Segoe UI',Arial,sans-serif;
+}
+.hero h1{
+  font-family:Georgia,serif;
+  font-size:clamp(2rem,4.5vw,3.2rem);
+  font-weight:700;color:var(--cream);
+  line-height:1.2;margin-bottom:.8rem;
+}
+.hero h1 span{color:var(--gold3)}
+.hero p{
+  font-size:1rem;color:rgba(253,248,240,.7);
+  line-height:1.75;margin-bottom:2rem;
+  font-family:'Segoe UI',Arial,sans-serif;
+}
+.hero-stats{
+  display:flex;gap:0;justify-content:center;flex-wrap:wrap;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:.9rem 1.5rem;width:fit-content;margin:0 auto;
+  gap:.5rem;
+}
+.hs-item{text-align:center;padding:0 1.2rem}
+.hs-val{
+  font-family:Georgia,serif;font-size:1.6rem;font-weight:700;
+  color:var(--gold3);display:block;line-height:1;
+}
+.hs-label{
+  font-size:.65rem;color:rgba(253,248,240,.5);
+  font-family:'Segoe UI',Arial,sans-serif;
+  text-transform:uppercase;letter-spacing:.1em;display:block;margin-top:.2rem;
+}
+.hs-sep{width:1px;height:38px;background:rgba(255,255,255,.1);margin:auto 0}
+
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;z-index:1}
+
+.main{max-width:1140px;margin:0 auto;padding:3rem 1.5rem 5rem}
+
+.filter-bar{
+  display:flex;gap:.6rem;flex-wrap:wrap;
+  margin-bottom:2.5rem;
+  padding:1.2rem 1.5rem;
+  background:var(--white);
+  border:1px solid var(--cream3);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  align-items:center;
+}
+.filter-label{
+  font-size:.72rem;font-weight:700;
+  font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--gray);letter-spacing:.1em;text-transform:uppercase;
+  margin-right:.3rem;white-space:nowrap;
+}
+.fbtn{
+  background:var(--cream2);color:var(--brown3);
+  border:1.5px solid var(--cream3);border-radius:100px;
+  font-size:.75rem;font-family:'Segoe UI',Arial,sans-serif;
+  font-weight:600;padding:.35rem .9rem;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.fbtn:hover,.fbtn.active{
+  background:var(--brown);color:var(--cream);border-color:var(--brown);
+}
+.count-badge{
+  margin-left:auto;
+  font-size:.72rem;font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--gray);white-space:nowrap;
+}
+#searchInput{
+  background:var(--cream2);border:1.5px solid var(--cream3);border-radius:100px;
+  padding:.35rem 1rem;font-size:.78rem;font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--ink);outline:none;width:220px;
+  transition:border-color .2s;
+}
+#searchInput:focus{border-color:var(--gold)}
+
+.sec-header{
+  display:flex;align-items:center;gap:1rem;
+  margin-bottom:1.5rem;padding-bottom:.8rem;
+  border-bottom:2px solid var(--cream3);
+}
+.sec-icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.si1{background:linear-gradient(135deg,#fef3c7,#fde68a)}
+.si2{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+.si3{background:linear-gradient(135deg,#d1fae5,#a7f3d0)}
+.si4{background:linear-gradient(135deg,#ede9fe,#ddd6fe)}
+.si5{background:linear-gradient(135deg,#fee2e2,#fecaca)}
+.sec-title{
+  font-family:Georgia,serif;font-size:1.3rem;font-weight:700;
+  color:var(--brown);
+}
+.sec-sub{
+  font-size:.78rem;color:var(--gray);
+  font-family:'Segoe UI',Arial,sans-serif;margin-top:.1rem;
+}
+
+.res-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.2rem;margin-bottom:3rem;
+}
+.res-card{
+  background:var(--white);
+  border:1px solid var(--cream3);
+  border-radius:14px;
+  padding:1.5rem;
+  box-shadow:var(--shadow);
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.res-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--gold);transform:scaleX(0);transform-origin:left;
+  transition:transform .3s;
+}
+.res-card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow2);border-color:var(--gold3);
+}
+.res-card:hover::before{transform:scaleX(1)}
+
+.rc-top{display:flex;align-items:flex-start;gap:.8rem;margin-bottom:.9rem}
+.rc-emoji{font-size:1.8rem;flex-shrink:0;line-height:1}
+.rc-meta{}
+.rc-type{
+  display:inline-block;font-size:.6rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  font-family:'Segoe UI',Arial,sans-serif;
+  padding:.18rem .55rem;border-radius:100px;margin-bottom:.3rem;
+}
+.type-livre  {background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.type-article{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.type-logiciel{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+.type-web    {background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe}
+.type-norme  {background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.type-donnees{background:#fef9c3;color:#713f12;border:1px solid #fde047}
+
+.rc-title{
+  font-family:Georgia,serif;font-size:.95rem;font-weight:700;
+  color:var(--brown);line-height:1.3;
+}
+.rc-authors{
+  font-size:.72rem;color:var(--gray);
+  font-family:'Segoe UI',Arial,sans-serif;
+  margin-top:.15rem;font-style:italic;
+}
+.rc-desc{
+  font-size:.8rem;color:var(--ink2);
+  font-family:'Segoe UI',Arial,sans-serif;
+  line-height:1.65;flex:1;margin-bottom:.9rem;
+}
+.rc-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.5rem;margin-top:auto;
+}
+.rc-tags{display:flex;gap:.3rem;flex-wrap:wrap}
+.rc-tag{
+  font-size:.62rem;background:var(--cream2);color:var(--brown3);
+  border:1px solid var(--cream3);border-radius:100px;
+  padding:.15rem .5rem;font-family:'Segoe UI',Arial,sans-serif;
+}
+.rc-link{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.72rem;font-weight:700;
+  font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--gold);text-decoration:none;
+  border:1.5px solid var(--gold);border-radius:6px;
+  padding:.3rem .7rem;transition:background-colors .2s,color .2s;
+  white-space:nowrap;
+}
+.rc-link:hover{background:var(--gold);color:var(--white)}
+.rc-link.gratuit{color:var(--green);border-color:var(--green)}
+.rc-link.gratuit:hover{background:var(--green);color:var(--white)}
+
+.res-card.featured{
+  grid-column:1/-1;
+  flex-direction:row;gap:2rem;align-items:center;
+  background:linear-gradient(135deg,var(--cream2),var(--white));
+  border-color:var(--gold3);border-width:1.5px;
+}
+.res-card.featured .rc-emoji{font-size:3.5rem}
+.res-card.featured .rc-title{font-size:1.15rem}
+.res-card.featured .rc-desc{font-size:.85rem}
+
+.note-box{
+  background:var(--cream2);border:1px solid var(--cream3);
+  border-left:4px solid var(--gold);border-radius:0 10px 10px 0;
+  padding:1rem 1.2rem;margin-bottom:2rem;
+  font-size:.8rem;font-family:'Segoe UI',Arial,sans-serif;
+  color:var(--ink2);line-height:1.6;
+}
+.note-box strong{color:var(--brown)}
+
+footer{
+  background:var(--brown);color:rgba(253,248,240,.5);
+  text-align:center;padding:2rem;
+  font-size:.75rem;font-family:'Segoe UI',Arial,sans-serif;
+}
+footer a{color:var(--gold3);text-decoration:none}
+footer a:hover{text-decoration:underline}
+.footer-brand{
+  font-family:Georgia,serif;font-size:1.1rem;
+  color:var(--cream);margin-bottom:.5rem;font-weight:700;
+}
+
+#btt{
+  position:fixed;bottom:1.8rem;right:1.8rem;width:42px;height:42px;
+  border-radius:50%;background:var(--brown);color:var(--gold3);
+  border:2px solid var(--gold);cursor:pointer;font-size:1rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(20px);transition:opacity .3s,transform .3s;
+  z-index:999;box-shadow:0 4px 14px rgba(74,44,10,.3);
+}
+#btt.visible{opacity:1;transform:translateY(0)}
+#btt:hover{background:var(--gold);color:var(--brown)}
+
+@media(max-width:960px){.res-grid{grid-template-columns:1fr 1fr}.res-card.featured{flex-direction:column}}
+@media(max-width:600px){.res-grid{grid-template-columns:1fr}.nav-links{display:none}.hs-sep{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="analyse.html" class="nav-back">← Analyse des données</a>
+  <div class="nav-brand">Biblio<span>Hydro</span></div>
+  <div class="nav-links">
+    <a href="#livres">📚 Livres</a>
+    <a href="#articles">📄 Articles</a>
+    <a href="#logiciels">💻 Logiciels</a>
+    <a href="#donnees">🌐 Données</a>
+    <a href="#normes">⚖️ Normes</a>
+  </div>
+  <a href="calculator.html" style="color:var(--brown);font-size:.75rem;font-weight:700;text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;border:1.5px solid var(--brown3);padding:.3rem .8rem;border-radius:5px;white-space:nowrap">🧮 Calculateurs</a>
+  <a href="profil.html" style="color:var(--brown);font-size:.75rem;font-weight:700;text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;border:1.5px solid var(--brown3);padding:.3rem .8rem;border-radius:5px;white-space:nowrap">👤 Profil</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">📚 Ressources académiques · INE–UAC · Licence</div>
+    <h1>Bibliothèque <span>Hydrologique</span></h1>
+    <p>Livres fondamentaux, articles scientifiques, logiciels, portails de données et normes sélectionnés pour la filière Hydrologie Quantitative &amp; GIRE.</p>
+    <div class="hero-stats">
+      <div class="hs-item"><span class="hs-val">25+</span><span class="hs-label">Livres & manuels</span></div>
+      <div class="hs-sep"></div>
+      <div class="hs-item"><span class="hs-val">18</span><span class="hs-label">Articles & revues</span></div>
+      <div class="hs-sep"></div>
+      <div class="hs-item"><span class="hs-val">12</span><span class="hs-label">Logiciels gratuits</span></div>
+      <div class="hs-sep"></div>
+      <div class="hs-item"><span class="hs-val">15</span><span class="hs-label">Portails de données</span></div>
+      <div class="hs-sep"></div>
+      <div class="hs-item"><span class="hs-val">10</span><span class="hs-label">Normes & textes</span></div>
+    </div>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1440 60" preserveAspectRatio="none">
+    <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#fdf8f0"/>
+  </svg>
+</div>
+
+<div class="main">
+
+  <div class="filter-bar">
+    <span class="filter-label">Filtrer :</span>
+    <button class="fbtn active" onclick="filterRes('all',this)">Tout</button>
+    <button class="fbtn" onclick="filterRes('livre',this)">📚 Livres</button>
+    <button class="fbtn" onclick="filterRes('article',this)">📄 Articles</button>
+    <button class="fbtn" onclick="filterRes('logiciel',this)">💻 Logiciels</button>
+    <button class="fbtn" onclick="filterRes('web',this)">🌐 Données</button>
+    <button class="fbtn" onclick="filterRes('norme',this)">⚖️ Normes</button>
+    <button class="fbtn" onclick="filterRes('gratuit',this)">🆓 Gratuit</button>
+    <input type="text" id="searchInput" placeholder="🔍 Rechercher..." oninput="searchRes(this.value)"/>
+    <span class="count-badge" id="countBadge">80 ressources</span>
+  </div>
+
+  <div id="livres">
+    <div class="sec-header">
+      <div class="sec-icon si1">📚</div>
+      <div>
+        <div class="sec-title">Livres &amp; Manuels d'Hydrologie</div>
+        <div class="sec-sub">Ouvrages fondamentaux recommandés pour la Licence et au-delà</div>
+      </div>
+    </div>
+
+    <div class="res-grid">
+
+      <div class="res-card featured" data-cat="livre" data-free="false" data-kw="hydrologie statistique chow maidment mays">
+        <div class="rc-emoji">📘</div>
+        <div style="flex:1">
+          <div class="rc-top" style="margin-bottom:.6rem">
+            <div>
+              <span class="rc-type type-livre">Manuel fondamental</span>
+              <div class="rc-title">Applied Hydrology</div>
+              <div class="rc-authors">Chow, V.T., Maidment, D.R. &amp; Mays, L.W. — McGraw-Hill, 1988</div>
+            </div>
+          </div>
+          <div class="rc-desc">La référence mondiale de l'hydrologie appliquée. Couvre l'ensemble du cycle hydrologique, les méthodes statistiques (Gumbel, Pearson III), la modélisation pluie-débit, les crues et étiages. Indispensable pour tout hydrologue. Traduit dans de nombreuses langues.</div>
+          <div class="rc-footer">
+            <div class="rc-tags"><span class="rc-tag">Statistiques</span><span class="rc-tag">Crues</span><span class="rc-tag">Modélisation</span><span class="rc-tag">Fondamental</span></div>
+            <a href="https://www.amazon.fr" class="rc-link" target="_blank">Trouver →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="false" data-kw="hydrologie générale musy soutter">
+        <div class="rc-top">
+          <div class="rc-emoji">📗</div>
+          <div><span class="rc-type type-livre">Manuel</span><div class="rc-title">Hydrologie — Une science de la nature</div><div class="rc-authors">Musy, A. &amp; Soutter, M. — PPUR, 1991</div></div>
+        </div>
+        <div class="rc-desc">Manuel en français couvrant tous les processus hydrologiques : précipitations, évapotranspiration, ruissellement, écoulements souterrains et bilans. Très utilisé dans les universités francophones d'Afrique de l'Ouest.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Francophone</span><span class="rc-tag">Bilan hydrique</span></div>
+          <a href="https://www.ppur.org" class="rc-link" target="_blank">Éditeur →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="true" data-kw="hydrologie surface Roche Dubreuil Loudet">
+        <div class="rc-top">
+          <div class="rc-emoji">📙</div>
+          <div><span class="rc-type type-livre">Manuel ORSTOM</span><div class="rc-title">Hydrologie de Surface</div><div class="rc-authors">Roche, M.A. — ORSTOM / Masson, 1963</div></div>
+        </div>
+        <div class="rc-desc">Classique de l'hydrologie tropicale africaine. Particulièrement adapté aux bassins sahéliens et soudaniens. Méthodes de jaugeage, courbes de tarage, régimes hydrologiques d'Afrique de l'Ouest.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Afrique</span><span class="rc-tag">Jaugeage</span><span class="rc-tag">ORSTOM</span></div>
+          <a href="https://horizon.documentation.ird.fr" class="rc-link gratuit" target="_blank">🆓 Gratuit →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="false" data-kw="groundwater hydrology Todd Mays eaux souterraines">
+        <div class="rc-top">
+          <div class="rc-emoji">📕</div>
+          <div><span class="rc-type type-livre">Hydrogéologie</span><div class="rc-title">Groundwater Hydrology</div><div class="rc-authors">Todd, D.K. &amp; Mays, L.W. — Wiley, 3e éd., 2005</div></div>
+        </div>
+        <div class="rc-desc">Référence mondiale en hydrogéologie. Aquifères, essais de pompage (Theis, Jacob, Dupuit), modélisation des nappes, qualité des eaux souterraines. Indispensable pour la section hydrogéologie de la Licence.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Aquifères</span><span class="rc-tag">Pompage</span><span class="rc-tag">Darcy</span></div>
+          <a href="https://www.wiley.com" class="rc-link" target="_blank">Éditeur →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="true" data-kw="statistiques hydrologie Musy cours EPFL">
+        <div class="rc-top">
+          <div class="rc-emoji">📊</div>
+          <div><span class="rc-type type-livre">Cours en ligne</span><div class="rc-title">Hydrologie — e-drologie</div><div class="rc-authors">Musy, A. — EPFL / IRD, 2005 (version numérique)</div></div>
+        </div>
+        <div class="rc-desc">Version numérique complète et gratuite du cours d'hydrologie de l'EPFL. Couvre tous les thèmes de la Licence : précipitations, bilan hydrique, crues, statistiques, SIG hydrologique.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">EPFL</span><span class="rc-tag">Gratuit</span><span class="rc-tag">Complet</span></div>
+          <a href="http://echo2.epfl.ch/e-drologie/" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="false" data-kw="GIRE gestion intégrée ressources eau Tortajada Biswas">
+        <div class="rc-top">
+          <div class="rc-emoji">🌍</div>
+          <div><span class="rc-type type-livre">GIRE</span><div class="rc-title">Water as a Human Right for All</div><div class="rc-authors">Biswas, A.K. &amp; Tortajada, C. — Routledge, 2011</div></div>
+        </div>
+        <div class="rc-desc">Analyse approfondie de la GIRE, du droit humain à l'eau et des politiques de l'eau à l'échelle mondiale. Très utile pour la partie gouvernance et institutions de la filière.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">GIRE</span><span class="rc-tag">Gouvernance</span><span class="rc-tag">ODD 6</span></div>
+          <a href="https://www.routledge.com" class="rc-link" target="_blank">Éditeur →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="true" data-kw="hydraulique générale Lencastre open channel manning strickler">
+        <div class="rc-top">
+          <div class="rc-emoji">🌊</div>
+          <div><span class="rc-type type-livre">Hydraulique</span><div class="rc-title">Hydraulique Générale et Appliquée</div><div class="rc-authors">Lencastre, A. — Eyrolles, 1995</div></div>
+        </div>
+        <div class="rc-desc">Manuel de référence en hydraulique : écoulements en charge et à surface libre, formule de Manning-Strickler, ouvrages hydrauliques, pompes. Base essentielle pour le dimensionnement des ouvrages.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Manning</span><span class="rc-tag">Canaux</span><span class="rc-tag">Ouvrages</span></div>
+          <a href="https://www.eyrolles.com" class="rc-link" target="_blank">Éditeur →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="false" data-kw="qualité eau Rodier analyse chimique physicochimique">
+        <div class="rc-top">
+          <div class="rc-emoji">🔬</div>
+          <div><span class="rc-type type-livre">Qualité des eaux</span><div class="rc-title">L'analyse de l'eau — Eaux naturelles, résiduaires, eau de mer</div><div class="rc-authors">Rodier, J. &amp; al. — Dunod, 9e éd., 2009</div></div>
+        </div>
+        <div class="rc-desc">La bible de l'analyse des eaux en langue française. Méthodes physico-chimiques et bactériologiques. Normes OMS et françaises. Indispensable pour les TP de qualité des eaux et les analyses de terrain.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Analyses</span><span class="rc-tag">Normes OMS</span><span class="rc-tag">Labo</span></div>
+          <a href="https://www.dunod.com" class="rc-link" target="_blank">Éditeur →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="livre" data-free="true" data-kw="HEC-HMS user manual hydraulic engineering center">
+        <div class="rc-top">
+          <div class="rc-emoji">📐</div>
+          <div><span class="rc-type type-livre">Manuel technique</span><div class="rc-title">HEC-HMS User's Manual</div><div class="rc-authors">US Army Corps of Engineers — HEC, 2023</div></div>
+        </div>
+        <div class="rc-desc">Manuel officiel du logiciel HEC-HMS. Méthodes de pertes, transformation pluie-débit, hydrogramme unitaire SCS, routage de Muskingum. Téléchargeable gratuitement sur le site officiel du HEC.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">HEC-HMS</span><span class="rc-tag">Officiel</span><span class="rc-tag">Anglais</span></div>
+          <a href="https://www.hec.usace.army.mil/software/hec-hms/" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="articles">
+    <div class="sec-header">
+      <div class="sec-icon si2">📄</div>
+      <div>
+        <div class="sec-title">Articles Scientifiques &amp; Revues de Référence</div>
+        <div class="sec-sub">Publications incontournables en hydrologie quantitative et GIRE</div>
+      </div>
+    </div>
+
+    <div class="res-grid">
+
+      <div class="res-card" data-cat="article" data-free="true" data-kw="HESS hydrology earth system sciences open access EGU">
+        <div class="rc-top">
+          <div class="rc-emoji">🌐</div>
+          <div><span class="rc-type type-article">Revue internationale</span><div class="rc-title">Hydrology and Earth System Sciences (HESS)</div><div class="rc-authors">European Geosciences Union (EGU) — Open Access</div></div>
+        </div>
+        <div class="rc-desc">La principale revue mondiale d'hydrologie en accès libre. Publie des articles sur tous les aspects de l'hydrologie : modélisation, changement climatique, GIRE, eaux souterraines. Recommandée pour la veille scientifique.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Open Access</span><span class="rc-tag">Mondial</span></div>
+          <a href="https://www.hydrology-and-earth-system-sciences.net" class="rc-link gratuit" target="_blank">🆓 Lire →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="article" data-free="false" data-kw="Journal Hydrology Elsevier international">
+        <div class="rc-top">
+          <div class="rc-emoji">📰</div>
+          <div><span class="rc-type type-article">Revue internationale</span><div class="rc-title">Journal of Hydrology</div><div class="rc-authors">Elsevier — depuis 1963</div></div>
+        </div>
+        <div class="rc-desc">L'une des revues les plus citées en hydrologie. Couvre les eaux de surface et souterraines, les crues, la qualité des eaux et les impacts climatiques. Accès via les bibliothèques universitaires.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Elsevier</span><span class="rc-tag">IF élevé</span></div>
+          <a href="https://www.sciencedirect.com/journal/journal-of-hydrology" class="rc-link" target="_blank">Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="article" data-free="true" data-kw="Hydrological Sciences Journal IAHS Afrique">
+        <div class="rc-top">
+          <div class="rc-emoji">🔬</div>
+          <div><span class="rc-type type-article">Revue IAHS</span><div class="rc-title">Hydrological Sciences Journal</div><div class="rc-authors">International Association of Hydrological Sciences (IAHS)</div></div>
+        </div>
+        <div class="rc-desc">Revue officielle de l'IAHS. Publie régulièrement des études sur l'hydrologie tropicale et les bassins versants d'Afrique sub-saharienne. Articles en français et anglais disponibles.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">IAHS</span><span class="rc-tag">Afrique</span><span class="rc-tag">Français</span></div>
+          <a href="https://www.tandfonline.com/journals/thsj20" class="rc-link" target="_blank">Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="article" data-free="true" data-kw="Sécheresse revue Afrique subsaharienne eau ressources">
+        <div class="rc-top">
+          <div class="rc-emoji">☀️</div>
+          <div><span class="rc-type type-article">Revue francophone</span><div class="rc-title">Revue Sécheresse</div><div class="rc-authors">John Libbey Eurotext — Afrique et pays du Sud</div></div>
+        </div>
+        <div class="rc-desc">Revue francophone dédiée aux problèmes d'eau et de sécheresse dans les pays du Sud. Articles sur les ressources en eau, la gestion des aléas climatiques et la vulnérabilité en Afrique de l'Ouest.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Francophone</span><span class="rc-tag">Sécheresse</span><span class="rc-tag">Afrique</span></div>
+          <a href="https://www.jle.com/fr/revues/sec/sommaire.phtml" class="rc-link gratuit" target="_blank">🆓 Consulter →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="article" data-free="true" data-kw="ResearchGate Academia articles gratuits hydrologie">
+        <div class="rc-top">
+          <div class="rc-emoji">🔍</div>
+          <div><span class="rc-type type-article">Plateforme</span><div class="rc-title">ResearchGate — Articles hydrologiques gratuits</div><div class="rc-authors">Plateforme académique mondiale</div></div>
+        </div>
+        <div class="rc-desc">Plateforme de partage d'articles scientifiques. De nombreux auteurs y déposent leurs articles en accès libre. Rechercher par mots-clés : "hydrology Benin", "West Africa water", "GIRE Afrique".</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Gratuit</span><span class="rc-tag">Tous domaines</span></div>
+          <a href="https://www.researchgate.net" class="rc-link gratuit" target="_blank">🆓 Rechercher →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="article" data-free="true" data-kw="Google Scholar articles gratuits citations hydrologie">
+        <div class="rc-top">
+          <div class="rc-emoji">🎓</div>
+          <div><span class="rc-type type-article">Moteur de recherche</span><div class="rc-title">Google Scholar</div><div class="rc-authors">Google — Recherche académique mondiale</div></div>
+        </div>
+        <div class="rc-desc">Moteur de recherche d'articles scientifiques. Nombreux articles en accès libre (PDF). Rechercher : "Ouémé hydrology", "Mono basin Benin", "GIRE Bénin", "Manning-Strickler tropical".</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Gratuit</span><span class="rc-tag">Moteur</span></div>
+          <a href="https://scholar.google.com" class="rc-link gratuit" target="_blank">🆓 Rechercher →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="logiciels">
+    <div class="sec-header">
+      <div class="sec-icon si3">💻</div>
+      <div>
+        <div class="sec-title">Logiciels &amp; Outils — Téléchargements</div>
+        <div class="sec-sub">Tous les logiciels utilisés dans la filière — majorité gratuite</div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Conseil :</strong> Tous les logiciels marqués 🆓 sont entièrement gratuits et librement téléchargeables. Priorité à R + QGIS + HEC-HMS pour la Licence S3A54.
+    </div>
+
+    <div class="res-grid">
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="R logiciel statistique hydrologie gratuit CRAN">
+        <div class="rc-top">
+          <div class="rc-emoji">📊</div>
+          <div><span class="rc-type type-logiciel">Statistiques</span><div class="rc-title">R + RStudio</div><div class="rc-authors">R Foundation — CRAN · Gratuit &amp; Open Source</div></div>
+        </div>
+        <div class="rc-desc">Le logiciel de référence pour l'analyse statistique hydrologique. Packages essentiels : <strong>hydroTSM</strong> (séries temporelles), <strong>lmom</strong> (moments L), <strong>fitdistrplus</strong> (ajustement lois), <strong>ggplot2</strong> (graphiques), <strong>evd</strong> (valeurs extrêmes).</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Essentiel</span><span class="rc-tag">Windows/Mac/Linux</span></div>
+          <a href="https://cran.r-project.org" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="QGIS SIG cartographie bassin versant open source">
+        <div class="rc-top">
+          <div class="rc-emoji">🗺️</div>
+          <div><span class="rc-type type-logiciel">SIG</span><div class="rc-title">QGIS</div><div class="rc-authors">QGIS Development Team · Open Source</div></div>
+        </div>
+        <div class="rc-desc">Système d'Information Géographique libre. Délimitation des bassins versants (SAGA/GRASS), calcul des paramètres morphométriques, cartographie des zones inondables. Plugin QGIS-HEC-HMS disponible.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Essentiel</span><span class="rc-tag">Multiplateforme</span></div>
+          <a href="https://www.qgis.org/fr/site/forusers/download.html" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="HEC-HMS modélisation pluie-débit US Army gratuit">
+        <div class="rc-top">
+          <div class="rc-emoji">🌊</div>
+          <div><span class="rc-type type-logiciel">Modélisation</span><div class="rc-title">HEC-HMS 4.x</div><div class="rc-authors">U.S. Army Corps of Engineers · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Modèle pluie-débit semi-distribué. Méthodes SCS-CN, Green-Ampt, Muskingum, hydrogramme unitaire. Interface graphique intuitive. Téléchargeable directement sur le site du HEC.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Essentiel</span><span class="rc-tag">Windows</span></div>
+          <a href="https://www.hec.usace.army.mil/software/hec-hms/" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="HEC-RAS modélisation hydraulique inondation 2D">
+        <div class="rc-top">
+          <div class="rc-emoji">🏗️</div>
+          <div><span class="rc-type type-logiciel">Hydraulique</span><div class="rc-title">HEC-RAS 6.x</div><div class="rc-authors">U.S. Army Corps of Engineers · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Modélisation hydraulique 1D/2D des cours d'eau. Calcul des lignes d'eau, cartographie des inondations, simulation non-permanente. Couplage avec QGIS pour les cartes de risque.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Inondations</span><span class="rc-tag">2D</span></div>
+          <a href="https://www.hec.usace.army.mil/software/hec-ras/" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="SWAT modélisation bassin versant semi-distribué ArcSWAT">
+        <div class="rc-top">
+          <div class="rc-emoji">🌱</div>
+          <div><span class="rc-type type-logiciel">Modélisation</span><div class="rc-title">SWAT+ / SWAT-CUP</div><div class="rc-authors">USDA-ARS · Texas A&amp;M University · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Modèle semi-distribué continu. Simulation de l'impact des changements d'occupation des sols et du climat. SWAT-CUP pour la calibration automatique. Interface QGIS-SWAT disponible.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Changement climatique</span><span class="rc-tag">Bassins</span></div>
+          <a href="https://swat.tamu.edu" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="logiciel" data-free="true" data-kw="SRTM MNT modèle numérique terrain USGS EarthExplorer">
+        <div class="rc-top">
+          <div class="rc-emoji">🛰️</div>
+          <div><span class="rc-type type-logiciel">Données</span><div class="rc-title">EarthExplorer USGS (MNT SRTM/ASTER)</div><div class="rc-authors">U.S. Geological Survey · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Téléchargement gratuit des MNT SRTM (30m) et ASTER GDEM pour la délimitation des bassins versants sous QGIS. Couverture mondiale. Inscription gratuite requise.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">MNT</span><span class="rc-tag">SRTM 30m</span><span class="rc-tag">Gratuit</span></div>
+          <a href="https://earthexplorer.usgs.gov" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="donnees">
+    <div class="sec-header">
+      <div class="sec-icon si4">🌐</div>
+      <div>
+        <div class="sec-title">Sites Web &amp; Portails de Données Hydrologiques</div>
+        <div class="sec-sub">Données pluviométriques, hydrométriques et climatiques accessibles en ligne</div>
+      </div>
+    </div>
+
+    <div class="res-grid">
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="SIEREM données hydroclima Afrique IRD base hydrologique">
+        <div class="rc-top">
+          <div class="rc-emoji">🌍</div>
+          <div><span class="rc-type type-web">Base de données</span><div class="rc-title">SIEREM — Système d'Information Environnemental sur les Ressources en Eau et leur Modélisation</div><div class="rc-authors">IRD / HSM Montpellier · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Base de données hydrochimique et hydrologique de l'IRD couvrant l'Afrique. Débits, précipitations et qualité des eaux pour de nombreux bassins africains dont le bassin de l'Ouémé et du Niger au Bénin.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">IRD</span><span class="rc-tag">Afrique</span><span class="rc-tag">Bénin</span></div>
+          <a href="http://www.sisyphe.ird.fr/~sierem/" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="FAO AQUASTAT eau agriculture pays monde">
+        <div class="rc-top">
+          <div class="rc-emoji">🌾</div>
+          <div><span class="rc-type type-web">Portail FAO</span><div class="rc-title">AQUASTAT — FAO Global Water Information System</div><div class="rc-authors">Food and Agriculture Organization (FAO) · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Base de données mondiale sur l'eau et l'agriculture. Ressources en eau par pays, irrigation, usage de l'eau. Fiches pays détaillées pour le Bénin : ressources renouvelables, prélèvements sectoriels.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">FAO</span><span class="rc-tag">Mondial</span><span class="rc-tag">Irrigation</span></div>
+          <a href="https://www.fao.org/aquastat" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="CHIRPS pluies satellite Afrique Climate Hazards UCSB">
+        <div class="rc-top">
+          <div class="rc-emoji">🌧️</div>
+          <div><span class="rc-type type-web">Données satellite</span><div class="rc-title">CHIRPS — Climate Hazards Group InfraRed Precipitation</div><div class="rc-authors">UCSB / USGS · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Données de précipitations par satellite avec résolution 0,05° et pas journalier depuis 1981. Couvre l'Afrique de l'Ouest. Très utile pour combler les lacunes des réseaux pluviométriques peu denses.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Satellite</span><span class="rc-tag">Journalier</span><span class="rc-tag">1981–présent</span></div>
+          <a href="https://www.chc.ucsb.edu/data/chirps" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="GPM IMERG précipitations NASA satellite global">
+        <div class="rc-top">
+          <div class="rc-emoji">🛰️</div>
+          <div><span class="rc-type type-web">NASA / JAXA</span><div class="rc-title">GPM IMERG — Global Precipitation Measurement</div><div class="rc-authors">NASA / JAXA · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Produit de précipitations mondiales à 0,1° et 30 minutes depuis 2000. Calibré avec les données des pluviomètres. Accès via NASA GES DISC. Outil puissant pour l'étude des événements extrêmes.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">NASA</span><span class="rc-tag">30 min</span><span class="rc-tag">Extrêmes</span></div>
+          <a href="https://gpm.nasa.gov/data/imerg" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="Copernicus Sentinel données environnement Europe ESA gratuit">
+        <div class="rc-top">
+          <div class="rc-emoji">🇪🇺</div>
+          <div><span class="rc-type type-web">ESA / Copernicus</span><div class="rc-title">Copernicus Open Access Hub (Sentinel)</div><div class="rc-authors">European Space Agency · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Données gratuites des satellites Sentinel-1 (radar SAR, inondations), Sentinel-2 (optique 10m, NDWI, NDVI) et Sentinel-3. Inscription gratuite. Outil indispensable pour la cartographie des zones humides.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Sentinel</span><span class="rc-tag">SAR</span><span class="rc-tag">NDWI</span></div>
+          <a href="https://dataspace.copernicus.eu" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="DG-Eau Bénin données hydrologiques stations réseau">
+        <div class="rc-top">
+          <div class="rc-emoji">🇧🇯</div>
+          <div><span class="rc-type type-donnees">Bénin</span><div class="rc-title">DG-Eau — Direction Générale de l'Eau du Bénin</div><div class="rc-authors">Ministère de l'Eau et des Mines · Bénin</div></div>
+        </div>
+        <div class="rc-desc">Institution nationale de référence pour les données hydrologiques du Bénin. Gère le réseau de stations hydrométriques et pluviométriques. Contact pour obtenir les données des stations de l'Ouémé, du Mono et de la Pendjari.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Bénin</span><span class="rc-tag">National</span><span class="rc-tag">Officiel</span></div>
+          <a href="https://www.gouv.bj" class="rc-link gratuit" target="_blank">🆓 Contacter →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="GRACE TWS stockage eau nappe NASA JPL gravité">
+        <div class="rc-top">
+          <div class="rc-emoji">🌕</div>
+          <div><span class="rc-type type-web">NASA / DLR</span><div class="rc-title">GRACE-FO — Total Water Storage (TWS)</div><div class="rc-authors">NASA Jet Propulsion Laboratory · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Données de variation du stockage total en eau (nappes, sols, lacs) à l'échelle régionale par gravimétrie satellitaire. Idéal pour le suivi des nappes à grande échelle en Afrique de l'Ouest.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Nappes</span><span class="rc-tag">Régional</span></div>
+          <a href="https://grace.jpl.nasa.gov" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="web" data-free="true" data-kw="GloFAS prévisions crues global Copernicus ECMWF">
+        <div class="rc-top">
+          <div class="rc-emoji">🌊</div>
+          <div><span class="rc-type type-web">ECMWF / Copernicus</span><div class="rc-title">GloFAS — Global Flood Awareness System</div><div class="rc-authors">European Centre for Medium-Range Weather Forecasts · Gratuit</div></div>
+        </div>
+        <div class="rc-desc">Système d'alerte précoce aux crues à l'échelle mondiale. Prévisions à 30 jours des débits fluviaux. Données historiques de 1979 à aujourd'hui pour tous les bassins mondiaux dont ceux du Bénin.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Crues</span><span class="rc-tag">Prévision</span><span class="rc-tag">Temps réel</span></div>
+          <a href="https://global-flood-awareness-system.ec.europa.eu" class="rc-link gratuit" target="_blank">🆓 Accéder →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="normes">
+    <div class="sec-header">
+      <div class="sec-icon si5">⚖️</div>
+      <div>
+        <div class="sec-title">Normes, Réglementations &amp; Textes de Référence</div>
+        <div class="sec-sub">Cadres légaux et normatifs de la gestion des ressources en eau</div>
+      </div>
+    </div>
+
+    <div class="res-grid">
+
+      <div class="res-card featured" data-cat="norme" data-free="true" data-kw="OMS normes eau potable qualité guidelines drinking water">
+        <div class="rc-emoji">🏥</div>
+        <div style="flex:1">
+          <div class="rc-top">
+            <div>
+              <span class="rc-type type-norme">OMS / WHO</span>
+              <div class="rc-title">Guidelines for Drinking-Water Quality (4e édition)</div>
+              <div class="rc-authors">Organisation Mondiale de la Santé — WHO, 2022</div>
+            </div>
+          </div>
+          <div class="rc-desc">La référence mondiale pour la qualité de l'eau potable. Valeurs guides pour les paramètres physico-chimiques (pH, nitrates, fluorures, métaux lourds) et microbiologiques (E. coli, coliformes). Mise à jour régulière. Téléchargeable gratuitement en anglais et français.</div>
+          <div class="rc-footer">
+            <div class="rc-tags"><span class="rc-tag">Normes OMS</span><span class="rc-tag">Qualité eau</span><span class="rc-tag">International</span><span class="rc-tag">Fondamental</span></div>
+            <a href="https://www.who.int/publications/i/item/9789240045064" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="ODD 6 eau assainissement développement durable agenda 2030 ONU">
+        <div class="rc-top">
+          <div class="rc-emoji">🎯</div>
+          <div><span class="rc-type type-norme">ONU / Agenda 2030</span><div class="rc-title">ODD 6 — Objectif de Développement Durable N°6</div><div class="rc-authors">Nations Unies — Agenda 2030 pour le développement durable</div></div>
+        </div>
+        <div class="rc-desc">Texte officiel de l'ODD 6 : garantir l'accès de tous à l'eau potable et à l'assainissement d'ici 2030. Comprend les 8 cibles (6.1 à 6.b) et les indicateurs de suivi. Cadre de référence obligatoire pour la GIRE.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">ODD 6</span><span class="rc-tag">2030</span><span class="rc-tag">WASH</span></div>
+          <a href="https://sdgs.un.org/goals/goal6" class="rc-link gratuit" target="_blank">🆓 Consulter →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="Code eau Bénin 2010 loi ressources hydrologiques">
+        <div class="rc-top">
+          <div class="rc-emoji">🇧🇯</div>
+          <div><span class="rc-type type-norme">Loi nationale</span><div class="rc-title">Code de l'Eau du Bénin (2010)</div><div class="rc-authors">République du Bénin — Assemblée Nationale, 2010</div></div>
+        </div>
+        <div class="rc-desc">Loi n°2010-44 portant gestion de l'eau en République du Bénin. Cadre juridique national régissant l'accès, l'utilisation et la protection des ressources en eau. Intègre les principes GIRE et la gestion par bassin versant.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Bénin</span><span class="rc-tag">National</span><span class="rc-tag">GIRE</span></div>
+          <a href="https://www.jo.gouv.bj" class="rc-link gratuit" target="_blank">🆓 Journal Officiel →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="Dublin principes eau 1992 GIRE GWP gouvernance">
+        <div class="rc-top">
+          <div class="rc-emoji">🌊</div>
+          <div><span class="rc-type type-norme">Déclaration internationale</span><div class="rc-title">Déclaration de Dublin sur l'Eau (1992)</div><div class="rc-authors">Conférence internationale sur l'eau et l'environnement — Dublin, 1992</div></div>
+        </div>
+        <div class="rc-desc">Les 4 principes fondateurs de la GIRE adoptés à Dublin : ressource finie, approche participative, rôle des femmes, valeur économique de l'eau. Base conceptuelle de toute politique moderne de l'eau.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">GIRE</span><span class="rc-tag">Fondateur</span><span class="rc-tag">1992</span></div>
+          <a href="https://www.gwp.org/fr/GWP-CEA/A-PROPOS/GIRE/" class="rc-link gratuit" target="_blank">🆓 Consulter →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="Convention New York 1997 cours eau internationaux ONU droit">
+        <div class="rc-top">
+          <div class="rc-emoji">🏛️</div>
+          <div><span class="rc-type type-norme">Droit international</span><div class="rc-title">Convention de New York sur les Cours d'Eau Internationaux (1997)</div><div class="rc-authors">Nations Unies — en vigueur depuis 2014</div></div>
+        </div>
+        <div class="rc-desc">Convention sur le droit relatif aux utilisations des cours d'eau internationaux à des fins autres que la navigation. Principes d'utilisation équitable et d'obligation de ne pas causer de dommages significatifs.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">Transfrontalier</span><span class="rc-tag">Droit</span><span class="rc-tag">ONU</span></div>
+          <a href="https://legal.un.org/ilc/texts/instruments/english/conventions/8_3_1997.pdf" class="rc-link gratuit" target="_blank">🆓 PDF →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="GWP GIRE plan stratégique Afrique West Africa partenariat eau">
+        <div class="rc-top">
+          <div class="rc-emoji">🤝</div>
+          <div><span class="rc-type type-norme">GWP</span><div class="rc-title">Stratégie GWP — Eau, Climat &amp; Développement (2020–2025)</div><div class="rc-authors">Global Water Partnership — Partenariat Mondial pour l'Eau</div></div>
+        </div>
+        <div class="rc-desc">Plan stratégique du GWP pour la période 2020–2025. Feuille de route pour la GIRE en Afrique de l'Ouest, l'adaptation climatique et l'atteinte de l'ODD 6. Cadre de référence pour les praticiens de l'eau.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">GWP</span><span class="rc-tag">Afrique Ouest</span><span class="rc-tag">Stratégie</span></div>
+          <a href="https://www.gwp.org/en/gwp-in-action/strategy/" class="rc-link gratuit" target="_blank">🆓 Télécharger →</a>
+        </div>
+      </div>
+
+      <div class="res-card" data-cat="norme" data-free="true" data-kw="GIEC IPCC AR6 changement climatique eau rapport 2021">
+        <div class="rc-top">
+          <div class="rc-emoji">🌡️</div>
+          <div><span class="rc-type type-norme">GIEC / IPCC</span><div class="rc-title">Rapport AR6 du GIEC — Eau &amp; Changement Climatique (2021–2022)</div><div class="rc-authors">Groupe d'experts Intergouvernemental sur l'Évolution du Climat</div></div>
+        </div>
+        <div class="rc-desc">6ème rapport d'évaluation du GIEC. Chapitres sur les ressources en eau, l'Afrique et les extrêmes hydrologiques. Base scientifique pour l'adaptation climatique du secteur de l'eau en Afrique de l'Ouest.</div>
+        <div class="rc-footer">
+          <div class="rc-tags"><span class="rc-tag">GIEC</span><span class="rc-tag">AR6</span><span class="rc-tag">Adaptation</span></div>
+          <a href="https://www.ipcc.ch/report/ar6/wg2/" class="rc-link gratuit" target="_blank">🆓 Rapport →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-brand">Bibliothèque Hydrologique · INE–UAC</div>
+  <p>
+    <a href="index.html">📘 Hydrologie</a> &nbsp;·&nbsp;
+    <a href="calculator.html">🧮 Calculateurs</a> &nbsp;·&nbsp;
+    <a href="profil.html">👤 Profil</a>
+  </p>
+  <p style="margin-top:.5rem">Licence · Hydrologie Quantitative &amp; GIRE · INE · Université d'Abomey-Calavi · Bénin <a href="index.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="calculator.html" style="color:var(--cyan);text-decoration:none">Calculateurs</a> · <a href="analyse.html" style="color:var(--cyan);text-decoration:none">Analyse de données</a> </p>
+</footer>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+function filterRes(cat, btn) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.res-card');
+  let count = 0;
+  cards.forEach(card => {
+    const cardCat = card.dataset.cat;
+    const isFree = card.dataset.free === 'true';
+    const show = cat === 'all' || cardCat === cat || (cat === 'gratuit' && isFree);
+    card.style.display = show ? 'flex' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('countBadge').textContent = count + ' ressource' + (count > 1 ? 's' : '');
+}
+
+function searchRes(val) {
+  const q = val.toLowerCase().trim();
+  const cards = document.querySelectorAll('.res-card');
+  let count = 0;
+  cards.forEach(card => {
+    const kw = (card.dataset.kw || '') + ' ' + card.textContent.toLowerCase();
+    const show = !q || kw.includes(q);
+    card.style.display = show ? 'flex' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('countBadge').textContent = count + ' ressource' + (count > 1 ? 's' : '');
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('btt').classList.toggle('visible', window.scrollY > 300);
+});
+
+document.getElementById('countBadge').textContent =
+  document.querySelectorAll('.res-card').length + ' ressources';
+</script>
+</body>
+</html>

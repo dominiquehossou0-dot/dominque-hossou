@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Carte Hydrologique du Bénin — INE/UAC</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a1f3c'/><text y='.9em' font-size='72' x='10'>🗺️</text></svg>"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@8.2.0/ol.css"/>
+<script src="https://cdn.jsdelivr.net/npm/ol@8.2.0/dist/ol.js"></script>
+<style>
+:root{
+  --navy:#0a1f3c;--blue:#1565c0;--sky:#2196f3;--cyan:#00b4d8;
+  --light:#e8f4fd;--white:#fff;--g50:#f8fafc;--g100:#f1f5f9;
+  --g200:#e2e8f0;--g500:#64748b;--g700:#334155;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--navy);color:var(--g700)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:50px;
+    background:rgba(10,31,60,.97);backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(0,180,216,.2);
+    display:flex;align-items:center;gap:1rem;padding:0 1.2rem}
+.nav-back{color:var(--cyan);text-decoration:none;font-size:.72rem;font-weight:600;
+          padding:.28rem .7rem;border-radius:5px;border:1px solid var(--cyan);
+          transition:all .2s;white-space:nowrap;flex-shrink:0}
+.nav-back:hover{background:var(--cyan);color:var(--navy)}
+.nav-brand{font-weight:700;font-size:.92rem;color:#fff;margin-right:auto;white-space:nowrap}
+.nav-brand span{color:var(--cyan)}
+.nav-links{display:flex;gap:.15rem;flex-wrap:nowrap}
+.nav-links a{font-size:.68rem;color:rgba(255,255,255,.55);text-decoration:none;
+             padding:.28rem .55rem;border-radius:4px;transition:all .15s;white-space:nowrap}
+.nav-links a:hover{background:rgba(0,180,216,.15);color:var(--cyan)}
+
+.app-layout{display:flex;height:calc(100vh - 50px);margin-top:50px}
+
+.sidebar{width:280px;flex-shrink:0;background:var(--white);
+         border-right:1px solid var(--g200);overflow-y:auto;
+         display:flex;flex-direction:column;z-index:100}
+.sb-header{background:linear-gradient(135deg,var(--navy),#1a3a6e);
+           padding:1rem 1.2rem;flex-shrink:0}
+.sb-header h2{font-family:Georgia,serif;font-size:.95rem;color:#fff;margin-bottom:.2rem}
+.sb-header p{font-size:.7rem;color:rgba(255,255,255,.55)}
+.sb-body{padding:1rem;flex:1}
+.sb-section{margin-bottom:1.2rem}
+.sb-title{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+          color:var(--g500);margin-bottom:.6rem;padding-bottom:.35rem;
+          border-bottom:1px solid var(--g200)}
+
+.layer-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .7rem;
+            border-radius:8px;cursor:pointer;transition:background-colors .15s;
+            border:1px solid transparent;margin-bottom:.3rem}
+.layer-item:hover{background:var(--g50);border-color:var(--g200)}
+.layer-item.active{background:var(--light);border-color:rgba(21,101,192,.25)}
+.layer-checkbox{width:16px;height:16px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
+.layer-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.layer-name{font-size:.78rem;font-weight:500;color:var(--g700);flex:1}
+.layer-count{font-size:.62rem;color:var(--g500);background:var(--g100);
+             padding:.1rem .4rem;border-radius:100px}
+
+.basemap-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.bm-btn{padding:.5rem;border:1.5px solid var(--g200);border-radius:8px;
+        font-size:.72rem;font-family:inherit;cursor:pointer;
+        background:var(--g50);color:var(--g700);transition:all .2s;text-align:center}
+.bm-btn:hover,.bm-btn.active{background:var(--light);border-color:var(--blue);color:var(--blue);font-weight:600}
+
+.legend-item{display:flex;align-items:center;gap:.6rem;font-size:.72rem;
+             color:var(--g700);margin-bottom:.4rem}
+.leg-sym{width:20px;height:12px;border-radius:2px;flex-shrink:0}
+.leg-sym.circle{border-radius:50%;width:12px;height:12px}
+.leg-sym.line{height:3px}
+.leg-sym.dashed{height:2px;background:repeating-linear-gradient(90deg,currentColor 0,currentColor 4px,transparent 4px,transparent 8px)}
+
+.tool-btn{display:flex;align-items:center;gap:.5rem;width:100%;padding:.5rem .7rem;
+          border:1px solid var(--g200);border-radius:7px;font-size:.75rem;
+          font-family:inherit;cursor:pointer;background:var(--g50);color:var(--g700);
+          transition:all .2s;margin-bottom:.35rem;text-align:left}
+.tool-btn:hover{background:var(--light);border-color:var(--blue);color:var(--blue)}
+
+.map-wrap{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+.map-controls{position:absolute;top:1rem;right:1rem;z-index:500;
+              display:flex;flex-direction:column;gap:.4rem}
+.mc-btn{width:36px;height:36px;background:var(--white);border:1px solid var(--g200);
+        border-radius:8px;display:flex;align-items:center;justify-content:center;
+        cursor:pointer;font-size:1rem;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.mc-btn:hover{background:var(--light);border-color:var(--blue)}
+
+.ol-popup{position:absolute;background:var(--white);border-radius:12px;
+          box-shadow:0 8px 32px rgba(0,0,0,.2);padding:0;min-width:240px;
+          border:1px solid var(--g200);z-index:600}
+.ol-popup:after{content:'';position:absolute;top:100%;left:50%;margin-left:-8px;
+                border-width:8px;border-style:solid;
+                border-color:var(--white) transparent transparent transparent}
+.popup-header{background:linear-gradient(135deg,var(--navy),#1a3a6e);
+              border-radius:12px 12px 0 0;padding:.7rem 1rem;
+              display:flex;justify-content:space-between;align-items:center}
+.popup-title{font-size:.82rem;font-weight:700;color:#fff}
+.popup-close{background:transparent;border:none;color:rgba(255,255,255,.6);
+             cursor:pointer;font-size:1rem;padding:0;line-height:1;
+             transition:color .15s}
+.popup-close:hover{color:#fff}
+.popup-body{padding:.9rem 1rem;font-size:.78rem;color:var(--g700);line-height:1.7}
+.popup-row{display:flex;justify-content:space-between;padding:.25rem 0;
+           border-bottom:1px solid var(--g100)}
+.popup-row:last-child{border-bottom:none}
+.popup-key{color:var(--g500);font-size:.72rem}
+.popup-val{font-weight:600;color:var(--navy)}
+.popup-badge{display:inline-block;font-size:.62rem;font-weight:700;
+             padding:.15rem .5rem;border-radius:100px;margin-top:.3rem}
+
+.coords-bar{position:absolute;bottom:0;left:0;right:0;z-index:500;
+            background:rgba(10,31,60,.85);backdrop-filter:blur(8px);
+            padding:.3rem 1rem;display:flex;gap:1.5rem;align-items:center;
+            border-top:1px solid rgba(0,180,216,.2)}
+.coords-item{font-size:.68rem;color:rgba(255,255,255,.6);white-space:nowrap}
+.coords-item span{color:var(--cyan);font-weight:600}
+
+.ol-scale-line{background:rgba(10,31,60,.8);border-radius:4px;padding:2px 6px}
+.ol-scale-line-inner{color:#fff;border-color:#fff;font-size:10px}
+.ol-attribution{display:none}
+
+.notif{position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%) translateY(60px);
+       background:var(--navy);color:#fff;border-radius:10px;padding:.7rem 1.3rem;
+       font-size:.78rem;z-index:2000;opacity:0;transition:all .3s;
+       border-left:4px solid var(--cyan);white-space:nowrap;
+       box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.notif.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+.search-box{position:absolute;top:1rem;left:1rem;z-index:500;
+            display:flex;gap:.4rem;align-items:center}
+.search-input{padding:.5rem .9rem;border:none;border-radius:8px;font-size:.8rem;
+              font-family:inherit;background:var(--white);color:var(--g900);
+              box-shadow:0 2px 12px rgba(0,0,0,.15);outline:none;width:200px}
+.search-btn{width:34px;height:34px;background:var(--blue);border:none;border-radius:7px;
+            color:#fff;cursor:pointer;font-size:.9rem;display:flex;align-items:center;
+            justify-content:center;box-shadow:0 2px 8px rgba(21,101,192,.3)}
+.search-btn:hover{background:var(--sky)}
+
+.reset-view{position:absolute;bottom:2.5rem;right:1rem;z-index:500}
+.rv-btn{background:var(--white);border:1px solid var(--g200);border-radius:8px;
+        padding:.45rem .9rem;font-size:.72rem;font-weight:600;cursor:pointer;
+        font-family:inherit;color:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.1);
+        transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.rv-btn:hover{background:var(--light)}
+
+@media(max-width:768px){
+  .sidebar{width:240px}
+  .nav-links{display:none}
+}
+@media(max-width:600px){
+  .sidebar{position:absolute;left:-240px;z-index:800;transition:left .3s;top:50px;height:calc(100vh - 50px)}
+  .sidebar.open{left:0}
+  .map-wrap{width:100%}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-back">← Hydro</a>
+  <div class="nav-brand">Carte <span>Bénin</span></div>
+  <div class="nav-links">
+    <a href="analyse.html">📊 Analyse</a>
+    <a href="calculator.html">🧮 Calc</a>
+    <a href="BiblioHydro.html">📚 Biblio</a>
+    <a href="profil.html">👤 Profil</a>
+  </div>
+</nav>
+
+<div class="app-layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <h2>🗺️ Carte Hydrologique</h2>
+      <p>Bénin · Bassins versants &amp; ressources en eau</p>
+    </div>
+    <div class="sb-body">
+
+      <div class="sb-section">
+        <div class="sb-title">Couches cartographiques</div>
+
+        <div class="layer-item active" onclick="toggleLayer('bassins',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('bassins',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#1565c0;opacity:.7"></div>
+          <span class="layer-name">Bassins versants</span>
+          <span class="layer-count">4</span>
+        </div>
+
+        <div class="layer-item active" onclick="toggleLayer('cours_eau',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('cours_eau',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#00b4d8;height:3px;border-radius:2px"></div>
+          <span class="layer-name">Cours d'eau principaux</span>
+          <span class="layer-count">8</span>
+        </div>
+
+        <div class="layer-item active" onclick="toggleLayer('stations_hydro',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('stations_hydro',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#0891b2;border-radius:50%"></div>
+          <span class="layer-name">Stations hydrométriques</span>
+          <span class="layer-count">12</span>
+        </div>
+
+        <div class="layer-item active" onclick="toggleLayer('stations_pluv',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('stations_pluv',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#7c3aed;border-radius:50%"></div>
+          <span class="layer-name">Stations pluviométriques</span>
+          <span class="layer-count">18</span>
+        </div>
+
+        <div class="layer-item active" onclick="toggleLayer('barrages',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('barrages',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#d97706"></div>
+          <span class="layer-name">Barrages &amp; retenues</span>
+          <span class="layer-count">6</span>
+        </div>
+
+        <div class="layer-item active" onclick="toggleLayer('villes',this)">
+          <input type="checkbox" class="layer-checkbox" checked onchange="toggleLayer('villes',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#334155;border-radius:50%"></div>
+          <span class="layer-name">Villes principales</span>
+          <span class="layer-count">12</span>
+        </div>
+
+        <div class="layer-item" onclick="toggleLayer('regions',this)">
+          <input type="checkbox" class="layer-checkbox" onchange="toggleLayer('regions',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:transparent;border:2px solid #64748b"></div>
+          <span class="layer-name">Régions administratives</span>
+          <span class="layer-count">12</span>
+        </div>
+
+        <div class="layer-item" onclick="toggleLayer('zones_eco',this)">
+          <input type="checkbox" class="layer-checkbox" onchange="toggleLayer('zones_eco',this.closest('.layer-item'))"/>
+          <div class="layer-dot" style="background:#16a34a;opacity:.6"></div>
+          <span class="layer-name">Zones écologiques</span>
+          <span class="layer-count">4</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Fond de carte</div>
+        <div class="basemap-grid">
+          <button class="bm-btn active" onclick="setBasemap('osm',this)">🗺️ Standard</button>
+          <button class="bm-btn" onclick="setBasemap('satellite',this)">🛰️ Satellite</button>
+          <button class="bm-btn" onclick="setBasemap('topo',this)">⛰️ Topo</button>
+          <button class="bm-btn" onclick="setBasemap('dark',this)">🌙 Sombre</button>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Légende</div>
+        <div class="legend-item"><div class="leg-sym" style="background:rgba(21,101,192,.25);border:2px solid #1565c0"></div>Bassin de l'Ouémé</div>
+        <div class="legend-item"><div class="leg-sym" style="background:rgba(22,163,74,.2);border:2px solid #16a34a"></div>Bassin du Mono</div>
+        <div class="legend-item"><div class="leg-sym" style="background:rgba(124,58,237,.2);border:2px solid #7c3aed"></div>Bassin de la Pendjari</div>
+        <div class="legend-item"><div class="leg-sym" style="background:rgba(234,88,12,.2);border:2px solid #ea580c"></div>Bassin du Niger</div>
+        <div class="legend-item"><div class="leg-sym line" style="background:#00b4d8"></div>Cours d'eau</div>
+        <div class="legend-item"><div class="leg-sym circle" style="background:#0891b2"></div>Station hydrométrique</div>
+        <div class="legend-item"><div class="leg-sym circle" style="background:#7c3aed"></div>Station pluviométrique</div>
+        <div class="legend-item"><div class="leg-sym" style="background:#d97706;clip-path:polygon(50% 0%,100% 100%,0% 100%)"></div>Barrage</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Outils</div>
+        <button class="tool-btn" onclick="goTo(9.33,2.32,7)">🎯 Vue d'ensemble Bénin</button>
+        <button class="tool-btn" onclick="goTo(8.5,2.5,9)">🌊 Bassin de l'Ouémé</button>
+        <button class="tool-btn" onclick="goTo(7.0,1.5,9)">💧 Bassin du Mono</button>
+        <button class="tool-btn" onclick="goTo(10.8,1.5,9)">🏔️ Bassin Pendjari</button>
+        <button class="tool-btn" onclick="goTo(11.5,3.0,9)">🌍 Bassin du Niger</button>
+        <button class="tool-btn" onclick="printMap()">🖨️ Imprimer la carte</button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Statistiques hydrologiques</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <div style="background:var(--light);border-radius:8px;padding:.6rem;text-align:center">
+            <div style="font-family:Georgia,serif;font-size:1.2rem;font-weight:700;color:var(--blue)">4</div>
+            <div style="font-size:.62rem;color:var(--g500);text-transform:uppercase;letter-spacing:.06em">Bassins versants</div>
+          </div>
+          <div style="background:var(--light);border-radius:8px;padding:.6rem;text-align:center">
+            <div style="font-family:Georgia,serif;font-size:1.2rem;font-weight:700;color:#0891b2">~75 000</div>
+            <div style="font-size:.62rem;color:var(--g500);text-transform:uppercase;letter-spacing:.06em">km² draînés</div>
+          </div>
+          <div style="background:var(--light);border-radius:8px;padding:.6rem;text-align:center">
+            <div style="font-family:Georgia,serif;font-size:1.2rem;font-weight:700;color:#7c3aed">1 200</div>
+            <div style="font-size:.62rem;color:var(--g500);text-transform:uppercase;letter-spacing:.06em">mm/an (moy.)</div>
+          </div>
+          <div style="background:var(--light);border-radius:8px;padding:.6rem;text-align:center">
+            <div style="font-family:Georgia,serif;font-size:1.2rem;font-weight:700;color:#16a34a">65 MW</div>
+            <div style="font-size:.62rem;color:var(--g500);text-transform:uppercase;letter-spacing:.06em">Nangbéto</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Chercher un lieu..." onkeydown="if(event.key==='Enter')searchPlace()"/>
+      <button class="search-btn" onclick="searchPlace()">🔍</button>
+    </div>
+
+    <div class="map-controls">
+      <div class="mc-btn" onclick="map.getView().setZoom(map.getView().getZoom()+1)" title="Zoom +">+</div>
+      <div class="mc-btn" onclick="map.getView().setZoom(map.getView().getZoom()-1)" title="Zoom -">−</div>
+      <div class="mc-btn" onclick="goTo(9.33,2.32,7)" title="Vue Bénin">🇧🇯</div>
+      <div class="mc-btn" onclick="toggleFullscreen()" title="Plein écran">⛶</div>
+    </div>
+
+    <div id="popup" class="ol-popup" style="display:none">
+      <div class="popup-header">
+        <span class="popup-title" id="popupTitle">—</span>
+        <button class="popup-close" onclick="closePopup()">✕</button>
+      </div>
+      <div class="popup-body" id="popupBody"></div>
+    </div>
+
+    <div class="coords-bar">
+      <div class="coords-item">Lat : <span id="coordLat">—</span></div>
+      <div class="coords-item">Lon : <span id="coordLon">—</span></div>
+      <div class="coords-item">Zoom : <span id="zoomLevel">—</span></div>
+      <div class="coords-item" id="hoverInfo" style="margin-left:auto;color:rgba(255,255,255,.5)"></div>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+
+const BASSINS = [
+  {
+    id:'oueme', nom:"Bassin de l'Ouémé", superficie:'50 000 km²',
+    couleur:'rgba(21,101,192,0.25)', bordure:'#1565c0',
+    module:'~90 m³/s', longueur:'510 km', exutoire:'Lagune de Porto-Novo',
+    description:"Le plus grand bassin hydrologique du Bénin. Draine le centre et le sud du pays. Régime bimodal au sud.",
+    coords:[[2.8,7.2],[3.8,7.2],[4.0,8.5],[3.5,9.8],[2.5,10.5],[1.8,9.0],[2.0,8.0],[2.5,7.5],[2.8,7.2]]
+  },
+  {
+    id:'mono', nom:"Bassin du Mono", superficie:'23 000 km²',
+    couleur:'rgba(22,163,74,0.2)', bordure:'#16a34a',
+    module:'~55 m³/s', longueur:'400 km', exutoire:'Embouchure (Bouche du Roy)',
+    description:"Fleuve partagé entre le Bénin et le Togo. Barrage de Nangbéto (65 MW). Zones humides et mangroves à l'embouchure.",
+    coords:[[1.5,6.3],[2.5,6.5],[2.8,7.2],[2.0,8.0],[1.0,7.5],[0.8,6.8],[1.5,6.3]]
+  },
+  {
+    id:'pendjari', nom:"Bassin de la Pendjari", superficie:'12 000 km²',
+    couleur:'rgba(124,58,237,0.2)', bordure:'#7c3aed',
+    module:'~35 m³/s', longueur:'380 km', exutoire:'Fleuve Volta (Burkina Faso)',
+    description:"Tributaire du fleuve Volta. Arrose le Parc W et la réserve de la Biosphère Pendjari. Régime unimodal sahélien.",
+    coords:[[0.8,10.2],[1.5,10.8],[2.0,11.2],[2.5,11.5],[2.0,12.0],[1.0,11.8],[0.5,11.0],[0.8,10.2]]
+  },
+  {
+    id:'niger', nom:"Bassin du Niger", superficie:'5 000 km²',
+    couleur:'rgba(234,88,12,0.2)', bordure:'#ea580c',
+    module:'~15 m³/s (apports)', longueur:'200 km (portion bén.)', exutoire:'Fleuve Niger (Nigeria)',
+    description:"Occupe l'extrême nord-est du Bénin. Apports saisonniers liés aux pluies sahéliennes. Cours d'eau temporaires.",
+    coords:[[3.0,11.0],[3.8,11.2],[4.0,11.8],[3.5,12.2],[2.8,12.0],[2.5,11.5],[3.0,11.0]]
+  }
+];
+
+const COURS_EAU = [
+  {nom:"Ouémé", coords:[[2.62,6.35],[2.70,7.00],[2.75,7.80],[2.65,8.80],[2.50,9.80]], debit:'~90 m³/s', long:'510 km'},
+  {nom:"Mono", coords:[[1.78,6.28],[1.70,6.80],[1.60,7.50],[1.55,7.80]], debit:'~55 m³/s', long:'400 km'},
+  {nom:"Pendjari", coords:[[0.90,10.80],[1.30,10.90],[1.80,11.10],[2.20,11.30]], debit:'~35 m³/s', long:'380 km'},
+  {nom:"Mékrou", coords:[[2.80,11.20],[3.00,11.50],[3.20,11.80]], debit:'~8 m³/s', long:'200 km'},
+  {nom:"Alibori", coords:[[2.90,10.80],[3.20,11.00],[3.50,11.20]], debit:'~12 m³/s', long:'170 km'},
+  {nom:"Zou", coords:[[2.15,7.10],[2.30,7.60],[2.50,8.00]], debit:'~20 m³/s', long:'150 km'},
+  {nom:"Couffo", coords:[[1.80,6.50],[1.85,7.00],[1.90,7.40]], debit:'~10 m³/s', long:'190 km'},
+  {nom:"Okpara", coords:[[2.50,8.50],[2.70,8.80],[2.90,9.20]], debit:'~15 m³/s', long:'200 km'}
+];
+
+const STATIONS_HYDRO = [
+  {nom:"Bétérou (Ouémé)", lat:9.20, lon:2.27, bassin:"Ouémé", surface:'10 250 km²', obs:'1951–présent', module:'56 m³/s'},
+  {nom:"Pont de Savè (Ouémé)", lat:8.03, lon:2.47, bassin:"Ouémé", surface:'23 600 km²', obs:'1960–présent', module:'78 m³/s'},
+  {nom:"Domè (Ouémé)", lat:7.00, lon:2.48, bassin:"Ouémé", surface:'46 800 km²', obs:'1948–présent', module:'90 m³/s'},
+  {nom:"Aval Nangbéto (Mono)", lat:7.45, lon:1.70, bassin:"Mono", surface:'13 400 km²', obs:'1987–présent', module:'55 m³/s'},
+  {nom:"Tététou (Mono)", lat:7.10, lon:1.65, bassin:"Mono", surface:'20 000 km²', obs:'1952–présent', module:'45 m³/s'},
+  {nom:"Porga (Pendjari)", lat:11.05, lon:0.97, bassin:"Pendjari", surface:'8 900 km²', obs:'1955–présent', module:'32 m³/s'},
+  {nom:"Natitingou (Mékrou)", lat:10.31, lon:1.38, bassin:"Pendjari", surface:'3 200 km²', obs:'1960–présent', module:'8 m³/s'},
+  {nom:"Malanville (Niger)", lat:11.87, lon:3.38, bassin:"Niger", surface:'2 000 km²', obs:'1952–présent', module:'15 m³/s'},
+  {nom:"Kandi (Alibori)", lat:11.13, lon:2.94, bassin:"Niger", surface:'8 600 km²', obs:'1958–présent', module:'12 m³/s'},
+  {nom:"Donga (Zou)", lat:8.26, lon:2.06, bassin:"Ouémé", surface:'5 000 km²', obs:'1965–présent', module:'18 m³/s'},
+  {nom:"Aval Couffo", lat:6.90, lon:1.80, bassin:"Mono", surface:'4 500 km²', obs:'1970–présent', module:'9 m³/s'},
+  {nom:"Kpassa (Ouémé)", lat:9.85, lon:2.62, bassin:"Ouémé", surface:'1 200 km²', obs:'1970–présent', module:'8 m³/s'}
+];
+
+const STATIONS_PLUV = [
+  {nom:"Cotonou", lat:6.37, lon:2.42, pluie:'1 350 mm/an', regime:'Bimodal', periode:'1922–présent'},
+  {nom:"Porto-Novo", lat:6.50, lon:2.60, pluie:'1 250 mm/an', regime:'Bimodal', periode:'1935–présent'},
+  {nom:"Bohicon", lat:7.18, lon:2.07, pluie:'1 100 mm/an', regime:'Bimodal', periode:'1920–présent'},
+  {nom:"Parakou", lat:9.35, lon:2.62, pluie:'1 250 mm/an', regime:'Unimodal', periode:'1930–présent'},
+  {nom:"Natitingou", lat:10.31, lon:1.38, pluie:'1 350 mm/an', regime:'Unimodal', periode:'1940–présent'},
+  {nom:"Kandi", lat:11.13, lon:2.94, pluie:'900 mm/an', regime:'Unimodal', periode:'1942–présent'},
+  {nom:"Malanville", lat:11.87, lon:3.38, pluie:'700 mm/an', regime:'Unimodal', periode:'1950–présent'},
+  {nom:"Savè", lat:8.03, lon:2.47, pluie:'1 150 mm/an', regime:'Bimodal→Unimodal', periode:'1935–présent'},
+  {nom:"Lokossa", lat:6.63, lon:1.72, pluie:'1 100 mm/an', regime:'Bimodal', periode:'1945–présent'},
+  {nom:"Abomey", lat:7.18, lon:1.99, pluie:'1 050 mm/an', regime:'Bimodal', periode:'1925–présent'},
+  {nom:"Djougou", lat:9.71, lon:1.67, pluie:'1 300 mm/an', regime:'Unimodal', periode:'1950–présent'},
+  {nom:"Nikki", lat:9.94, lon:3.21, pluie:'1 000 mm/an', regime:'Unimodal', periode:'1952–présent'},
+  {nom:"Bembèrèkè", lat:10.22, lon:2.66, pluie:'950 mm/an', regime:'Unimodal', periode:'1955–présent'},
+  {nom:"Tchaourou", lat:8.88, lon:2.60, pluie:'1 200 mm/an', regime:'Unimodal', periode:'1955–présent'},
+  {nom:"Aplahoué", lat:6.93, lon:1.68, pluie:'1 100 mm/an', regime:'Bimodal', periode:'1960–présent'},
+  {nom:"Kétou", lat:7.37, lon:2.60, pluie:'1 150 mm/an', regime:'Bimodal', periode:'1955–présent'},
+  {nom:"Tanguiéta", lat:10.62, lon:1.27, pluie:'1 200 mm/an', regime:'Unimodal', periode:'1960–présent'},
+  {nom:"Banikoara", lat:11.30, lon:2.44, pluie:'850 mm/an', regime:'Unimodal', periode:'1960–présent'}
+];
+
+const BARRAGES = [
+  {nom:"Barrage de Nangbéto", lat:7.45, lon:1.70, fleuve:"Mono", puissance:'65 MW', volume:'150 M m³', annee:'1987', type:'Hydroélectrique', pays:'Bénin-Togo'},
+  {nom:"Retenue de Toui-Kilibo", lat:8.30, lon:2.15, fleuve:"Ouémé", puissance:'—', volume:'~80 M m³', annee:'2000s', type:'Irrigation agricole', pays:'Bénin'},
+  {nom:"Barrage de Yéripao", lat:10.15, lon:1.55, fleuve:"Mékrou", puissance:'—', volume:'25 M m³', annee:'1990', type:'Eau potable + irrigation', pays:'Bénin'},
+  {nom:"Retenue de Donga-Pont", lat:9.68, lon:1.65, fleuve:"Donga", puissance:'—', volume:'18 M m³', annee:'2002', type:'Eau potable', pays:'Bénin'},
+  {nom:"Barrage de Kpassa", lat:9.85, lon:2.62, fleuve:"Ouémé", puissance:'—', volume:'30 M m³', annee:'1985', type:'Irrigation', pays:'Bénin'},
+  {nom:"Retenue de Sousoumarou", lat:10.50, lon:2.30, fleuve:"Sousoumarou", puissance:'—', volume:'12 M m³', annee:'1995', type:'Eau potable + élevage', pays:'Bénin'}
+];
+
+const VILLES = [
+  {nom:"Cotonou", lat:6.37, lon:2.42, pop:'800 000', type:'Capitale économique', eau:'SONEB', fonction:'Port, économie'},
+  {nom:"Porto-Novo", lat:6.50, lon:2.60, pop:'300 000', type:'Capitale officielle', eau:'SONEB', fonction:'Administration'},
+  {nom:"Parakou", lat:9.35, lon:2.62, pop:'260 000', type:'Capitale nord', eau:'SONEB', fonction:'Commerce, transport'},
+  {nom:"Natitingou", lat:10.31, lon:1.38, pop:'100 000', type:'Chef-lieu Atacora', eau:'SONEB', fonction:'Agriculture, tourisme'},
+  {nom:"Kandi", lat:11.13, lon:2.94, pop:'65 000', type:'Chef-lieu Alibori', eau:'AEP communale', fonction:'Agriculture, élevage'},
+  {nom:"Abomey", lat:7.18, lon:1.99, pop:'100 000', type:'Ville historique', eau:'SONEB', fonction:'Tourisme, artisanat'},
+  {nom:"Bohicon", lat:7.18, lon:2.07, pop:'120 000', type:'Ville carrefour', eau:'SONEB', fonction:'Commerce'},
+  {nom:"Lokossa", lat:6.63, lon:1.72, pop:'75 000', type:'Chef-lieu Mono', eau:'AEP', fonction:'Agriculture'},
+  {nom:"Malanville", lat:11.87, lon:3.38, pop:'65 000', type:'Frontière Niger', eau:'AEP communale', fonction:'Commerce transfrontalier'},
+  {nom:"Djougou", lat:9.71, lon:1.67, pop:'90 000', type:'Centre-Ouest', eau:'AEP', fonction:'Agriculture'},
+  {nom:"Savè", lat:8.03, lon:2.47, pop:'60 000', type:'Centre", eau:"AEP"', fonction:'Agriculture, transit'},
+  {nom:"Ouidah", lat:6.37, lon:2.09, pop:'95 000', type:'Côtière', eau:'SONEB', fonction:'Tourisme, pêche'}
+];
+
+const ZONES_ECO = [
+  {nom:"Zone côtière et lagunaire", couleur:'rgba(0,180,216,0.15)', bordure:'#00b4d8',
+   desc:"Lagunes, mangroves, cordons littoraux. Lac Nokoué, lagune de Porto-Novo. Pêche, aquaculture.",
+   coords:[[1.7,6.2],[3.8,6.2],[3.8,6.6],[1.7,6.6],[1.7,6.2]]},
+  {nom:"Zone guinéenne (forêt dense)", couleur:'rgba(22,163,74,0.15)', bordure:'#16a34a',
+   desc:"Forêt dense semi-décidu. Pluies bimodales 1200–1400 mm/an. Riche biodiversité aquatique.",
+   coords:[[1.7,6.6],[3.8,6.6],[3.8,8.0],[1.7,8.0],[1.7,6.6]]},
+  {nom:"Zone soudanienne (savane)", couleur:'rgba(234,88,12,0.12)', bordure:'#ea580c',
+   desc:"Savane arborée et boisée. Pluies unimodales 900–1300 mm/an. Transition forêt-savane.",
+   coords:[[1.7,8.0],[4.0,8.0],[4.0,10.5],[1.7,10.5],[1.7,8.0]]},
+  {nom:"Zone sahélienne (nord)", couleur:'rgba(217,119,6,0.12)', bordure:'#d97706',
+   desc:"Savane à épineux. Pluies 600–900 mm/an. Saison sèche 7–8 mois. Cours d'eau temporaires.",
+   coords:[[1.7,10.5],[4.0,10.5],[4.0,12.5],[1.7,12.5],[1.7,10.5]]}
+];
+
+const REGIONS = [
+  {nom:"Alibori", chef_lieu:"Kandi", superficie:'26 242 km²',
+   coords:[[2.5,11.0],[4.0,11.0],[4.0,12.5],[2.5,12.5],[2.5,11.0]]},
+  {nom:"Atacora", chef_lieu:"Natitingou", superficie:'20 499 km²',
+   coords:[[0.8,9.8],[2.5,9.8],[2.5,12.0],[0.8,12.0],[0.8,9.8]]},
+  {nom:"Borgou", chef_lieu:"Parakou", superficie:'25 856 km²',
+   coords:[[2.5,9.0],[4.0,9.0],[4.0,11.0],[2.5,11.0],[2.5,9.0]]},
+  {nom:"Collines", chef_lieu:"Savalou", superficie:'13 931 km²',
+   coords:[[1.8,7.8],[3.5,7.8],[3.5,9.0],[1.8,9.0],[1.8,7.8]]},
+  {nom:"Couffo", chef_lieu:"Aplahoué", superficie:'2 404 km²',
+   coords:[[1.5,6.8],[2.2,6.8],[2.2,7.6],[1.5,7.6],[1.5,6.8]]},
+  {nom:"Donga", chef_lieu:"Djougou", superficie:'10 691 km²',
+   coords:[[0.8,9.0],[2.0,9.0],[2.0,10.5],[0.8,10.5],[0.8,9.0]]},
+  {nom:"Littoral", chef_lieu:"Cotonou", superficie:'79 km²',
+   coords:[[2.3,6.3],[2.6,6.3],[2.6,6.5],[2.3,6.5],[2.3,6.3]]},
+  {nom:"Mono", chef_lieu:"Lokossa", superficie:'1 605 km²',
+   coords:[[1.5,6.3],[2.2,6.3],[2.2,6.8],[1.5,6.8],[1.5,6.3]]},
+  {nom:"Ouémé", chef_lieu:"Porto-Novo", superficie:'3 264 km²',
+   coords:[[2.3,6.5],[3.8,6.5],[3.8,7.2],[2.3,7.2],[2.3,6.5]]},
+  {nom:"Plateau", chef_lieu:"Pobè", superficie:'3 264 km²',
+   coords:[[2.3,7.2],[3.8,7.2],[3.8,7.8],[2.3,7.8],[2.3,7.2]]},
+  {nom:"Zou", chef_lieu:"Abomey", superficie:'5 243 km²',
+   coords:[[1.7,6.8],[2.5,6.8],[2.5,7.8],[1.7,7.8],[1.7,6.8]]},
+  {nom:"Atlantique", chef_lieu:"Ouidah", superficie:'3 233 km²',
+   coords:[[1.7,6.3],[2.3,6.3],[2.3,6.8],[1.7,6.8],[1.7,6.3]]}
+];
+
+const notify = (msg,dur=3000)=>{const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),dur);};
+const toLonLat = ol.proj.toLonLat, fromLonLat = ol.proj.fromLonLat;
+const coords2ol = c => c.map(p => fromLonLat([p[0],p[1]]));
+
+const osmLayer = new ol.layer.Tile({source: new ol.source.OSM(), name:'osm'});
+const satLayer = new ol.layer.Tile({
+  source: new ol.source.XYZ({url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attributions:'Esri'}),
+  name:'satellite', visible:false
+});
+const topoLayer = new ol.layer.Tile({
+  source: new ol.source.XYZ({url:'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'}),
+  name:'topo', visible:false
+});
+const darkLayer = new ol.layer.Tile({
+  source: new ol.source.XYZ({url:'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png'}),
+  name:'dark', visible:false
+});
+
+function makePolygon(coords, props){
+  return new ol.Feature({geometry: new ol.geom.Polygon([coords2ol(coords)]),...props});
+}
+function makePoint(lon, lat, props){
+  return new ol.Feature({geometry: new ol.geom.Point(fromLonLat([lon,lat])),...props});
+}
+function makeLine(coords, props){
+  return new ol.Feature({geometry: new ol.geom.LineString(coords2ol(coords)),...props});
+}
+
+const srcBassins = new ol.source.Vector({features: BASSINS.map(b=>makePolygon(b.coords,{...b,type_layer:'bassin'}))});
+const srcCours = new ol.source.Vector({features: COURS_EAU.map(r=>makeLine(r.coords,{...r,type_layer:'cours_eau'}))});
+const srcStationsH = new ol.source.Vector({features: STATIONS_HYDRO.map(s=>makePoint(s.lon,s.lat,{...s,type_layer:'station_hydro'}))});
+const srcStationsP = new ol.source.Vector({features: STATIONS_PLUV.map(s=>makePoint(s.lon,s.lat,{...s,type_layer:'station_pluv'}))});
+const srcBarrages = new ol.source.Vector({features: BARRAGES.map(b=>makePoint(b.lon,b.lat,{...b,type_layer:'barrage'}))});
+const srcVilles = new ol.source.Vector({features: VILLES.map(v=>makePoint(v.lon,v.lat,{...v,type_layer:'ville'}))});
+const srcRegions = new ol.source.Vector({features: REGIONS.map(r=>makePolygon(r.coords,{...r,type_layer:'region'}))});
+const srcZonesEco = new ol.source.Vector({features: ZONES_ECO.map(z=>makePolygon(z.coords,{...z,type_layer:'zone_eco'}))});
+
+const styleBassins = f => new ol.style.Style({
+  fill: new ol.style.Fill({color: BASSINS.find(b=>b.id===f.get('id'))?.couleur||'rgba(0,100,200,0.2)'}),
+  stroke: new ol.style.Stroke({color: BASSINS.find(b=>b.id===f.get('id'))?.bordure||'#1565c0', width:2.5, lineDash:[8,4]}),
+  text: new ol.style.Text({text:f.get('nom'), font:'bold 11px Segoe UI,sans-serif', fill:new ol.style.Fill({color:'#0a1f3c'}), stroke:new ol.style.Stroke({color:'rgba(255,255,255,0.8)',width:3}), overflow:true})
+});
+
+const styleCoursEau = () => new ol.style.Style({
+  stroke: new ol.style.Stroke({color:'#00b4d8', width:2.5})
+});
+
+const styleStationH = () => new ol.style.Style({
+  image: new ol.style.Circle({radius:7, fill:new ol.style.Fill({color:'#0891b2'}), stroke:new ol.style.Stroke({color:'#fff',width:1.5})})
+});
+
+const styleStationP = () => new ol.style.Style({
+  image: new ol.style.RegularShape({radius:7, points:4, fill:new ol.style.Fill({color:'#7c3aed'}), stroke:new ol.style.Stroke({color:'#fff',width:1.5})})
+});
+
+const styleBarrage = () => new ol.style.Style({
+  image: new ol.style.RegularShape({radius:8, points:3, fill:new ol.style.Fill({color:'#d97706'}), stroke:new ol.style.Stroke({color:'#fff',width:1.5})})
+});
+
+const styleVille = () => new ol.style.Style({
+  image: new ol.style.Circle({radius:5, fill:new ol.style.Fill({color:'#334155'}), stroke:new ol.style.Stroke({color:'#fff',width:1.5})}),
+  text: new ol.style.Text({text:'', font:'11px Segoe UI,sans-serif', fill:new ol.style.Fill({color:'#0a1f3c'}), stroke:new ol.style.Stroke({color:'rgba(255,255,255,0.9)',width:3}), offsetY:-12, overflow:false})
+});
+
+const styleRegion = () => new ol.style.Style({
+  fill: new ol.style.Fill({color:'rgba(100,116,139,0.06)'}),
+  stroke: new ol.style.Stroke({color:'rgba(100,116,139,0.5)', width:1.5, lineDash:[4,6]})
+});
+
+const styleZoneEco = f => new ol.style.Style({
+  fill: new ol.style.Fill({color: ZONES_ECO.find(z=>z.nom===f.get('nom'))?.couleur||'rgba(0,100,0,0.1)'}),
+  stroke: new ol.style.Stroke({color: ZONES_ECO.find(z=>z.nom===f.get('nom'))?.bordure||'#16a34a', width:1.5, lineDash:[6,4]})
+});
+
+const LAYERS = {
+  bassins:      new ol.layer.Vector({source:srcBassins, style:styleBassins, zIndex:2}),
+  cours_eau:    new ol.layer.Vector({source:srcCours, style:styleCoursEau, zIndex:3}),
+  zones_eco:    new ol.layer.Vector({source:srcZonesEco, style:styleZoneEco, zIndex:1, visible:false}),
+  regions:      new ol.layer.Vector({source:srcRegions, style:styleRegion, zIndex:1, visible:false}),
+  stations_hydro: new ol.layer.Vector({source:srcStationsH, style:styleStationH, zIndex:5}),
+  stations_pluv:  new ol.layer.Vector({source:srcStationsP, style:styleStationP, zIndex:5}),
+  barrages:     new ol.layer.Vector({source:srcBarrages, style:styleBarrage, zIndex:6}),
+  villes:       new ol.layer.Vector({source:srcVilles, style:styleVille, zIndex:4})
+};
+
+const map = new ol.Map({
+  target:'map',
+  layers:[osmLayer, satLayer, topoLayer, darkLayer, ...Object.values(LAYERS)],
+  view: new ol.View({
+    center: fromLonLat([2.32, 9.33]),
+    zoom: 7,
+    minZoom:6, maxZoom:16
+  }),
+  controls: ol.control.defaults.defaults({zoom:false, rotate:false, attribution:false})
+    .extend([new ol.control.ScaleLine({units:'metric'})])
+});
+
+map.getView().on('change:resolution',()=>{
+  const zoom = map.getView().getZoom();
+  LAYERS.villes.setStyle(f=>{
+    const showLabel = zoom >= 9;
+    return new ol.style.Style({
+      image: new ol.style.Circle({radius: zoom>=10?6:4.5, fill:new ol.style.Fill({color:'#334155'}), stroke:new ol.style.Stroke({color:'#fff',width:1.5})}),
+      text: showLabel ? new ol.style.Text({text:f.get('nom'), font:`${zoom>=11?'bold ':''} ${zoom>=10?11:9}px Segoe UI,sans-serif`, fill:new ol.style.Fill({color:'#0a1f3c'}), stroke:new ol.style.Stroke({color:'rgba(255,255,255,0.9)',width:3}), offsetY:-13, overflow:false}) : null
+    });
+  });
+});
+map.getView().dispatchEvent('change:resolution');
+
+map.on('pointermove', e => {
+  const [lon,lat] = toLonLat(e.coordinate);
+  document.getElementById('coordLat').textContent = lat.toFixed(4)+'°N';
+  document.getElementById('coordLon').textContent = lon.toFixed(4)+'°E';
+  document.getElementById('zoomLevel').textContent = map.getView().getZoom().toFixed(1);
+
+  const hit = map.hasFeatureAtPixel(e.pixel);
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+
+  const features = map.getFeaturesAtPixel(e.pixel);
+  if(features.length){
+    const f = features[0];
+    document.getElementById('hoverInfo').textContent = f.get('nom') || '';
+  } else {
+    document.getElementById('hoverInfo').textContent = '';
+  }
+});
+
+map.on('singleclick', e => {
+  const features = map.getFeaturesAtPixel(e.pixel, {hitTolerance:6});
+  if(!features.length){ closePopup(); return; }
+
+  const f = features[0];
+  const type = f.get('type_layer');
+  const pos = e.coordinate;
+
+  let title='', body='';
+
+  if(type==='bassin'){
+    title = `🌊 ${f.get('nom')}`;
+    body = buildPopupRows([
+      ['Superficie',f.get('superficie')],['Module',f.get('module')],
+      ['Longueur',f.get('longueur')],['Exutoire',f.get('exutoire')]
+    ]) + `<div style="margin-top:.5rem;font-size:.73rem;color:var(--g500);line-height:1.5">${f.get('description')}</div>`;
+  } else if(type==='cours_eau'){
+    title = `💧 ${f.get('nom')}`;
+    body = buildPopupRows([['Débit moyen',f.get('debit')],['Longueur',f.get('long')]]);
+  } else if(type==='station_hydro'){
+    title = `📏 ${f.get('nom')}`;
+    body = buildPopupRows([
+      ['Bassin',f.get('bassin')],['Surface',f.get('surface')],
+      ['Module',f.get('module')],['Observation',f.get('obs')]
+    ]) + `<span class="popup-badge" style="background:rgba(8,145,178,.12);color:#0e7490;border:1px solid rgba(8,145,178,.25)">Station hydrométrique</span>`;
+  } else if(type==='station_pluv'){
+    title = `🌧️ ${f.get('nom')}`;
+    body = buildPopupRows([
+      ['Pluie annuelle',f.get('pluie')],['Régime',f.get('regime')],['Période',f.get('periode')]
+    ]) + `<span class="popup-badge" style="background:rgba(124,58,237,.12);color:#6d28d9;border:1px solid rgba(124,58,237,.25)">Station pluviométrique</span>`;
+  } else if(type==='barrage'){
+    title = `🏗️ ${f.get('nom')}`;
+    body = buildPopupRows([
+      ['Fleuve',f.get('fleuve')],['Type',f.get('type')],
+      ['Puissance',f.get('puissance')],['Volume',f.get('volume')],
+      ['Mise en service',f.get('annee')],['Gestion',f.get('pays')]
+    ]);
+  } else if(type==='ville'){
+    title = `🏙️ ${f.get('nom')}`;
+    body = buildPopupRows([
+      ['Population',f.get('pop')],['Statut',f.get('type')],
+      ['Eau potable',f.get('eau')],['Fonction',f.get('fonction')]
+    ]);
+  } else if(type==='region'){
+    title = `📍 ${f.get('nom')}`;
+    body = buildPopupRows([['Chef-lieu',f.get('chef_lieu')],['Superficie',f.get('superficie')]]);
+  } else if(type==='zone_eco'){
+    title = `🌿 ${f.get('nom')}`;
+    body = `<div style="font-size:.78rem;color:var(--g700);line-height:1.6">${f.get('desc')}</div>`;
+  }
+
+  if(!title) return;
+  showPopup(title, body, pos);
+});
+
+function buildPopupRows(rows){
+  return '<div>'+rows.filter(([,v])=>v&&v!=='—'&&v!==undefined).map(([k,v])=>`
+    <div class="popup-row"><span class="popup-key">${k}</span><span class="popup-val">${v}</span></div>`).join('')+'</div>';
+}
+
+const popupEl = document.getElementById('popup');
+const popupOverlay = new ol.Overlay({element:popupEl, positioning:'bottom-center', stopEvent:true, offset:[0,-12]});
+map.addOverlay(popupOverlay);
+
+function showPopup(title, body, pos){
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupBody').innerHTML = body;
+  popupEl.style.display='block';
+  popupOverlay.setPosition(pos);
+}
+function closePopup(){
+  popupEl.style.display='none';
+  popupOverlay.setPosition(undefined);
+}
+
+const basemapSources = {
+  osm: osmLayer, satellite: satLayer, topo: topoLayer, dark: darkLayer
+};
+
+function setBasemap(name, btn){
+  Object.values(basemapSources).forEach(l=>l.setVisible(false));
+  basemapSources[name].setVisible(true);
+  document.querySelectorAll('.bm-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleLayer(name, item){
+  const chk = item.querySelector('.layer-checkbox');
+  const visible = chk.checked;
+  if(LAYERS[name]) LAYERS[name].setVisible(visible);
+  item.classList.toggle('active', visible);
+}
+
+function goTo(lat, lon, zoom){
+  map.getView().animate({center:fromLonLat([lon,lat]), zoom, duration:800});
+  closePopup();
+}
+
+function searchPlace(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if(!q) return;
+
+  let found = null;
+  for(const src of [srcStationsH, srcStationsP, srcBarrages, srcVilles]){
+    const f = src.getFeatures().find(f=>(f.get('nom')||'').toLowerCase().includes(q));
+    if(f){ found=f; break; }
+  }
+  if(!found){
+    const f = srcBassins.getFeatures().find(f=>(f.get('nom')||'').toLowerCase().includes(q));
+    if(f) found=f;
+  }
+  if(found){
+    const ext = found.getGeometry().getExtent();
+    const center = ol.extent.getCenter(ext);
+    map.getView().animate({center, zoom:10, duration:800});
+    notify(`✅ Trouvé : ${found.get('nom')}`);
+    setTimeout(()=>showPopup('📍 '+found.get('nom'),'',center),850);
+  } else {
+    notify('⚠️ Lieu non trouvé dans la base de données.');
+  }
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+function printMap(){
+  notify('🖨️ Impression en cours...');
+  window.print();
+}
+
+setTimeout(()=>notify('🇧🇯 Carte chargée — cliquez sur un élément pour obtenir ses informations'),800);
+</script>
+</body>
+</html>
