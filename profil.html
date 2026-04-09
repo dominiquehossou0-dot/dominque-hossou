@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,19 +10,44 @@
 </head>
 <body>
 
-<nav class="pnav" id="pNav">
-  <a href="index.html" class="pnav-back">← Retour Hydrologie</a>
-  <div class="pnav-brand">Mon <span>Profil</span></div>
-  <ul class="pnav-links">
-    <li><a href="#hero-profil">Accueil</a></li>
-    <li><a href="#formation">Formation</a></li>
-    <li><a href="#competences">Compétences</a></li>
-    <li><a href="#langues">Langues</a></li>
-    <li><a href="#interets">Intérêts</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="calculator.html" class="pnav-profil">🧮 Calculateur</a>
-</nav>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar-nav" id="sidebarNav">
+  <div class="snav-header">
+    <a href="index.html" class="snav-logo">
+      <div class="snav-logo-icon">💧</div>
+      <div>
+        <div class="snav-logo-text">Hydro<span>INE</span></div>
+        <span class="snav-logo-sub">INE · UAC · Bénin</span>
+      </div>
+    </a>
+    <button class="snav-close" onclick="closeSidebar()" aria-label="Fermer">✕</button>
+  </div>
+  <nav class="snav-links">
+    <span class="snav-section-lbl">Navigation</span>
+    <a href="index.html" class="snav-link"><span class="sn-icon">🏠</span> Accueil</a>
+    <a href="index.html" class="snav-link"><span class="sn-icon">🌊</span> Hydrologie</a>
+    <a href="carte.html" class="snav-link"><span class="sn-icon">📊</span> Carte</a>
+    <a href="calculator.html" class="snav-link"><span class="sn-icon">🧮</span> Calculateurs</a>
+    <a href="BiblioHydro.html" class="snav-link"><span class="sn-icon">📚</span> Bibliothèque</a>
+    <a href="analyse.html" class="snav-link"><span class="sn-icon">📊</span> Analyse de données</a>
+    <span class="snav-section-lbl">Étudiant</span>
+    <a href="révisions.html" class="snav-link active"><span class="sn-icon">📝</span> Centre de révisions</a>
+    <a href="profil.html" class="snav-link"><span class="sn-icon">👤</span> Mon profil</a>
+  </nav>
+  <div class="snav-badge">
+    <strong>Licence </strong>
+    Institut National de l'Eau
+  </div>
+</aside>
+<header class="topbar">
+  <button class="topbar-menu-btn" onclick="openSidebar()" aria-label="Menu">☰</button>
+  <div>
+    <div class="topbar-brand">Hydro<span>INE</span></div>
+    <span class="topbar-sub">INE · UAC · Bénin</span>
+  </div>
+  <span class="topbar-page">Profil</span>
+</header>
 
 <section class="hero-profil" id="hero-profil">
   <div class="hp-bg"></div>
@@ -52,7 +75,7 @@
       <div class="hp-cta">
         <a href="#contact" class="hp-btn-primary">Me contacter →</a>
         <a href="#competences" class="hp-btn-outline">Voir mes compétences</a>
-        <a href="calculator.html" class="hp-btn-ghost">🧮 Calculateurs</a><a href="index.html" class="hp-btn-ghost">📘 Hydrologie</a><a href="BiblioHydro.html" class="hp-btn-ghost">📚  Bibliothèque</a>
+        <a href="calculator.html" class="hp-btn-ghost">🧮 Calculateurs</a><a href="hydrologie.html" class="hp-btn-ghost">📘 Hydrologie</a><a href="BiblioHydro.html" class="hp-btn-ghost">📚  Bibliothèque</a>
       </div>
 
       <div class="hp-quick-stats">
@@ -463,6 +486,18 @@
 <button id="pBackTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
+ function openSidebar(){
+  document.getElementById('sidebarNav').classList.add('open');
+  document.getElementById('sbOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebarNav').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});
+ 
 window.addEventListener('scroll', function() {
   const btn = document.getElementById('pBackTop');
   btn.classList.toggle('visible', window.scrollY > 400);
