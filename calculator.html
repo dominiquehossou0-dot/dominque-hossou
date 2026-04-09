@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Calculateurs Hydrologiques v2 — INE/UAC</title>
+<title>Calculateurs Hydrologiques — INE/UAC</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a1f3c'/><text y='.9em' font-size='72' x='10'>🧮</text></svg>"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -19,20 +18,47 @@
 html{scroll-behavior:smooth}
 body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--g50);color:var(--g700)}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97);
-    backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,180,216,.2);
-    display:flex;align-items:center;gap:.8rem;padding:.7rem 1.5rem;flex-wrap:wrap}
-.nb{color:var(--cyan);text-decoration:none;font-size:.73rem;font-weight:600;
-    padding:.28rem .7rem;border-radius:6px;border:1px solid var(--cyan);transition:all .2s;white-space:nowrap}
-.nb:hover{background:var(--cyan);color:var(--navy)}
-.nbrand{font-weight:700;font-size:.95rem;color:#fff;margin-right:auto}
-.nbrand span{color:var(--cyan)}
-.npill{font-size:.68rem;color:rgba(255,255,255,.55);text-decoration:none;
-       padding:.28rem .6rem;border-radius:5px;transition:all .15s;white-space:nowrap}
-.npill:hover{background:rgba(0,180,216,.15);color:var(--cyan)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;backdrop-filter:blur(4px)}
+.sb-overlay.open{display:block}
 
-/* HERO */
+.sidebar-nav{
+  position:fixed;top:0;left:0;height:100vh;width:265px;z-index:1001;
+  background:linear-gradient(180deg,#0a1f3c 0%,#063d6e 100%);
+  border-right:1px solid rgba(0,180,216,.18);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 30px rgba(0,0,0,.35);
+}
+.sidebar-nav.open{transform:translateX(0)}
+
+.snav-header{padding:1.4rem 1.1rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between}
+.snav-logo{display:flex;align-items:center;gap:.55rem;text-decoration:none}
+.snav-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#00b4d8,#1565c0);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.snav-logo-text{font-family:Georgia,serif;font-size:1rem;font-weight:700;color:#fff}
+.snav-logo-text span{color:#00b4d8}
+.snav-logo-sub{font-size:.52rem;color:rgba(255,255,255,.32);display:block;font-family:'Segoe UI',sans-serif;text-transform:uppercase;letter-spacing:.1em}
+.snav-close{background:rgba(255,255,255,.07);border:none;width:28px;height:28px;border-radius:6px;color:rgba(255,255,255,.45);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.snav-close:hover{background:rgba(255,255,255,.14);color:#fff}
+
+.snav-links{flex:1;padding:.7rem .65rem;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.snav-section-lbl{font-size:.55rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:.5rem .45rem .25rem;display:block;margin-top:.3rem}
+.snav-link{display:flex;align-items:center;gap:.65rem;padding:.55rem .7rem;border-radius:8px;text-decoration:none;color:rgba(255,255,255,.52);font-size:.8rem;font-weight:500;transition:all .17s;margin-bottom:.08rem;border:1px solid transparent}
+.snav-link .sn-icon{font-size:.95rem;width:20px;text-align:center;flex-shrink:0}
+.snav-link:hover{color:#fff;background:rgba(255,255,255,.07)}
+.snav-link.active{color:#fff;background:rgba(0,180,216,.18);border-color:rgba(0,180,216,.3);font-weight:600}
+.snav-link.active .sn-icon{filter:drop-shadow(0 0 5px #00b4d8)}
+.snav-badge{margin:.3rem .65rem 1rem;background:rgba(0,180,216,.08);border:1px solid rgba(0,180,216,.18);border-radius:7px;padding:.45rem .65rem;font-size:.6rem;color:rgba(255,255,255,.35);text-align:center;letter-spacing:.05em}
+.snav-badge strong{color:#00b4d8;display:block;font-size:.68rem;margin-bottom:.1rem}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:999;height:52px;background:rgba(10,31,60,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,180,216,.2);display:flex;align-items:center;padding:0 1rem;gap:.8rem}
+.topbar-menu-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);width:36px;height:36px;border-radius:8px;color:#fff;cursor:pointer;font-size:1.15rem;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.topbar-menu-btn:hover{background:rgba(0,180,216,.2);border-color:rgba(0,180,216,.4)}
+.topbar-brand{font-size:1rem;font-weight:700;color:#fff;font-family:Georgia,serif}
+.topbar-brand span{color:#00b4d8}
+.topbar-sub{font-size:.58rem;color:rgba(255,255,255,.35);display:block;font-family:'Segoe UI',sans-serif;text-transform:uppercase;letter-spacing:.1em}
+.topbar-page{margin-left:auto;font-size:.7rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.05em;white-space:nowrap}
+
 .hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a6e 55%,#0d3b6e 100%);
       padding:5.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;
@@ -54,10 +80,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97
     border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:.22rem .75rem}
 .hero-wave{position:absolute;bottom:-2px;left:0;width:100%;z-index:1}
 
-/* LAYOUT */
 .app{display:grid;grid-template-columns:255px 1fr;gap:0;max-width:1380px;margin:0 auto;padding:1.5rem 1rem 4rem}
 
-/* SIDEBAR */
 .sidebar{position:sticky;top:65px;height:fit-content;padding-right:1rem}
 .sb-card{background:var(--white);border:1px solid var(--g200);border-radius:12px;
          margin-bottom:.8rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -71,7 +95,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97
 .cat-count{margin-left:auto;font-size:.62rem;color:var(--g500);background:var(--g100);padding:.1rem .4rem;border-radius:100px}
 .hist-list{padding:.5rem;max-height:200px;overflow-y:auto}
 .hist-item{padding:.48rem .7rem;border-radius:7px;font-size:.71rem;cursor:pointer;
-           transition:background .15s;border-bottom:1px solid var(--g100);color:var(--g700)}
+           transition:background-colors .15s;border-bottom:1px solid var(--g100);color:var(--g700)}
 .hist-item:hover{background:var(--g50)}
 .hist-item:last-child{border-bottom:none}
 .hist-time{font-size:.6rem;color:var(--g500);display:block;margin-top:.1rem}
@@ -99,7 +123,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97
     color:var(--g500);transition:all .15s}
 .fb:hover,.fb.active{border-color:var(--blue);color:var(--blue);background:var(--light);font-weight:600}
 
-/* CARTE CALCULATEUR */
 .ccard{background:var(--white);border:1px solid var(--g200);border-radius:14px;
        margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,.05);overflow:hidden;
        transition:box-shadow .25s}
@@ -107,7 +130,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97
 .ccard.hidden{display:none}
 .cheader{display:flex;align-items:center;gap:.85rem;padding:.95rem 1.3rem;
          border-bottom:1px solid var(--g100);cursor:pointer;user-select:none;
-         background:var(--g50);transition:background .15s}
+         background:var(--g50);transition:background-colors .15s}
 .cheader:hover{background:var(--g100)}
 .cicon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
        justify-content:center;font-size:1.2rem;flex-shrink:0}
@@ -127,7 +150,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(10,31,60,.97
 .ccard.open .cbody{display:block}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;align-items:start}
 
-/* INPUTS */
 .ig{margin-bottom:.85rem}
 label.il{display:block;font-size:.75rem;font-weight:600;color:var(--g700);margin-bottom:.28rem}
 label.il span{font-size:.66rem;color:var(--g500);font-weight:400;margin-left:.22rem}
@@ -138,7 +160,6 @@ input.if:focus,textarea.if:focus,select.if:focus{border-color:var(--blue);box-sh
 textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;font-size:.77rem}
 .ih{font-size:.66rem;color:var(--g500);margin-top:.16rem;line-height:1.4}
 
-/* BOUTONS */
 .bcalc{width:100%;padding:.62rem;background:linear-gradient(135deg,var(--blue),var(--sky));
        color:#fff;border:none;border-radius:9px;font-size:.84rem;font-weight:700;
        font-family:inherit;cursor:pointer;transition:all .2s;
@@ -156,7 +177,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 .bdl-png{background:rgba(21,101,192,.08);color:var(--blue);border:1px solid rgba(21,101,192,.2)}
 .bdl-png:hover{background:rgba(21,101,192,.17)}
 
-/* RÉSULTATS */
 .rpanel{background:linear-gradient(135deg,var(--navy),#1a3a6e);border-radius:11px;
         padding:1.2rem;display:none;margin-top:.8rem}
 .rpanel.show{display:block}
@@ -183,7 +203,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
             border-bottom:1px solid rgba(255,255,255,.06)}
 .rptable tr:last-child td{border-bottom:none}
 
-/* CHART */
 .chart-wrap{background:var(--white);border:1px solid var(--g200);border-radius:10px;
             padding:.85rem;margin-top:.85rem;display:block;min-height:0;overflow:hidden}
 .chart-wrap.show{min-height:255px}
@@ -192,18 +211,15 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
              text-align:center;letter-spacing:.05em;text-transform:uppercase;display:none}
 .chart-wrap.show .chart-title{display:block}
 
-/* AIDE */
 .chelp{background:rgba(21,101,192,.05);border-left:3px solid var(--blue);
        border-radius:0 8px 8px 0;padding:.7rem .88rem;margin-top:.75rem;
        font-size:.72rem;color:var(--g700);line-height:1.6}
 .chelp strong{color:var(--navy)}
 
-/* GRILLE MENSUELLE */
 .mgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.38rem;margin-bottom:.75rem}
 .mgi label{font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--g500);
            display:block;margin-bottom:.15rem;text-align:center}
 
-/* COURBE TARAGE */
 .tarage-table{width:100%;border-collapse:collapse;font-size:.74rem;margin-bottom:.55rem}
 .tarage-table th{background:var(--navy);color:#fff;padding:.38rem .48rem;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;text-align:center}
 .tarage-table td{padding:.28rem .38rem;border-bottom:1px solid var(--g200)}
@@ -212,7 +228,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 .add-row-btn{font-size:.71rem;padding:.32rem .68rem;border:1px solid var(--g200);border-radius:6px;cursor:pointer;background:var(--g50);color:var(--g700);transition:all .15s;margin-bottom:.55rem}
 .add-row-btn:hover{background:var(--light);color:var(--blue);border-color:var(--blue)}
 
-/* ICÔNES COULEURS */
 .ci1{background:linear-gradient(135deg,#e3f2fd,#bbdefb)}
 .ci2{background:linear-gradient(135deg,#e0f7fa,#b2ebf2)}
 .ci3{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
@@ -234,7 +249,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 .ci19{background:linear-gradient(135deg,#ecfdf5,#6ee7b7)}
 .ci20{background:linear-gradient(135deg,#eff6ff,#93c5fd)}
 
-/* NOTIF & BTT */
 .notif{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);
        background:var(--navy);color:#fff;border-radius:10px;padding:.62rem 1.2rem;
        font-size:.76rem;z-index:2000;opacity:0;transition:all .3s;
@@ -253,14 +267,45 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </head>
 <body>
 
-<nav>
-  <a href="index.html" class="nb">← Hydro</a>
-  <div class="nbrand">Calcul<span>Hydro</span> <span style="font-size:.58rem;opacity:.45;font-weight:400">v2.0</span></div>
-  <a href="analyse.html" class="npill">📊 Analyse</a>
-  <a href="carte.html" class="npill">🗺️ Carte</a>
-  <a href="BiblioHydro.html" class="npill">📚 Biblio</a>
-  <a href="profil.html" class="npill">👤 Profil</a>
-</nav>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar-nav" id="sidebarNav">
+  <div class="snav-header">
+    <a href="index.html" class="snav-logo">
+      <div class="snav-logo-icon">💧</div>
+      <div>
+        <div class="snav-logo-text">Hydro<span>INE</span></div>
+        <span class="snav-logo-sub">INE · UAC · Bénin</span>
+      </div>
+    </a>
+    <button class="snav-close" onclick="closeSidebar()" aria-label="Fermer">✕</button>
+  </div>
+  <nav class="snav-links">
+    <span class="snav-section-lbl">Navigation</span>
+    <a href="index.html" class="snav-link"><span class="sn-icon">🏠</span> Accueil</a>
+    <a href="hydrologie.html" class="snav-link"><span class="sn-icon">🌊</span> Hydrologie</a>
+    <a href="carte.html" class="snav-link"><span class="sn-icon">📊</span> Carte</a>
+    <a href="calculator.html" class="snav-link"><span class="sn-icon">🧮</span> Calculateurs</a>
+    <a href="BiblioHydro.html" class="snav-link"><span class="sn-icon">📚</span> Bibliothèque</a>
+    <a href="analyse.html" class="snav-link"><span class="sn-icon">📊</span> Analyse de données</a>
+    <span class="snav-section-lbl">Étudiant</span>
+    <a href="révisions.html" class="snav-link active"><span class="sn-icon">📝</span> Centre de révisions</a>
+    <a href="profil.html" class="snav-link"><span class="sn-icon">👤</span> Mon profil</a>
+  </nav>
+  <div class="snav-badge">
+    <strong>Licence </strong>
+    Institut National de l'Eau
+  </div>
+</aside>
+
+<header class="topbar">
+  <button class="topbar-menu-btn" onclick="openSidebar()" aria-label="Menu">☰</button>
+  <div>
+    <div class="topbar-brand">Hydro<span>INE</span></div>
+    <span class="topbar-sub">INE · UAC · Bénin</span>
+  </div>
+  <span class="topbar-page">🧮 Calculateurs</span>
+</header>
 
 <div class="hero">
   <div class="hero-inner">
@@ -283,7 +328,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 
 <div class="app">
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-card">
     <div class="sb-title">Navigation rapide</div>
@@ -310,7 +354,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
   </div>
 </aside>
 
-<!-- CONTENU -->
 <div class="content">
 <div class="filter-bar">
   <input class="search-calc" type="text" placeholder="🔍 Rechercher un calculateur..." oninput="searchCalc(this.value)"/>
@@ -324,7 +367,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
   </div>
 </div>
 
-<!-- ══ C01 — MÉTHODE RATIONNELLE ══ -->
 <div class="ccard open" id="c1" data-cat="hydro" data-kw="rationnel débit pointe ruissellement bassin">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci1">🌊</div>
@@ -370,7 +412,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C02 — TEMPS DE CONCENTRATION ══ -->
 <div class="ccard" id="c2" data-cat="hydro" data-kw="temps concentration kirpich giandotti passini bassin">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci2">⏱️</div>
@@ -419,7 +460,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C03 — SCS-CN ══ -->
 <div class="ccard" id="c3" data-cat="hydro" data-kw="SCS CN hydrogramme unitaire crue ruissellement">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci3">📈</div>
@@ -466,7 +506,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C04 — COURBE DE TARAGE ══ -->
 <div class="ccard" id="c4" data-cat="hydro" data-kw="courbe tarage hauteur débit H-Q jaugeage station">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci4">📏</div>
@@ -512,7 +551,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C05 — MUSKINGUM ══ -->
 <div class="ccard" id="c5" data-cat="hydro" data-kw="muskingum routage crue propagation onde hydrologique">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci5">🌊</div>
@@ -559,7 +597,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C06 — GUMBEL ══ -->
 <div class="ccard" id="c6" data-cat="stat" data-kw="gumbel loi fréquence période retour extrême">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci6">📈</div>
@@ -601,7 +638,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C07 — NORMALE ══ -->
 <div class="ccard" id="c7" data-cat="stat" data-kw="normale log lognormale distribution ajustement fréquence">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci7">🔔</div>
@@ -641,7 +677,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C08 — STATISTIQUES ══ -->
 <div class="ccard" id="c8" data-cat="stat" data-kw="statistiques descriptives moyenne médiane écart-type Cv">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci8">📊</div>
@@ -683,7 +718,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C09 — THORNTHWAITE ══ -->
 <div class="ccard" id="c9" data-cat="bilan" data-kw="thornthwaite bilan hydrologique ETP ETR déficit excédent">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci9">🌱</div>
@@ -725,7 +759,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C10 — TURC ══ -->
 <div class="ccard" id="c10" data-cat="bilan" data-kw="Turc ETP évapotranspiration bilan mensuel rayonnement">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci10">☀️</div>
@@ -754,7 +787,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C11 — MANNING-STRICKLER ══ -->
 <div class="ccard" id="c11" data-cat="hydraul" data-kw="Manning Strickler débit canal hydraulique section écoulement">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci11">🏗️</div>
@@ -803,7 +835,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C12 — REYNOLDS ══ -->
 <div class="ccard" id="c12" data-cat="hydraul" data-kw="Reynolds régime écoulement laminaire turbulent viscosité">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci12">🔄</div>
@@ -846,7 +877,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C13 — CANAL OPTIMAL ══ -->
 <div class="ccard" id="c13" data-cat="hydraul" data-kw="canal dimensionnement section optimale hydraulique économique">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci13">📐</div>
@@ -897,7 +927,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C14 — RECHARGE NAPPES ══ -->
 <div class="ccard" id="c14" data-cat="souterrain" data-kw="recharge nappe bilan chlorure aquifère infiltration">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci14">💧</div>
@@ -941,7 +970,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C15 — GRAVELIUS ══ -->
 <div class="ccard" id="c15" data-cat="hydro" data-kw="Gravelius morphométrie bassin versant compacité drainage">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci15">🗺️</div>
@@ -983,7 +1011,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C16 — MAYER ══ -->
 <div class="ccard" id="c16" data-cat="stat" data-kw="Mayer corrélation régression pluie débit droite Pearson">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci16">🔗</div>
@@ -1026,7 +1053,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C17 — CDC ══ -->
 <div class="ccard" id="c17" data-cat="hydro" data-kw="courbe débits classés CDC étiage module crue régime">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci17">📊</div>
@@ -1068,7 +1094,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C18 — SPI ══ -->
 <div class="ccard" id="c18" data-cat="stat" data-kw="SPI sécheresse précipitations standardisé indice aridité">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci18">🏜️</div>
@@ -1107,7 +1132,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C19 — PEARSON III ══ -->
 <div class="ccard" id="c19" data-cat="stat" data-kw="Pearson III gamma distribution fréquence asymétrie">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci19">📐</div>
@@ -1146,7 +1170,6 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-<!-- ══ C20 — JACOB (POMPAGE) ══ -->
 <div class="ccard" id="c20" data-cat="souterrain" data-kw="Jacob pompage rabattement transmissivité aquifère nappe">
 <div class="cheader" onclick="tog(this)">
   <div class="cicon ci20">🪨</div>
@@ -1192,15 +1215,27 @@ textarea.if{resize:vertical;min-height:70px;font-family:'Courier New',monospace;
 </div>
 </div>
 
-</div><!-- /content -->
-</div><!-- /app -->
+</div>
+</div>
 
 <div class="notif" id="notif"></div>
 <button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 <footer style="background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:1.4rem;font-size:.72rem">
-  CalcHydro v1.0 · <a href="index.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="analyse.html" style="color:var(--cyan);text-decoration:none">Analyse</a> · <a href="carte.html" style="color:var(--cyan);text-decoration:none">Carte</a> · INE–UAC · Bénin
+  CalcHydro v1.0 · <a href="hydrologie.html" style="color:var(--cyan);text-decoration:none">Hydrologie</a> · <a href="analyse.html" style="color:var(--cyan);text-decoration:none">Analyse</a> · <a href="carte.html" style="color:var(--cyan);text-decoration:none">Carte</a> · INE–UAC · Bénin
 </footer>
-<!-- JAVASCRIPT CHARGÉ DEPUIS FICHIER SÉPARÉ -->
 <script src="calculator.js"></script>
+<script>
+    function openSidebar(){
+  document.getElementById('sidebarNav').classList.add('open');
+  document.getElementById('sbOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebarNav').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});
+</script>
 </body>
 </html>
